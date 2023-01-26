@@ -1,36 +1,34 @@
-import "./App.css";
-// import Profile from "./Components/Profile/Profile";
-import Login from "./Components/Login/Login";
-import Register from "./Components/Register/Register";
-import UIG from "./Components/GUI/main";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import './App.css';
+import Login from './Components/Login/Login';
+import Register from './Components/Register/Register';
+import UIG from './Components/GUI/main';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
 
 function App() {
-  const [userstate, setUserState] = useState({});
+  const [userstate, setUserState] = useState(
+    localStorage.getItem('user')
+      ? JSON.parse(localStorage.getItem('user'))
+      : {},
+  );
+
   return (
-    <div className="App">
+    <div className='App'>
       <Router>
         <Routes>
           <Route
-            path="/"
+            path='/'
             element={
               userstate && userstate._id ? (
-                <UIG
-                  setUserState={setUserState}
-                  username={userstate.fname}
-                />
+                <UIG setUserState={setUserState} username={userstate.fname} />
               ) : (
                 <Login setUserState={setUserState} />
               )
-            }
-          ></Route>
+            }></Route>
           <Route
-            path="/login"
-            element={<Login setUserState={setUserState} />}
-          ></Route>
-          <Route path="/signup" element={<Register />}></Route>
-          
+            path='/login'
+            element={<Login setUserState={setUserState} />}></Route>
+          <Route path='/signup' element={<Register />}></Route>
         </Routes>
       </Router>
     </div>
