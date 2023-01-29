@@ -51,10 +51,10 @@
   padding: 10px 20px;
 }
 
-.sideBarOptions:hover {
+/* .sideBarOptions:hover {
   transition: 0.3s;
   background-color: whitesmoke;
-}
+} */
 
 .sideBarOptions img {
   height: 20px;

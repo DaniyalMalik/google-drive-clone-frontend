@@ -16,13 +16,13 @@ export default function SideBar({ selector, setSelector }) {
       <div id='sideBar'>
         <div id='sideBarOpt'>
           <div
-            className='sideBarOptions activeSideOpt'
+            className={`sideBarOptions ${selector.files && 'activeSideOpt'}`}
             onClick={() => setSelector({ files: true, upload: false })}>
             <img src={drive} alt='Reload page' className='opacity' />
             <h3>My drive</h3>
           </div>
           <div
-            className='sideBarOptions'
+            className={`sideBarOptions ${selector.upload && 'activeSideOpt'}`}
             onClick={() => setSelector({ files: false, upload: true })}>
             <img src={computers} alt='Reload page' className='opacity' />
             <h3>Computers</h3>

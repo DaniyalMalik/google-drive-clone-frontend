@@ -1,13 +1,24 @@
 import React, { useRef } from 'react';
 import '../css/DisplayContainer.css';
+import axios from 'axios';
 
 export default function FileUploadForm() {
   const fileInput = useRef(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const file = fileInput.current.files[0];
+    const formData = new FormData();
+
+    formData.append('file', fileInput.current.files[0]);
+
+    const res = await axios.post('http://localhost:5000/api/upload', formData, {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    alert(res.data.message);
   };
 
   return (
