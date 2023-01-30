@@ -1,6 +1,6 @@
 #displayCont {
   /* border: 1px solid red; */
-  width: 100%;
+  /* width: 80%; */
 }
 
 #displayInfoNav {
@@ -12,10 +12,10 @@
   padding: 5px 10px;
 }
 
-#displayInfoNav h2 {
+#displayInfoNav h1 {
   /* font-size: 20px; */
   /* border: 1px solid blue; */
-  width: 90%;
+  width: 100%;
 }
 
 #displayInfoNav button {
@@ -41,11 +41,12 @@
 
 #contentDisplayer {
   /* border: 1px solid wheat; */
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  /* display: flex; */
+  /* flex-wrap: wrap; */
+  /* align-items: center; */
   height: calc(100vh - 130px);
-  overflow-y: scroll;
+  max-width: 100%;
+  /* overflow-y: scroll; */
 }
 
 .displayCard {

@@ -5,12 +5,12 @@ import FileUpload from './components/fileupload';
 import './main.css';
 import { useState } from 'react';
 
-function Main() {
+function Main({ setUserState }) {
   const [selector, setSelector] = useState({ files: true, upload: false });
 
   return (
     <>
-      <Navbar />
+      <Navbar setUserState={setUserState} />
       <div id='mainCont'>
         <SideBar selector={selector} setSelector={setSelector} />
         {selector.files && <DisplayContainer />}

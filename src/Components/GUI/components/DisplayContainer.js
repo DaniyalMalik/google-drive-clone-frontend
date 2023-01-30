@@ -30,9 +30,9 @@ export default function DisplayContainer() {
     setFiles(res.data.files);
   };
 
-  const deleteFile = async (fileName) => {
+  const deleteFile = async (fileNameWithExt) => {
     const res = await axios.delete(
-      'http://localhost:5000/api/upload?fileName=' + fileName,
+      'http://localhost:5000/api/upload?fileName=' + fileNameWithExt,
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -52,7 +52,7 @@ export default function DisplayContainer() {
   return (
     <div id='displayCont'>
       <div id='displayInfoNav'>
-        <h2>Files</h2>
+        <h1>Files</h1>
         <button>
           <img src={list_view} alt='Reload page' className='opacity' />
         </button>
@@ -60,15 +60,18 @@ export default function DisplayContainer() {
           <img src={info} alt='Reload page' className='opacity' />
         </button>
       </div>
-      {console.log(files, 'files')}
       <div id='contentDisplayer'>
         {files?.length > 0 ? (
           <>
             <Typography variant='h5'>Images</Typography>
             <br />
             <ImageList
-              style={{ width: '100%', height: '300px' }}
-              cols={3}
+              style={{
+                maxWidth: '100%',
+                height: 'auto',
+                marginBottom: '50px',
+                marginTop: '50px',
+              }}
               rowHeight={164}>
               {files.map(
                 (item, key) =>
@@ -88,16 +91,10 @@ export default function DisplayContainer() {
                             {item.fileName}
                           </Typography>
                         }
-                        // subtitle={
-                        //   <Typography variant='string' color='textPrimary'>
-                        //     <b>Deleted At:</b>{' '}
-                        //     {new Date(item?.createdAt).toLocaleString()}
-                        //   </Typography>
-                        // }
                         actionIcon={
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileName)}>
+                            onClick={() => deleteFile(item.fileNameWithExt)}>
                             <DeleteOutlined />
                           </IconButton>
                         }
@@ -111,8 +108,12 @@ export default function DisplayContainer() {
             <Typography variant='h5'>Videos</Typography>
             <br />
             <ImageList
-              style={{ width: '100%', height: '300px' }}
-              cols={3}
+              style={{
+                width: '100%',
+                height: 'auto',
+                marginBottom: '50px',
+                marginTop: '50px',
+              }}
               rowHeight={164}>
               {files.map(
                 (item, key) =>
@@ -133,16 +134,10 @@ export default function DisplayContainer() {
                             {item.fileName}
                           </Typography>
                         }
-                        // subtitle={
-                        //   <Typography variant='string' color='textPrimary'>
-                        //     <b>Deleted At:</b>{' '}
-                        //     {new Date(item?.createdAt).toLocaleString()}
-                        //   </Typography>
-                        // }
                         actionIcon={
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileName)}>
+                            onClick={() => deleteFile(item.fileNameWithExt)}>
                             <DeleteOutlined />
                           </IconButton>
                         }
@@ -156,8 +151,12 @@ export default function DisplayContainer() {
             <Typography variant='h5'>Audios</Typography>
             <br />
             <ImageList
-              style={{ width: '100%', height: '300px' }}
-              cols={3}
+              style={{
+                width: '100%',
+                height: 'auto',
+                marginBottom: '50px',
+                marginTop: '50px',
+              }}
               rowHeight={164}>
               {files.map(
                 (item, key) =>
@@ -176,16 +175,10 @@ export default function DisplayContainer() {
                             {item.fileName}
                           </Typography>
                         }
-                        // subtitle={
-                        //   <Typography variant='string' color='textPrimary'>
-                        //     <b>Deleted At:</b>{' '}
-                        //     {new Date(item?.createdAt).toLocaleString()}
-                        //   </Typography>
-                        // }
                         actionIcon={
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileName)}>
+                            onClick={() => deleteFile(item.fileNameWithExt)}>
                             <DeleteOutlined />
                           </IconButton>
                         }
@@ -199,9 +192,10 @@ export default function DisplayContainer() {
             <Typography variant='h5'>Documents</Typography>
             <div
               style={{
-                // overflowY: 'scroll',
                 width: '100%',
                 height: 'auto',
+                marginBottom: '50px',
+                marginTop: '50px',
               }}>
               {files.map(
                 (item, key) =>
@@ -210,79 +204,34 @@ export default function DisplayContainer() {
                     <List
                       sx={{
                         width: '100%',
-                        maxWidth: 360,
+                        height: 'auto',
                         bgcolor: 'background.paper',
                       }}>
                       <ListItem alignItems='flex-start'>
                         <ListItemText
                           primary={item.fileName}
-                          // secondary={
-                          //   <>
-                          //     <Typography variant='body2' color='textPrimary'>
-                          //       <b>Deleted By: </b>
-                          //       {item?.userId?.firstName +
-                          //         ' ' +
-                          //         item?.userId?.lastName}
-                          //     </Typography>
-                          //     <Typography variant='body2' color='textPrimary'>
-                          //       <b>Deleted At: </b>
-                          //       {new Date(item?.createdAt).toLocaleString()}
-                          //     </Typography>
-                          //   </>
-                          // }
                         />
                         <ListItemIcon>
-                          {/* <a
-                            href={item?.path}
-                            download='assighment'
+                          <a
+                            href={`data:${item.mimeType};base64,${item.file}`}
+                            download={item.fileName}
+                            rel='noreferrer'
                             target='_blank'>
                             <IconButton>
                               <GetAppOutlined color='primary' />
                             </IconButton>
-                          </a> */}
+                          </a>
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileName)}>
+                            onClick={() => deleteFile(item.fileNameWithExt)}>
                             <DeleteOutlined />
                           </IconButton>
                         </ListItemIcon>
                       </ListItem>
                       <Divider variant='inset' component='li' />
                     </List>
-                    // <>
-                    //   <div
-                    //     style={{
-                    //       display: 'flex',
-                    //       justifyContent: 'flex-start',
-                    //       alignItems: 'center',
-                    //     }}
-                    //   >
-                    //     <Typography variant="h6">File-{key + 1}</Typography>
-                    //     <a
-                    //       href={item?.path}
-                    //       download="assighment"
-                    //       target="_blank"
-                    //     >
-                    //       <IconButton>
-                    //         <Typography variant="body2">
-                    //           Download Attachment
-                    //           <AttachFile fontSize="medium" />
-                    //         </Typography>
-                    //       </IconButton>
-                    //     </a>
-                    //     <IconButton onClick={() => onDelete(item._id, item.path)}>
-                    //       <DeleteOutlined fontSize="large" color="primary" />
-                    //     </IconButton>
-                    //   </div>
-                    //   <Typography variant="body2">
-                    //     {item?.userId?.firstName +
-                    //       ' ' +
-                    //       item?.userId?.lastName}
-                    //   </Typography>
-                    // </>
                   ),
               )}
-              <Divider />
               <br />
             </div>
           </>

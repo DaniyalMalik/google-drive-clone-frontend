@@ -7,8 +7,17 @@ import settings from '../pics/settings.png';
 import list from '../pics/list.png';
 import '../css/Navbar.css';
 import { Link } from 'react-router-dom';
+import { IconButton } from '@material-ui/core';
+import { ExitToApp } from '@material-ui/icons';
 
-export default function Navbar() {
+export default function Navbar({ setUserState }) {
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    setUserState({});
+  };
+
   return (
     <>
       <nav>
@@ -47,9 +56,12 @@ export default function Navbar() {
               <button>
                 <img src={list} alt='Reload page' className='opacity' />
               </button>
-              <button>
+              {/* <button>
                 <img src={filters} alt='Reload page' className='opacity' />
-              </button>
+              </button> */}
+              <IconButton onClick={logout} aria-label='delete'>
+                <ExitToApp color='primary' />
+              </IconButton>
             </div>
           </li>
         </ul>
