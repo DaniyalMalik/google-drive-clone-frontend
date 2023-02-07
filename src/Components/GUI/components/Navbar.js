@@ -7,10 +7,12 @@ import settings from '../pics/settings.png';
 import list from '../pics/list.png';
 import '../css/Navbar.css';
 import { Link } from 'react-router-dom';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Typography } from '@material-ui/core';
 import { ExitToApp } from '@material-ui/icons';
 
 export default function Navbar({ setUserState }) {
+  const [user] = React.useState(JSON.parse(localStorage.getItem('user')));
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -43,22 +45,25 @@ export default function Navbar({ setUserState }) {
           </li>
           <li>
             <div id='navOptions'>
-              <button>
+              {/* <button>
                 <img
                   src={interrogation}
                   alt='Reload page'
                   className='opacity'
                 />
-              </button>
-              <button>
+              </button> */}
+              {/* <button>
                 <img src={settings} alt='Reload page' className='opacity' />
               </button>
               <button>
                 <img src={list} alt='Reload page' className='opacity' />
-              </button>
+              </button> */}
               {/* <button>
                 <img src={filters} alt='Reload page' className='opacity' />
               </button> */}
+              <Typography variant='h6'>
+                {user.firstName + ' ' + user.lastName}
+              </Typography>
               <IconButton onClick={logout} aria-label='delete'>
                 <ExitToApp color='primary' />
               </IconButton>

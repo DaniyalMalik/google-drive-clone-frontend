@@ -200,7 +200,8 @@ export default function DisplayContainer() {
               {files.map(
                 (item, key) =>
                   item.mimeType &&
-                  item.mimeType.split('/')[0] === 'application' && (
+                  (item.mimeType.split('/')[0] === 'application' ||
+                    item.mimeType.split('/')[0] === 'text') && (
                     <List
                       sx={{
                         width: '100%',
@@ -208,9 +209,7 @@ export default function DisplayContainer() {
                         bgcolor: 'background.paper',
                       }}>
                       <ListItem alignItems='flex-start'>
-                        <ListItemText
-                          primary={item.fileName}
-                        />
+                        <ListItemText primary={item.fileName} />
                         <ListItemIcon>
                           <a
                             href={`data:${item.mimeType};base64,${item.file}`}

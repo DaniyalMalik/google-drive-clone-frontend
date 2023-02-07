@@ -25,7 +25,7 @@ export default function SideBar({ selector, setSelector }) {
             className={`sideBarOptions ${selector.upload && 'activeSideOpt'}`}
             onClick={() => setSelector({ files: false, upload: true })}>
             <img src={computers} alt='Reload page' className='opacity' />
-            <h3>Computers</h3>
+            <h3>Upload</h3>
           </div>
           <div className='sideBarOptions'>
             <img src={shared} alt='Reload page' className='opacity' />

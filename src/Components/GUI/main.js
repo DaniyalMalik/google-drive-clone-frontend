@@ -14,7 +14,7 @@ function Main({ setUserState }) {
       <div id='mainCont'>
         <SideBar selector={selector} setSelector={setSelector} />
         {selector.files && <DisplayContainer />}
-        {selector.upload && <FileUpload />}
+        {selector.upload && <FileUpload setSelector={setSelector} />}
       </div>
     </>
   );

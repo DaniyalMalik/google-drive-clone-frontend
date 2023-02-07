@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
 
-export default function FileUploadForm() {
+export default function FileUploadForm({ setSelector }) {
   const fileInput = useRef(null);
 
   const handleSubmit = async (e) => {
@@ -19,6 +19,7 @@ export default function FileUploadForm() {
     });
 
     alert(res.data.message);
+    setSelector({ files: true, upload: false });
   };
 
   return (
