@@ -1,7 +1,7 @@
 import './App.css';
 import Login from './Components/Login/Login';
 import Register from './Components/Register/Register';
-import UIG from './Components/GUI/main';
+import Main from './Components/GUI/Main';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -20,7 +20,7 @@ function App() {
             path='/'
             element={
               userstate && userstate._id ? (
-                <UIG setUserState={setUserState} username={userstate.fname} />
+                <Main setUserState={setUserState} username={userstate.fname} />
               ) : (
                 <Login setUserState={setUserState} />
               )

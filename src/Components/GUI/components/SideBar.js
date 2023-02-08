@@ -17,15 +17,39 @@ export default function SideBar({ selector, setSelector }) {
         <div id='sideBarOpt'>
           <div
             className={`sideBarOptions ${selector.files && 'activeSideOpt'}`}
-            onClick={() => setSelector({ files: true, upload: false })}>
+            onClick={() =>
+              setSelector({
+                files: true,
+                uploadFile: false,
+                uploadFolder: false,
+              })
+            }>
             <img src={drive} alt='Reload page' className='opacity' />
             <h3>My drive</h3>
           </div>
           <div
             className={`sideBarOptions ${selector.upload && 'activeSideOpt'}`}
-            onClick={() => setSelector({ files: false, upload: true })}>
+            onClick={() =>
+              setSelector({
+                files: false,
+                uploadFile: true,
+                uploadFolder: false,
+              })
+            }>
             <img src={computers} alt='Reload page' className='opacity' />
-            <h3>Upload</h3>
+            <h3>Upload Files</h3>
+          </div>
+          <div
+            className={`sideBarOptions ${selector.upload && 'activeSideOpt'}`}
+            onClick={() =>
+              setSelector({
+                files: false,
+                uploadFile: false,
+                uploadFolder: true,
+              })
+            }>
+            <img src={computers} alt='Reload page' className='opacity' />
+            <h3>Upload Folder</h3>
           </div>
           <div className='sideBarOptions'>
             <img src={shared} alt='Reload page' className='opacity' />

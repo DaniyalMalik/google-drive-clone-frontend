@@ -27,11 +27,17 @@ export default function FileUploadForm({ setSelector }) {
   return (
     <div id='displayCont'>
       <div id='displayInfoNav'>
-        <h1>Upload Files</h1>
+        <h1>Upload Folder</h1>
       </div>
       <div id='contentDisplayer'>
         <form onSubmit={handleSubmit}>
-          <input multiple type='file' ref={fileInput} />
+          <input
+            type='file'
+            ref={fileInput}
+            webkitdirectory='true'
+            mozdirectory='true'
+            directory='true'
+          />
           <button type='submit'>Upload</button>
         </form>
       </div>
