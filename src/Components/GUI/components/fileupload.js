@@ -21,7 +21,7 @@ export default function FileUploadForm({ setSelector }) {
     });
 
     alert(res.data.message);
-    setSelector({ files: true, upload: false });
+    setSelector({ files: true, uploadFile: false, uploadFolder: false });
   };
 
   return (

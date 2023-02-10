@@ -28,7 +28,7 @@ export default function SideBar({ selector, setSelector }) {
             <h3>My drive</h3>
           </div>
           <div
-            className={`sideBarOptions ${selector.upload && 'activeSideOpt'}`}
+            className={`sideBarOptions ${selector.uploadFile && 'activeSideOpt'}`}
             onClick={() =>
               setSelector({
                 files: false,
@@ -40,7 +40,7 @@ export default function SideBar({ selector, setSelector }) {
             <h3>Upload Files</h3>
           </div>
           <div
-            className={`sideBarOptions ${selector.upload && 'activeSideOpt'}`}
+            className={`sideBarOptions ${selector.uploadFolder && 'activeSideOpt'}`}
             onClick={() =>
               setSelector({
                 files: false,

@@ -1,27 +1,41 @@
 import React, { useRef } from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
+import { logDOM } from '@testing-library/react';
 
 export default function FileUploadForm({ setSelector }) {
   const fileInput = useRef(null);
+  const formData = new FormData();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
+    let folderName = '';
 
     for (let i = 0; i < fileInput.current.files.length; i++) {
-      formData.append('files', fileInput.current.files[i]);
+      formData.append(
+        'files',
+        fileInput.current.files[i],
+        fileInput.current.files[i].webkitRelativePath,
+      );
+
+      folderName = fileInput.current.files[i].webkitRelativePath;
     }
 
-    const res = await axios.post('http://localhost:5000/api/upload', formData, {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
+    folderName = folderName.split('/')[0];
+
+    const res = await axios.post(
+      'http://localhost:5000/api/upload?folderName=' + folderName,
+      formData,
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
       },
-    });
+    );
 
     alert(res.data.message);
-    setSelector({ files: true, upload: false });
+    setSelector({ files: true, uploadFile: false, uploadFolder: false });
   };
 
   return (

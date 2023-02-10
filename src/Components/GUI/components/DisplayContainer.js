@@ -32,7 +32,7 @@ export default function DisplayContainer() {
 
   const deleteFile = async (fileNameWithExt) => {
     const res = await axios.delete(
-      'http://localhost:5000/api/upload?fileName=' + fileNameWithExt,
+      'http://localhost:5000/api/upload?fileOrFolderName=' + fileNameWithExt,
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -67,7 +67,7 @@ export default function DisplayContainer() {
             <br />
             <ImageList
               style={{
-                maxWidth: '100%',
+                maxWidth: '80vw',
                 height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
@@ -109,7 +109,7 @@ export default function DisplayContainer() {
             <br />
             <ImageList
               style={{
-                width: '100%',
+                width: '80vw',
                 height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
@@ -152,7 +152,7 @@ export default function DisplayContainer() {
             <br />
             <ImageList
               style={{
-                width: '100%',
+                width: '80vw',
                 height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
@@ -192,7 +192,7 @@ export default function DisplayContainer() {
             <Typography variant='h5'>Documents</Typography>
             <div
               style={{
-                width: '100%',
+                width: '80vw',
                 height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
@@ -213,7 +213,11 @@ export default function DisplayContainer() {
                         <ListItemIcon>
                           <a
                             href={`data:${item.mimeType};base64,${item.file}`}
-                            download={item.fileName}
+                            download={
+                              item.fileNameWithExt.split('.')[1] === 'rar'
+                                ? item.fileNameWithExt
+                                : item.fileName
+                            }
                             rel='noreferrer'
                             target='_blank'>
                             <IconButton>
