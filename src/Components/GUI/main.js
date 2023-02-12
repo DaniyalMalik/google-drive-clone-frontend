@@ -3,6 +3,7 @@ import SideBar from './components/SideBar';
 import DisplayContainer from './components/DisplayContainer';
 import FileUpload from './components/FileUpload';
 import FolderUpload from './components/FolderUpload';
+import CreateFolder from './components/CreateFolder';
 import './main.css';
 import { useState } from 'react';
 
@@ -11,6 +12,7 @@ function Main({ setUserState }) {
     files: true,
     uploadFile: false,
     uploadFolder: false,
+    createFolder: false,
   });
 
   return (
@@ -21,6 +23,7 @@ function Main({ setUserState }) {
         {selector.files && <DisplayContainer />}
         {selector.uploadFile && <FileUpload setSelector={setSelector} />}
         {selector.uploadFolder && <FolderUpload setSelector={setSelector} />}
+        {selector.createFolder && <CreateFolder setSelector={setSelector} />}
       </div>
     </>
   );

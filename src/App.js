@@ -1,4 +1,3 @@
-import './App.css';
 import Login from './Components/Login/Login';
 import Register from './Components/Register/Register';
 import Main from './Components/GUI/Main';
@@ -13,7 +12,7 @@ function App() {
   );
 
   return (
-    <div className='App'>
+    <div>
       <Router>
         <Routes>
           <Route

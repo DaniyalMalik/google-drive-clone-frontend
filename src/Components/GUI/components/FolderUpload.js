@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
-import { logDOM } from '@testing-library/react';
+import { Button } from '@material-ui/core';
 
 export default function FileUploadForm({ setSelector }) {
   const fileInput = useRef(null);
@@ -35,7 +35,12 @@ export default function FileUploadForm({ setSelector }) {
     );
 
     alert(res.data.message);
-    setSelector({ files: true, uploadFile: false, uploadFolder: false });
+    setSelector({
+      files: true,
+      uploadFile: false,
+      uploadFolder: false,
+      createFolder: false,
+    });
   };
 
   return (
@@ -52,7 +57,9 @@ export default function FileUploadForm({ setSelector }) {
             mozdirectory='true'
             directory='true'
           />
-          <button type='submit'>Upload</button>
+          <Button variant='outlined' type='submit'>
+            Upload
+          </Button>
         </form>
       </div>
     </div>

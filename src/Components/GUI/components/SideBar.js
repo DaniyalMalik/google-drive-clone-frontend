@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import icon from '../pics/drive_icon.png';
+import React from 'react';
+// import icon from '../pics/drive_icon.png';
 import drive from '../pics/myDrive.png';
 import computers from '../pics/computers.png';
 import shared from '../pics/shared.png';
@@ -7,7 +7,7 @@ import recent from '../pics/recent.png';
 import starred from '../pics/starred.png';
 import trash from '../pics/trash.png';
 import cloud from '../pics/cloud.png';
-import google from '../pics/google.png';
+// import google from '../pics/google.png';
 import '../css/SideBar.css';
 
 export default function SideBar({ selector, setSelector }) {
@@ -22,34 +22,56 @@ export default function SideBar({ selector, setSelector }) {
                 files: true,
                 uploadFile: false,
                 uploadFolder: false,
+                createFolder: false,
               })
             }>
             <img src={drive} alt='Reload page' className='opacity' />
             <h3>My drive</h3>
           </div>
           <div
-            className={`sideBarOptions ${selector.uploadFile && 'activeSideOpt'}`}
+            className={`sideBarOptions ${
+              selector.uploadFile && 'activeSideOpt'
+            }`}
             onClick={() =>
               setSelector({
                 files: false,
                 uploadFile: true,
                 uploadFolder: false,
+                createFolder: false,
               })
             }>
             <img src={computers} alt='Reload page' className='opacity' />
             <h3>Upload Files</h3>
           </div>
           <div
-            className={`sideBarOptions ${selector.uploadFolder && 'activeSideOpt'}`}
+            className={`sideBarOptions ${
+              selector.uploadFolder && 'activeSideOpt'
+            }`}
             onClick={() =>
               setSelector({
                 files: false,
                 uploadFile: false,
                 uploadFolder: true,
+                createFolder: false,
               })
             }>
             <img src={computers} alt='Reload page' className='opacity' />
             <h3>Upload Folder</h3>
+          </div>
+          <div
+            className={`sideBarOptions ${
+              selector.createFolder && 'activeSideOpt'
+            }`}
+            onClick={() =>
+              setSelector({
+                files: false,
+                uploadFile: false,
+                uploadFolder: false,
+                createFolder: true,
+              })
+            }>
+            <img src={computers} alt='Reload page' className='opacity' />
+            <h3>Create a Folder</h3>
           </div>
           <div className='sideBarOptions'>
             <img src={shared} alt='Reload page' className='opacity' />
@@ -81,12 +103,12 @@ export default function SideBar({ selector, setSelector }) {
           <div id='storageNumericalInfo'>
             <p>10 GB of 15 GB Used</p>
           </div>
-          <button id='buyStorage'>Buy storage</button>
+          {/* <button id='buyStorage'>Buy storage</button> */}
         </div>
-        <div id='sponsor'>
+        {/* <div id='sponsor'>
           <p>Product by </p>
           <p> Online drive</p>
-        </div>
+        </div> */}
       </div>
     </>
   );

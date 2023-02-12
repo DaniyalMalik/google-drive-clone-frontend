@@ -1,6 +1,6 @@
 import React from 'react';
-import list_view from '../pics/list_view.jpg';
-import info from '../pics/info.png';
+// import list_view from '../pics/list_view.jpg';
+// import info from '../pics/info.png';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
 import {
@@ -14,20 +14,45 @@ import {
   ListItemText,
   List,
   ImageList,
+  Button,
+  Card,
+  CardActionArea,
+  CardActions,
+  CardContent,
 } from '@material-ui/core';
+import { Delete, Visibility } from '@material-ui/icons';
 import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
 
 export default function DisplayContainer() {
   const [files, setFiles] = React.useState([]);
+  const [folders, setFolders] = React.useState([]);
 
-  const getImages = async () => {
-    const res = await axios.get('http://localhost:5000/api/upload', {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
+  const getFilesOrFolders = async (folderName) => {
+    if (folderName) {
+      const res = await axios.get(
+        'http://localhost:5000/api/upload?folderName=' + folderName,
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
 
-    setFiles(res.data.files);
+      setFolders(res.data.folders);
+      setFiles(res.data.files);
+    } else {
+      const res = await axios.get(
+        'http://localhost:5000/api/upload?folderName=',
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      setFolders(res.data.folders);
+      setFiles(res.data.files);
+    }
   };
 
   const deleteFile = async (fileNameWithExt) => {
@@ -42,24 +67,64 @@ export default function DisplayContainer() {
 
     alert(res.data.message);
 
-    getImages();
+    getFilesOrFolders();
   };
 
   React.useEffect(() => {
-    getImages();
+    getFilesOrFolders();
   }, []);
 
   return (
-    <div id='displayCont'>
-      <div id='displayInfoNav'>
-        <h1>Files</h1>
-        <button>
-          <img src={list_view} alt='Reload page' className='opacity' />
-        </button>
-        <button>
-          <img src={info} alt='Reload page' className='opacity' />
-        </button>
+    <div>
+      {/* <div id='displayInfoNav'>
+        <h1>Folders</h1>
+        <Button variant='outlined' onClick={() => getFilesOrFolders()}>
+          back to root folder
+        </Button>
+      </div> */}
+      <div id='contentDisplayer'>
+        {folders?.length > 0 ? (
+          folders.map((item) => (
+            <Card style={{ maxHeight: '80px', maxWidth: '250px' }}>
+              <CardActionArea>
+                <CardContent>
+                  <Typography
+                    gutterBottom
+                    variant='h5'
+                    component='h2'
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}>
+                    {item.folderName}
+                    <span>
+                      <IconButton
+                        onClick={() => getFilesOrFolders(item.folderName)}>
+                        <Visibility />
+                      </IconButton>
+                      <IconButton onClick={() => deleteFile(item.folderName)}>
+                        <Delete />
+                      </IconButton>
+                    </span>
+                  </Typography>
+                  {/* <Typography variant="body2" color="textSecondary" component="p">
+            Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging
+            across all continents except Antarctica
+          </Typography> */}
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          ))
+        ) : (
+          <Typography variant='h5' style={{ textAlign: 'center' }}>
+            No Folders Found!
+          </Typography>
+        )}
       </div>
+      {/* <div id='displayInfoNav'>
+        <h1>Files</h1>
+      </div> */}
       <div id='contentDisplayer'>
         {files?.length > 0 ? (
           <>
@@ -67,7 +132,6 @@ export default function DisplayContainer() {
             <br />
             <ImageList
               style={{
-                maxWidth: '80vw',
                 height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
@@ -109,7 +173,6 @@ export default function DisplayContainer() {
             <br />
             <ImageList
               style={{
-                width: '80vw',
                 height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
@@ -152,7 +215,6 @@ export default function DisplayContainer() {
             <br />
             <ImageList
               style={{
-                width: '80vw',
                 height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
@@ -192,7 +254,6 @@ export default function DisplayContainer() {
             <Typography variant='h5'>Documents</Typography>
             <div
               style={{
-                width: '80vw',
                 height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',

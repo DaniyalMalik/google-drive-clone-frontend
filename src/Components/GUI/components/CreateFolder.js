@@ -1,12 +1,34 @@
 import React, { useRef } from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
-import { Button } from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 
 export default function FileUploadForm({ setSelector }) {
   const fileInput = useRef(null);
 
-  const handleSubmit = async (e) => {
+  const createFolder = async (e) => {
+    e.preventDefault();
+
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/create',
+      { folderName: e.target.folderName.value },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+    // setSelector({
+    //   files: true,
+    //   uploadFile: false,
+    //   uploadFolder: false,
+    //   createFolder: false,
+    // });
+  };
+
+  const uploadFiles = async (e) => {
     e.preventDefault();
 
     const formData = new FormData();
@@ -33,13 +55,17 @@ export default function FileUploadForm({ setSelector }) {
   return (
     <div id='displayCont'>
       <div id='displayInfoNav'>
-        <h1>Upload Files</h1>
+        <h1>Create a Folder</h1>
       </div>
       <div id='contentDisplayer'>
-        <form onSubmit={handleSubmit}>
-          <input multiple type='file' ref={fileInput} />
-          <Button variant='outlined' type='submit'>
-            Upload
+        <form onSubmit={createFolder}>
+          <TextField
+            name='folderName'
+            placeholder='Folder Name'
+            style={{ padding: '10px' }}
+          />
+          <Button variant='outlined' type='submit' style={{ padding: '10px' }}>
+            Create Folder
           </Button>
         </form>
       </div>
