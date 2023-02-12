@@ -21,13 +21,44 @@ function App() {
               userstate && userstate._id ? (
                 <Main setUserState={setUserState} username={userstate.fname} />
               ) : (
-                <Login setUserState={setUserState} />
+                <div
+                  style={{
+                    height: '100vh',
+                    alignItems: 'center',
+                    display: 'flex',
+                  }}>
+                  <Login setUserState={setUserState} />
+                </div>
               )
             }></Route>
-          <Route
-            path='/login'
-            element={<Login setUserState={setUserState} />}></Route>
-          <Route path='/signup' element={<Register />}></Route>
+          {!userstate && (
+            <>
+              <Route
+                path='/login'
+                element={
+                  <div
+                    style={{
+                      height: '100vh',
+                      alignItems: 'center',
+                      display: 'flex',
+                    }}>
+                    <Login setUserState={setUserState} />
+                  </div>
+                }></Route>
+              <Route
+                path='/signup'
+                element={
+                  <div
+                    style={{
+                      height: '100vh',
+                      alignItems: 'center',
+                      display: 'flex',
+                    }}>
+                    <Register />
+                  </div>
+                }></Route>
+            </>
+          )}
         </Routes>
       </Router>
     </div>

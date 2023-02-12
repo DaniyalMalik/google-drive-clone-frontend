@@ -1,3 +1,4 @@
 #mainCont {
   display: flex;
+  align-items: baseline;
 }

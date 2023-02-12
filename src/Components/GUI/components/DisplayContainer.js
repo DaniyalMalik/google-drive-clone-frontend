@@ -76,16 +76,17 @@ export default function DisplayContainer() {
 
   return (
     <div>
-      {/* <div id='displayInfoNav'>
+      <div id='displayInfoNav'>
         <h1>Folders</h1>
         <Button variant='outlined' onClick={() => getFilesOrFolders()}>
           back to root folder
         </Button>
-      </div> */}
+      </div>
       <div id='contentDisplayer'>
         {folders?.length > 0 ? (
           folders.map((item) => (
-            <Card style={{ maxHeight: '80px', maxWidth: '250px' }}>
+            <Card
+              style={{ maxHeight: '80px', maxWidth: '250px', margin: '10px' }}>
               <CardActionArea>
                 <CardContent>
                   <Typography
@@ -108,10 +109,6 @@ export default function DisplayContainer() {
                       </IconButton>
                     </span>
                   </Typography>
-                  {/* <Typography variant="body2" color="textSecondary" component="p">
-            Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging
-            across all continents except Antarctica
-          </Typography> */}
                 </CardContent>
               </CardActionArea>
             </Card>
@@ -122,17 +119,15 @@ export default function DisplayContainer() {
           </Typography>
         )}
       </div>
-      {/* <div id='displayInfoNav'>
+      <div id='displayInfoNav'>
         <h1>Files</h1>
-      </div> */}
+      </div>
       <div id='contentDisplayer'>
         {files?.length > 0 ? (
           <>
             <Typography variant='h5'>Images</Typography>
-            <br />
             <ImageList
               style={{
-                height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
               }}
@@ -170,10 +165,8 @@ export default function DisplayContainer() {
             <Divider />
             <br />
             <Typography variant='h5'>Videos</Typography>
-            <br />
             <ImageList
               style={{
-                height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
               }}
@@ -212,10 +205,8 @@ export default function DisplayContainer() {
             <Divider />
             <br />
             <Typography variant='h5'>Audios</Typography>
-            <br />
             <ImageList
               style={{
-                height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
               }}
@@ -254,7 +245,6 @@ export default function DisplayContainer() {
             <Typography variant='h5'>Documents</Typography>
             <div
               style={{
-                height: 'auto',
                 marginBottom: '50px',
                 marginTop: '50px',
               }}>
@@ -266,7 +256,6 @@ export default function DisplayContainer() {
                     <List
                       sx={{
                         width: '100%',
-                        height: 'auto',
                         bgcolor: 'background.paper',
                       }}>
                       <ListItem alignItems='flex-start'>
@@ -296,7 +285,6 @@ export default function DisplayContainer() {
                     </List>
                   ),
               )}
-              <br />
             </div>
           </>
         ) : (

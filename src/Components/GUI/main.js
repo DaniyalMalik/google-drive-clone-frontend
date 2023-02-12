@@ -16,7 +16,7 @@ function Main({ setUserState }) {
   });
 
   return (
-    <>
+    <div style={{ width: '95vw' }}>
       <Navbar setUserState={setUserState} />
       <div id='mainCont'>
         <SideBar selector={selector} setSelector={setSelector} />
@@ -25,7 +25,7 @@ function Main({ setUserState }) {
         {selector.uploadFolder && <FolderUpload setSelector={setSelector} />}
         {selector.createFolder && <CreateFolder setSelector={setSelector} />}
       </div>
-    </>
+    </div>
   );
 }
 

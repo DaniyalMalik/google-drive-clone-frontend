@@ -26,7 +26,7 @@ export default function SideBar({ selector, setSelector }) {
               })
             }>
             <img src={drive} alt='Reload page' className='opacity' />
-            <h3>My drive</h3>
+            <h3>My Drive</h3>
           </div>
           <div
             className={`sideBarOptions ${
