@@ -22,7 +22,9 @@ import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
 
 export default function DisplayContainer({ selector, setSelector }) {
   const [files, setFiles] = React.useState([]);
+  const [saveFiles, setSaveFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
+  const formData = new FormData();
 
   const getFilesOrFolders = async (folderName) => {
     if (folderName) {
@@ -68,18 +70,94 @@ export default function DisplayContainer({ selector, setSelector }) {
     getFilesOrFolders();
   };
 
+  const uploadFiles = async () => {
+    for (let i = 0; i < saveFiles.length; i++) {
+      formData.append('files', saveFiles[i]);
+    }
+
+    if (selector.folderName) {
+      const res = await axios.post(
+        'http://localhost:5000/api/upload?folderName=' + selector.folderName,
+        formData,
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      alert(res.data.message);
+
+      setSaveFiles([]);
+
+      if (res.data.success)
+        setSelector({
+          files: true,
+          uploadFile: false,
+          uploadFolder: false,
+          createFolder: false,
+          // folderName: '',
+        });
+    } else {
+      const res = await axios.post(
+        'http://localhost:5000/api/upload',
+        formData,
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      alert(res.data.message);
+
+      if (res.data.success)
+        setSelector({
+          files: true,
+          uploadFile: false,
+          uploadFolder: false,
+          createFolder: false,
+        });
+    }
+  };
+
   React.useEffect(() => {
     getFilesOrFolders();
   }, []);
 
+  React.useEffect(() => {
+    saveFiles.length > 0 && uploadFiles();
+  }, [saveFiles]);
+
+  const onUploadFiles = (e) => {
+    for (let i = 0; i < e.target.files.length; i++) {
+      setSaveFiles((items) => items.concat(e.target.files[i]));
+    }
+  };
+
   return (
     <div>
+      {console.log(selector.folderName, 'selector.folderName')}
       <div id='displayInfoNav'>
         <h1>Folders</h1>
         {selector.folderName && (
-          <Button variant='outlined' onClick={() => getFilesOrFolders()}>
-            back to root folder
-          </Button>
+          <div>
+            <input
+              style={{ display: 'none' }}
+              id='contained-button-file'
+              multiple
+              type='file'
+              onChange={(e) => onUploadFiles(e)}
+            />
+            <label htmlFor='contained-button-file'>
+              <Button variant='outlined' component='span'>
+                Upload upload files in this folder
+              </Button>
+            </label>
+            <Button variant='outlined' onClick={() => getFilesOrFolders()}>
+              back to root folder
+            </Button>
+          </div>
         )}
       </div>
       <div id='contentDisplayer'>

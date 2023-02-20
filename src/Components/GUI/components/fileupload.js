@@ -5,11 +5,10 @@ import { Button } from '@material-ui/core';
 
 export default function FileUploadForm({ selector, setSelector }) {
   const fileInput = useRef(null);
+  const formData = new FormData();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formData = new FormData();
 
     for (let i = 0; i < fileInput.current.files.length; i++) {
       formData.append('files', fileInput.current.files[i]);

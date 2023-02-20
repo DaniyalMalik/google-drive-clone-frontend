@@ -19,11 +19,11 @@ export default function SideBar({ selector, setSelector }) {
             className={`sideBarOptions ${selector.files && 'activeSideOpt'}`}
             onClick={() =>
               setSelector({
+                ...selector,
                 files: true,
                 uploadFile: false,
                 uploadFolder: false,
                 createFolder: false,
-                folderName: '',
               })
             }>
             <img src={drive} alt='Reload page' className='opacity' />
