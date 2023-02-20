@@ -1,11 +1,9 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
 import { Button, TextField } from '@material-ui/core';
 
 export default function FileUploadForm({ setSelector }) {
-  const fileInput = useRef(null);
-
   const createFolder = async (e) => {
     e.preventDefault();
 
@@ -20,36 +18,15 @@ export default function FileUploadForm({ setSelector }) {
     );
 
     alert(res.data.message);
-    // setSelector({
-    //   files: true,
-    //   uploadFile: false,
-    //   uploadFolder: false,
-    //   createFolder: false,
-    // });
-  };
 
-  const uploadFiles = async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData();
-
-    for (let i = 0; i < fileInput.current.files.length; i++) {
-      formData.append('files', fileInput.current.files[i]);
-    }
-
-    const res = await axios.post('http://localhost:5000/api/upload', formData, {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-
-    alert(res.data.message);
-    setSelector({
-      files: true,
-      uploadFile: false,
-      uploadFolder: false,
-      createFolder: false,
-    });
+    if (res.data.success)
+      setSelector({
+        files: true,
+        uploadFile: false,
+        uploadFolder: false,
+        createFolder: false,
+        folderName: '',
+      });
   };
 
   return (

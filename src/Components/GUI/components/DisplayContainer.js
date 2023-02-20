@@ -1,6 +1,4 @@
 import React from 'react';
-// import list_view from '../pics/list_view.jpg';
-// import info from '../pics/info.png';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
 import {
@@ -17,13 +15,12 @@ import {
   Button,
   Card,
   CardActionArea,
-  CardActions,
   CardContent,
 } from '@material-ui/core';
 import { Delete, Visibility } from '@material-ui/icons';
 import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
 
-export default function DisplayContainer() {
+export default function DisplayContainer({ selector, setSelector }) {
   const [files, setFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
 
@@ -40,6 +37,7 @@ export default function DisplayContainer() {
 
       setFolders(res.data.folders);
       setFiles(res.data.files);
+      setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
         'http://localhost:5000/api/upload?folderName=',
@@ -78,9 +76,11 @@ export default function DisplayContainer() {
     <div>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
-        <Button variant='outlined' onClick={() => getFilesOrFolders()}>
-          back to root folder
-        </Button>
+        {selector.folderName && (
+          <Button variant='outlined' onClick={() => getFilesOrFolders()}>
+            back to root folder
+          </Button>
+        )}
       </div>
       <div id='contentDisplayer'>
         {folders?.length > 0 ? (

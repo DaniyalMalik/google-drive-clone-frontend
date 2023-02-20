@@ -35,12 +35,15 @@ export default function FileUploadForm({ setSelector }) {
     );
 
     alert(res.data.message);
-    setSelector({
-      files: true,
-      uploadFile: false,
-      uploadFolder: false,
-      createFolder: false,
-    });
+
+    if (res.data.success)
+      setSelector({
+        files: true,
+        uploadFile: false,
+        uploadFolder: false,
+        createFolder: false,
+        folderName: '',
+      });
   };
 
   return (

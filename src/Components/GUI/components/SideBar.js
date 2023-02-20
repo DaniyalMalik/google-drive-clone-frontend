@@ -23,6 +23,7 @@ export default function SideBar({ selector, setSelector }) {
                 uploadFile: false,
                 uploadFolder: false,
                 createFolder: false,
+                folderName: '',
               })
             }>
             <img src={drive} alt='Reload page' className='opacity' />
@@ -38,6 +39,7 @@ export default function SideBar({ selector, setSelector }) {
                 uploadFile: true,
                 uploadFolder: false,
                 createFolder: false,
+                folderName: '',
               })
             }>
             <img src={computers} alt='Reload page' className='opacity' />
@@ -53,6 +55,7 @@ export default function SideBar({ selector, setSelector }) {
                 uploadFile: false,
                 uploadFolder: true,
                 createFolder: false,
+                folderName: '',
               })
             }>
             <img src={computers} alt='Reload page' className='opacity' />
@@ -68,6 +71,7 @@ export default function SideBar({ selector, setSelector }) {
                 uploadFile: false,
                 uploadFolder: false,
                 createFolder: true,
+                folderName: '',
               })
             }>
             <img src={computers} alt='Reload page' className='opacity' />

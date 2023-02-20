@@ -13,6 +13,7 @@ function Main({ setUserState }) {
     uploadFile: false,
     uploadFolder: false,
     createFolder: false,
+    folderName: '',
   });
 
   return (
@@ -20,8 +21,12 @@ function Main({ setUserState }) {
       <Navbar setUserState={setUserState} />
       <div id='mainCont'>
         <SideBar selector={selector} setSelector={setSelector} />
-        {selector.files && <DisplayContainer />}
-        {selector.uploadFile && <FileUpload setSelector={setSelector} />}
+        {selector.files && (
+          <DisplayContainer selector={selector} setSelector={setSelector} />
+        )}
+        {selector.uploadFile && (
+          <FileUpload selector={selector} setSelector={setSelector} />
+        )}
         {selector.uploadFolder && <FolderUpload setSelector={setSelector} />}
         {selector.createFolder && <CreateFolder setSelector={setSelector} />}
       </div>
