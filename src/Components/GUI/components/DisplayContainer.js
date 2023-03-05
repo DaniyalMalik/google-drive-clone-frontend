@@ -134,7 +134,7 @@ export default function DisplayContainer({ selector, setSelector }) {
             />
             <label htmlFor='contained-button-file'>
               <Button variant='outlined' component='span'>
-                upload files in this folder
+                upload files in Folder: <b>{selector.folderName}</b>
               </Button>
             </label>
             <Button variant='outlined' onClick={() => getFilesOrFolders()}>
