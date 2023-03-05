@@ -24,6 +24,7 @@ export default function DisplayContainer({ selector, setSelector }) {
   const [files, setFiles] = React.useState([]);
   const [saveFiles, setSaveFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
+  const [sameFolder, setSameFolder] = React.useState(false);
   const formData = new FormData();
 
   const getFilesOrFolders = async (folderName) => {
@@ -52,6 +53,7 @@ export default function DisplayContainer({ selector, setSelector }) {
 
       setFolders(res.data.folders);
       setFiles(res.data.files);
+      setSelector({ ...selector, folderName: '' });
     }
   };
 
@@ -77,7 +79,10 @@ export default function DisplayContainer({ selector, setSelector }) {
 
     if (selector.folderName) {
       const res = await axios.post(
-        'http://localhost:5000/api/upload?folderName=' + selector.folderName,
+        'http://localhost:5000/api/upload?folderName=' +
+          selector.folderName +
+          '&sameFolder=' +
+          sameFolder,
         formData,
         {
           headers: {
@@ -89,35 +94,9 @@ export default function DisplayContainer({ selector, setSelector }) {
       alert(res.data.message);
 
       setSaveFiles([]);
+      setSameFolder(false);
 
-      if (res.data.success)
-        setSelector({
-          files: true,
-          uploadFile: false,
-          uploadFolder: false,
-          createFolder: false,
-          // folderName: '',
-        });
-    } else {
-      const res = await axios.post(
-        'http://localhost:5000/api/upload',
-        formData,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
-        },
-      );
-
-      alert(res.data.message);
-
-      if (res.data.success)
-        setSelector({
-          files: true,
-          uploadFile: false,
-          uploadFolder: false,
-          createFolder: false,
-        });
+      getFilesOrFolders(selector.folderName);
     }
   };
 
@@ -130,14 +109,18 @@ export default function DisplayContainer({ selector, setSelector }) {
   }, [saveFiles]);
 
   const onUploadFiles = (e) => {
+    const arr = [];
+
     for (let i = 0; i < e.target.files.length; i++) {
-      setSaveFiles((items) => items.concat(e.target.files[i]));
+      arr.push(e.target.files[i]);
     }
+
+    setSaveFiles(arr);
+    setSameFolder(true);
   };
 
   return (
     <div>
-      {console.log(selector.folderName, 'selector.folderName')}
       <div id='displayInfoNav'>
         <h1>Folders</h1>
         {selector.folderName && (
@@ -147,11 +130,11 @@ export default function DisplayContainer({ selector, setSelector }) {
               id='contained-button-file'
               multiple
               type='file'
-              onChange={(e) => onUploadFiles(e)}
+              onChange={onUploadFiles}
             />
             <label htmlFor='contained-button-file'>
               <Button variant='outlined' component='span'>
-                Upload upload files in this folder
+                upload files in this folder
               </Button>
             </label>
             <Button variant='outlined' onClick={() => getFilesOrFolders()}>

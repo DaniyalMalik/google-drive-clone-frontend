@@ -14,49 +14,45 @@ export default function FileUploadForm({ selector, setSelector }) {
       formData.append('files', fileInput.current.files[i]);
     }
 
-    if (selector.folderName) {
-      const res = await axios.post(
-        'http://localhost:5000/api/upload?folderName=' + selector.folderName,
-        formData,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
-        },
-      );
-      console.log(res, 'res');
-      alert(res.data.message);
+    // if (selector.folderName) {
+    //   const res = await axios.post(
+    //     'http://localhost:5000/api/upload?folderName=' + selector.folderName,
+    //     formData,
+    //     {
+    //       headers: {
+    //         'x-auth-token': localStorage.getItem('token'),
+    //       },
+    //     },
+    //   );
 
-      if (res.data.success)
-        setSelector({
-          files: true,
-          uploadFile: false,
-          uploadFolder: false,
-          createFolder: false,
-          folderName: '',
-        });
-    } else {
-      const res = await axios.post(
-        'http://localhost:5000/api/upload',
-        formData,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
-        },
-      );
+    //   alert(res.data.message);
 
-      alert(res.data.message);
+    //   if (res.data.success)
+    //     setSelector({
+    //       files: true,
+    //       uploadFile: false,
+    //       uploadFolder: false,
+    //       createFolder: false,
+    //       folderName: '',
+    //     });
+    // } else {
+    const res = await axios.post('http://localhost:5000/api/upload', formData, {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
 
-      if (res.data.success)
-        setSelector({
-          files: true,
-          uploadFile: false,
-          uploadFolder: false,
-          createFolder: false,
-          folderName: '',
-        });
-    }
+    alert(res.data.message);
+
+    if (res.data.success)
+      setSelector({
+        files: true,
+        uploadFile: false,
+        uploadFolder: false,
+        createFolder: false,
+        folderName: '',
+      });
+    // }
   };
 
   return (

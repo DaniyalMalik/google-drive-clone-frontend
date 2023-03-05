@@ -3,8 +3,6 @@ import React from 'react';
 import drive from '../pics/myDrive.png';
 import computers from '../pics/computers.png';
 import shared from '../pics/shared.png';
-import recent from '../pics/recent.png';
-import starred from '../pics/starred.png';
 import trash from '../pics/trash.png';
 import cloud from '../pics/cloud.png';
 // import google from '../pics/google.png';
@@ -81,14 +79,14 @@ export default function SideBar({ selector, setSelector }) {
             <img src={shared} alt='Reload page' className='opacity' />
             <h3>Shared with me</h3>
           </div>
-          <div className='sideBarOptions'>
+          {/* <div className='sideBarOptions'>
             <img src={recent} alt='Reload page' className='opacity' />
             <h3>Recent</h3>
           </div>
           <div className='sideBarOptions'>
             <img src={starred} alt='Reload page' className='opacity' />
             <h3>Starred</h3>
-          </div>
+          </div> */}
           <div className='sideBarOptions'>
             <img src={trash} alt='Reload page' className='opacity' />
             <h3>Trash</h3>

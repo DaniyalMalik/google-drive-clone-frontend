@@ -33,7 +33,7 @@ export default function FileUploadForm({ setSelector }) {
         },
       },
     );
-
+    console.log(res.data, 'res.data');
     alert(res.data.message);
 
     if (res.data.success)

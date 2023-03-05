@@ -2,11 +2,11 @@ import Login from './Components/Login/Login';
 import Register from './Components/Register/Register';
 import Main from './Components/GUI/Main';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function App() {
   const [userstate, setUserState] = useState(
-    localStorage.getItem('user')
+    localStorage.getItem('user') && localStorage.getItem('user') !== 'undefined'
       ? JSON.parse(localStorage.getItem('user'))
       : {},
   );

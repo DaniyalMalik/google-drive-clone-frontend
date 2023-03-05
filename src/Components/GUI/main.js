@@ -18,6 +18,7 @@ function Main({ setUserState }) {
 
   return (
     <div style={{ width: '95vw' }}>
+      {console.log(selector, 'selector')}
       <Navbar setUserState={setUserState} />
       <div id='mainCont'>
         <SideBar selector={selector} setSelector={setSelector} />
