@@ -4,11 +4,17 @@ import DisplayContainer from './components/DisplayContainer';
 import FileUpload from './components/FileUpload';
 import FolderUpload from './components/FolderUpload';
 import CreateFolder from './components/CreateFolder';
+import Account from './components/Account';
+import Shared from './components/Shared';
+import Trash from './components/Trash';
 import './main.css';
 import { useState } from 'react';
 
 function Main({ setUserState }) {
   const [selector, setSelector] = useState({
+    account: false,
+    trash: false,
+    shared: false,
     files: true,
     uploadFile: false,
     uploadFolder: false,
@@ -30,6 +36,9 @@ function Main({ setUserState }) {
         )}
         {selector.uploadFolder && <FolderUpload setSelector={setSelector} />}
         {selector.createFolder && <CreateFolder setSelector={setSelector} />}
+        {selector.account && <Account setSelector={setSelector} />}
+        {selector.trash && <Trash setSelector={setSelector} />}
+        {selector.shared && <Shared setSelector={setSelector} />}
       </div>
     </div>
   );

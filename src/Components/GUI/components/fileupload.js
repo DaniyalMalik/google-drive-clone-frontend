@@ -46,8 +46,11 @@ export default function FileUploadForm({ selector, setSelector }) {
 
     if (res.data.success)
       setSelector({
+        account: false,
+        trash: false,
+        shared: false,
         files: true,
-        uploadFile: false,
+        uploadFile: true,
         uploadFolder: false,
         createFolder: false,
         folderName: '',

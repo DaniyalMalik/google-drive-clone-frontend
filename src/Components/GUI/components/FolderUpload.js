@@ -33,13 +33,16 @@ export default function FileUploadForm({ setSelector }) {
         },
       },
     );
-    console.log(res.data, 'res.data');
+
     alert(res.data.message);
 
     if (res.data.success)
       setSelector({
+        account: false,
+        trash: false,
+        shared: false,
         files: true,
-        uploadFile: false,
+        uploadFile: true,
         uploadFolder: false,
         createFolder: false,
         folderName: '',

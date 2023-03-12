@@ -28,7 +28,6 @@ const Register = () => {
   const validateForm = (values) => {
     const error = {};
     const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
-
     if (!values.fname) {
       error.fname = 'First Name is required';
     }

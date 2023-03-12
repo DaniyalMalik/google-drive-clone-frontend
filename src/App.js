@@ -2,7 +2,7 @@ import Login from './Components/Login/Login';
 import Register from './Components/Register/Register';
 import Main from './Components/GUI/Main';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 function App() {
   const [userstate, setUserState] = useState(
@@ -31,7 +31,7 @@ function App() {
                 </div>
               )
             }></Route>
-          {!userstate && (
+          {!userstate?._id && (
             <>
               <Route
                 path='/login'

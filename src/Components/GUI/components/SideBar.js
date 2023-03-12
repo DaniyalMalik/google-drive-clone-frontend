@@ -7,17 +7,38 @@ import trash from '../pics/trash.png';
 import cloud from '../pics/cloud.png';
 // import google from '../pics/google.png';
 import '../css/SideBar.css';
+import { ExitToApp } from '@material-ui/icons';
 
 export default function SideBar({ selector, setSelector }) {
   return (
     <>
       <div id='sideBar'>
         <div id='sideBarOpt'>
+          {/* <div
+            className={`sideBarOptions ${selector.account && 'activeSideOpt'}`}
+            onClick={() =>
+              setSelector({
+                folderName: '',
+                account: true,
+                trash: false,
+                shared: false,
+                files: false,
+                uploadFile: false,
+                uploadFolder: false,
+                createFolder: false,
+              })
+            }>
+            <img src={shared} alt='Reload page' className='opacity' />
+            <h3>Account</h3>
+          </div> */}
           <div
             className={`sideBarOptions ${selector.files && 'activeSideOpt'}`}
             onClick={() =>
               setSelector({
                 ...selector,
+                account: false,
+                trash: false,
+                shared: false,
                 files: true,
                 uploadFile: false,
                 uploadFolder: false,
@@ -33,6 +54,9 @@ export default function SideBar({ selector, setSelector }) {
             }`}
             onClick={() =>
               setSelector({
+                account: false,
+                trash: false,
+                shared: false,
                 files: false,
                 uploadFile: true,
                 uploadFolder: false,
@@ -49,6 +73,9 @@ export default function SideBar({ selector, setSelector }) {
             }`}
             onClick={() =>
               setSelector({
+                account: false,
+                trash: false,
+                shared: false,
                 files: false,
                 uploadFile: false,
                 uploadFolder: true,
@@ -65,6 +92,9 @@ export default function SideBar({ selector, setSelector }) {
             }`}
             onClick={() =>
               setSelector({
+                account: false,
+                trash: false,
+                shared: false,
                 files: false,
                 uploadFile: false,
                 uploadFolder: false,
@@ -75,22 +105,40 @@ export default function SideBar({ selector, setSelector }) {
             <img src={computers} alt='Reload page' className='opacity' />
             <h3>Create a Folder</h3>
           </div>
-          <div className='sideBarOptions'>
+          {/* <div
+            className={`sideBarOptions ${selector.shared && 'activeSideOpt'}`}
+            onClick={() =>
+              setSelector({
+                account: false,
+                trash: false,
+                shared: true,
+                files: false,
+                uploadFile: false,
+                uploadFolder: false,
+                createFolder: false,
+                folderName: '',
+              })
+            }>
             <img src={shared} alt='Reload page' className='opacity' />
             <h3>Shared with me</h3>
           </div>
-          {/* <div className='sideBarOptions'>
-            <img src={recent} alt='Reload page' className='opacity' />
-            <h3>Recent</h3>
-          </div>
-          <div className='sideBarOptions'>
-            <img src={starred} alt='Reload page' className='opacity' />
-            <h3>Starred</h3>
-          </div> */}
-          <div className='sideBarOptions'>
+          <div
+            className={`sideBarOptions ${selector.trash && 'activeSideOpt'}`}
+            onClick={() =>
+              setSelector({
+                account: false,
+                trash: true,
+                shared: false,
+                files: false,
+                uploadFile: false,
+                uploadFolder: false,
+                createFolder: false,
+                folderName: '',
+              })
+            }>
             <img src={trash} alt='Reload page' className='opacity' />
             <h3>Trash</h3>
-          </div>
+          </div> */}
         </div>
         <div id='storageInfo'>
           <div className='sideBarOptions'>
