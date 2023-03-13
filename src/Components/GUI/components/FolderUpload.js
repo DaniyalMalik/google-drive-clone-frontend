@@ -36,13 +36,15 @@ export default function FileUploadForm({ setSelector }) {
 
     alert(res.data.message);
 
+    formData.delete('files');
+
     if (res.data.success)
       setSelector({
         account: false,
         trash: false,
         shared: false,
         files: true,
-        uploadFile: true,
+        uploadFile: false,
         uploadFolder: false,
         createFolder: false,
         folderName: '',

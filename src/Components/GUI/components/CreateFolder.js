@@ -25,7 +25,7 @@ export default function FileUploadForm({ setSelector }) {
         trash: false,
         shared: false,
         files: true,
-        uploadFile: true,
+        uploadFile: false,
         uploadFolder: false,
         createFolder: false,
         folderName: '',
