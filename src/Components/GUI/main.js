@@ -10,7 +10,7 @@ import Trash from './components/Trash';
 import './main.css';
 import { useState } from 'react';
 
-function Main({ setUserState }) {
+function Main({ userstate, setUserState }) {
   const [selector, setSelector] = useState({
     account: false,
     trash: false,
@@ -25,7 +25,7 @@ function Main({ setUserState }) {
   return (
     <div style={{ width: '95vw' }}>
       {/* {console.log(selector, 'selector')} */}
-      <Navbar setUserState={setUserState} />
+      <Navbar userstate={userstate} setUserState={setUserState} />
       <div id='mainCont'>
         <SideBar selector={selector} setSelector={setSelector} />
         {selector.files && (
@@ -36,7 +36,7 @@ function Main({ setUserState }) {
         )}
         {selector.uploadFolder && <FolderUpload setSelector={setSelector} />}
         {selector.createFolder && <CreateFolder setSelector={setSelector} />}
-        {selector.account && <Account setSelector={setSelector} />}
+        {selector.account && <Account setUserState={setUserState} />}
         {selector.trash && <Trash setSelector={setSelector} />}
         {selector.shared && <Shared setSelector={setSelector} />}
       </div>

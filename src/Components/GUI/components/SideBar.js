@@ -14,7 +14,7 @@ export default function SideBar({ selector, setSelector }) {
     <>
       <div id='sideBar'>
         <div id='sideBarOpt'>
-          {/* <div
+          <div
             className={`sideBarOptions ${selector.account && 'activeSideOpt'}`}
             onClick={() =>
               setSelector({
@@ -30,7 +30,7 @@ export default function SideBar({ selector, setSelector }) {
             }>
             <img src={shared} alt='Reload page' className='opacity' />
             <h3>Account</h3>
-          </div> */}
+          </div>
           <div
             className={`sideBarOptions ${selector.files && 'activeSideOpt'}`}
             onClick={() =>

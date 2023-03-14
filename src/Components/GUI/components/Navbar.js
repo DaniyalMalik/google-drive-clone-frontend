@@ -6,9 +6,7 @@ import { Link } from 'react-router-dom';
 import { IconButton, Typography } from '@material-ui/core';
 import { ExitToApp } from '@material-ui/icons';
 
-export default function Navbar({ setUserState }) {
-  const [user] = React.useState(JSON.parse(localStorage.getItem('user')));
-
+export default function Navbar({ userstate, setUserState }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -55,7 +53,7 @@ export default function Navbar({ setUserState }) {
           alignItems: 'center',
         }}>
         <Typography variant='h6'>
-          {user.firstName + ' ' + user.lastName}
+          {userstate.firstName + ' ' + userstate.lastName}
         </Typography>
         <IconButton onClick={logout} aria-label='delete'>
           <ExitToApp />

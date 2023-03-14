@@ -19,7 +19,7 @@ function App() {
             path='/'
             element={
               userstate && userstate._id ? (
-                <Main setUserState={setUserState} username={userstate.fname} />
+                <Main userstate={userstate} setUserState={setUserState} />
               ) : (
                 <div
                   style={{

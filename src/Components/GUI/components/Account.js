@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Account({ selector, setSelector }) {
+export default function Account({ setUserState }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
   const [changePassword, setChangePassword] = useState({
@@ -94,6 +94,13 @@ export default function Account({ selector, setSelector }) {
     );
 
     alert(res.data.message);
+
+    if (res.data.success)
+      setChangePassword({
+        oldPassword: '',
+        newPassword: '',
+        repeatNewPassword: '',
+      });
   };
 
   const handleProfileSubmit = async (e) => {
@@ -111,8 +118,11 @@ export default function Account({ selector, setSelector }) {
 
     alert(res.data.message);
 
-    if (res.data.success)
+    if (res.data.success) {
       localStorage.setItem('user', JSON.stringify(res.data.user));
+
+      setUserState({ ...res.data.user });
+    }
   };
 
   const handleChange = (event, newValue) => {
@@ -192,13 +202,14 @@ export default function Account({ selector, setSelector }) {
         </TabPanel>
         <TabPanel value={value} index={1}>
           <div id='contentDisplayer'>
-            <form noValidate autoComplete='off' onSubmit={handlePasswordSubmit}>
+            <form autoComplete='off' onSubmit={handlePasswordSubmit}>
               <TextField
                 label='Old Password'
                 style={{ margin: '10px' }}
                 variant='outlined'
                 onChange={onPasswordsChange}
                 name='oldPassword'
+                required
                 value={changePassword.oldPassword}
               />
               <br />
@@ -206,6 +217,7 @@ export default function Account({ selector, setSelector }) {
                 style={{ margin: '10px' }}
                 onChange={onPasswordsChange}
                 label='New Password'
+                required
                 variant='outlined'
                 name='newPassword'
                 value={changePassword.newPassword}
@@ -216,6 +228,7 @@ export default function Account({ selector, setSelector }) {
                 onChange={onPasswordsChange}
                 label='Repeat New Password'
                 variant='outlined'
+                required
                 name='repeatNewPassword'
                 value={changePassword.repeatNewPassword}
               />
@@ -224,7 +237,6 @@ export default function Account({ selector, setSelector }) {
                 style={{ margin: '10px' }}
                 type='submit'
                 variant='contained'
-                disabled
                 size='small'>
                 Update Password
               </Button>
