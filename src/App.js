@@ -3,6 +3,8 @@ import Register from './Components/Register/Register';
 import Main from './Components/GUI/Main';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
+import ForgotPassword from './Components/ForgotPassword/ForgotPassword';
+import ResetPassword from './Components/Resetpassword/ResetPassword';
 
 function App() {
   const [userstate, setUserState] = useState(
@@ -30,7 +32,8 @@ function App() {
                   <Login setUserState={setUserState} />
                 </div>
               )
-            }></Route>
+            }
+          />
           {!userstate?._id && (
             <>
               <Route
@@ -44,7 +47,8 @@ function App() {
                     }}>
                     <Login setUserState={setUserState} />
                   </div>
-                }></Route>
+                }
+              />
               <Route
                 path='/signup'
                 element={
@@ -56,7 +60,34 @@ function App() {
                     }}>
                     <Register />
                   </div>
-                }></Route>
+                }
+              />
+              <Route
+                path='/forgotpassword'
+                element={
+                  <div
+                    style={{
+                      height: '100vh',
+                      alignItems: 'center',
+                      display: 'flex',
+                    }}>
+                    <ForgotPassword />
+                  </div>
+                }
+              />
+              <Route
+                path='/resetpassword/:token'
+                element={
+                  <div
+                    style={{
+                      height: '100vh',
+                      alignItems: 'center',
+                      display: 'flex',
+                    }}>
+                    <ResetPassword />
+                  </div>
+                }
+              />
             </>
           )}
         </Routes>

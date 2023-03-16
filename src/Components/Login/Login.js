@@ -43,9 +43,6 @@ const Login = ({ setUserState }) => {
 
     setFormErrors(validateForm(user));
     setIsSubmit(true);
-    // if (!formErrors) {
-
-    // }
   };
 
   useEffect(() => {
@@ -83,6 +80,9 @@ const Login = ({ setUserState }) => {
           onChange={changeHandler}
           value={user.password}
         />
+        <NavLink to='/forgotpassword' style={{ float: 'right' }}>
+          Forgot Passsword
+        </NavLink>
         <p className={basestyle.error}>{formErrors.password}</p>
         <button className={basestyle.button_common} onClick={loginHandler}>
           Login

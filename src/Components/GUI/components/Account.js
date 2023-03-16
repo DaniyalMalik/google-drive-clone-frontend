@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Account({ setUserState }) {
+export default function Account({ userstate, setUserState }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
   const [changePassword, setChangePassword] = useState({
@@ -70,11 +70,11 @@ export default function Account({ setUserState }) {
     newPassword: '',
     repeatNewPassword: '',
   });
-  const [account, setProfile] = useState();
+  const [profile, setProfile] = useState({});
 
   useEffect(() => {
-    setProfile(JSON.parse(localStorage.getItem('user')));
-  }, []);
+    setProfile(userstate);
+  }, [userstate]);
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -84,7 +84,7 @@ export default function Account({ setUserState }) {
     }
 
     const res = await axios.put(
-      'http://localhost:5000/api/user/updatepassword/' + account._id,
+      'http://localhost:5000/api/user/updatepassword/' + profile._id,
       { ...changePassword },
       {
         headers: {
@@ -107,8 +107,8 @@ export default function Account({ setUserState }) {
     e.preventDefault();
 
     const res = await axios.put(
-      'http://localhost:5000/api/user/' + account._id,
-      { ...account },
+      'http://localhost:5000/api/user/' + profile._id,
+      { ...profile },
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -125,6 +125,47 @@ export default function Account({ setUserState }) {
     }
   };
 
+  const handleEmailVerification = async (e) => {
+    e.preventDefault();
+
+    const res = await axios.get(
+      'http://localhost:5000/api/user/sendverifyemail/?email=' + profile.email,
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) handleChange(null, 2);
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+
+    const res = await axios.post(
+      'http://localhost:5000/api/user/verifyemail/',
+      { resetToken: e.target.verificationCode.value },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) {
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+
+      handleChange(null, 0);
+
+      setUserState({ ...res.data.user });
+    }
+  };
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -134,7 +175,7 @@ export default function Account({ setUserState }) {
   };
 
   const onProfileChange = (e) => {
-    setProfile({ ...account, [e.target.name]: e.target.value });
+    setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
   return (
@@ -146,8 +187,11 @@ export default function Account({ setUserState }) {
             value={value}
             onChange={handleChange}
             aria-label='nav tabs example'>
-            <LinkTab label='Profile' href='/drafts' {...a11yProps(0)} />
-            <LinkTab label='Change Password' href='/trash' {...a11yProps(1)} />
+            <LinkTab label='Profile' {...a11yProps(0)} />
+            <LinkTab label='Change Password' {...a11yProps(1)} />
+            {!profile?.isEmailVerified && (
+              <LinkTab label='Verify Email' {...a11yProps(2)} />
+            )}
           </Tabs>
         </AppBar>
         <TabPanel value={value} index={0}>
@@ -159,16 +203,16 @@ export default function Account({ setUserState }) {
                 variant='outlined'
                 onChange={onProfileChange}
                 name='email'
-                value={account?.email}
+                value={profile?.email}
                 disabled
               />
               <Button
                 variant='contained'
+                disabled={profile?.isEmailVerified}
+                onClick={handleEmailVerification}
                 style={{ margin: '10px' }}
                 onChange={onProfileChange}
-                size='small'
-                disabled>
-                {/* disabled={account?.isEmailVerified}> */}
+                size='small'>
                 Verify Email
               </Button>
               <br />
@@ -178,7 +222,7 @@ export default function Account({ setUserState }) {
                 label='Name'
                 variant='outlined'
                 name='firstName'
-                value={account?.firstName}
+                value={profile?.firstName}
               />
               <br />
               <TextField
@@ -187,7 +231,7 @@ export default function Account({ setUserState }) {
                 label='Name'
                 variant='outlined'
                 name='lastName'
-                value={account?.lastName}
+                value={profile?.lastName}
               />
               <br />
               <Button
@@ -239,6 +283,27 @@ export default function Account({ setUserState }) {
                 variant='contained'
                 size='small'>
                 Update Password
+              </Button>
+            </form>
+          </div>
+        </TabPanel>
+        <TabPanel value={value} index={2}>
+          <div id='contentDisplayer'>
+            <form autoComplete='off' onSubmit={handleVerifyCode}>
+              <TextField
+                label='Email verification code'
+                style={{ margin: '10px' }}
+                variant='outlined'
+                name='verificationCode'
+                required
+              />
+              <br />
+              <Button
+                style={{ margin: '10px' }}
+                type='submit'
+                variant='contained'
+                size='small'>
+                Verify
               </Button>
             </form>
           </div>

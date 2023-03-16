@@ -24,7 +24,7 @@ function Main({ userstate, setUserState }) {
 
   return (
     <div style={{ width: '95vw' }}>
-      {/* {console.log(selector, 'selector')} */}
+      {/* {console.log(userstate, 'userstate')} */}
       <Navbar userstate={userstate} setUserState={setUserState} />
       <div id='mainCont'>
         <SideBar selector={selector} setSelector={setSelector} />
@@ -36,7 +36,9 @@ function Main({ userstate, setUserState }) {
         )}
         {selector.uploadFolder && <FolderUpload setSelector={setSelector} />}
         {selector.createFolder && <CreateFolder setSelector={setSelector} />}
-        {selector.account && <Account setUserState={setUserState} />}
+        {selector.account && (
+          <Account userstate={userstate} setUserState={setUserState} />
+        )}
         {selector.trash && <Trash setSelector={setSelector} />}
         {selector.shared && <Shared setSelector={setSelector} />}
       </div>
