@@ -27,14 +27,34 @@ function Main({ userstate, setUserState }) {
       {/* {console.log(userstate, 'userstate')} */}
       <Navbar userstate={userstate} setUserState={setUserState} />
       <div id='mainCont'>
-        <SideBar selector={selector} setSelector={setSelector} />
+        <SideBar
+          userstate={userstate}
+          selector={selector}
+          setSelector={setSelector}
+        />
         {selector.files && (
-          <DisplayContainer selector={selector} setSelector={setSelector} />
+          <DisplayContainer
+            userstate={userstate}
+            setUserState={setUserState}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
         {selector.uploadFile && (
-          <FileUpload selector={selector} setSelector={setSelector} />
+          <FileUpload
+            userstate={userstate}
+            setUserState={setUserState}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
-        {selector.uploadFolder && <FolderUpload setSelector={setSelector} />}
+        {selector.uploadFolder && (
+          <FolderUpload
+            userstate={userstate}
+            setUserState={setUserState}
+            setSelector={setSelector}
+          />
+        )}
         {selector.createFolder && <CreateFolder setSelector={setSelector} />}
         {selector.account && (
           <Account userstate={userstate} setUserState={setUserState} />

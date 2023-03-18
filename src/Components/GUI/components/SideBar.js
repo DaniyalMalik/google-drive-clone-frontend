@@ -9,7 +9,7 @@ import cloud from '../pics/cloud.png';
 import '../css/SideBar.css';
 import { ExitToApp } from '@material-ui/icons';
 
-export default function SideBar({ selector, setSelector }) {
+export default function SideBar({ userstate, selector, setSelector }) {
   return (
     <>
       <div id='sideBar'>
@@ -147,11 +147,18 @@ export default function SideBar({ selector, setSelector }) {
           </div>
           <div className='sideBarOptions'>
             <div id='storageLoader'>
-              <div id='preLoader'></div>
+              <div
+                style={{
+                  width: `${(userstate?.currentStorage / 5) * 100}%`,
+                  height: '3px',
+                  borderRadius: '30px',
+                  backgroundColor: 'dodgerblue',
+                }}
+              />
             </div>
           </div>
           <div id='storageNumericalInfo'>
-            <p>10 GB of 15 GB Used</p>
+            <p>{(userstate?.currentStorage).toFixed(2)} GB of 5 GB Used</p>
           </div>
           {/* <button id='buyStorage'>Buy storage</button> */}
         </div>

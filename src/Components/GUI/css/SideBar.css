@@ -79,13 +79,6 @@
   height: 100%;
 }
 
-#preLoader {
-  width: 60%;
-  height: 3px;
-  border-radius: 30px;
-  background-color: dodgerblue;
-}
-
 #storageNumericalInfo p {
   color: grey;
   font-size: 14px;

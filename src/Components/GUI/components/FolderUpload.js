@@ -3,13 +3,22 @@ import '../css/DisplayContainer.css';
 import axios from 'axios';
 import { Button } from '@material-ui/core';
 
-export default function FileUploadForm({ setSelector }) {
+export default function FileUploadForm({
+  userstate,
+  setUserState,
+  setSelector,
+}) {
   const fileInput = useRef(null);
-  const formData = new FormData();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (fileInput.current.files.length === 0) {
+      return alert('No folder selected or it is empty!');
+    }
+
+    const formData = new FormData();
+    let size = 0;
     let folderName = '';
 
     for (let i = 0; i < fileInput.current.files.length; i++) {
@@ -19,8 +28,15 @@ export default function FileUploadForm({ setSelector }) {
         fileInput.current.files[i].webkitRelativePath,
       );
 
+      size += fileInput.current.files[i].size;
       folderName = fileInput.current.files[i].webkitRelativePath;
     }
+
+    if (
+      userstate?.currentStorage + size / 1024 / 1024 / 1024 >=
+      userstate?.storageLimit
+    )
+      return alert('Uploaded folder size is greater than your storage limit');
 
     folderName = folderName.split('/')[0];
 
@@ -36,9 +52,7 @@ export default function FileUploadForm({ setSelector }) {
 
     alert(res.data.message);
 
-    formData.delete('files');
-
-    if (res.data.success)
+    if (res.data.success) {
       setSelector({
         account: false,
         trash: false,
@@ -49,6 +63,11 @@ export default function FileUploadForm({ setSelector }) {
         createFolder: false,
         folderName: '',
       });
+
+      setUserState(res.data.user);
+
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+    }
   };
 
   return (

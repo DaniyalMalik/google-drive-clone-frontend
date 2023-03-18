@@ -20,12 +20,25 @@ import {
 import { Delete, Visibility } from '@material-ui/icons';
 import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
 
-export default function DisplayContainer({ selector, setSelector }) {
+export default function DisplayContainer({
+  userstate,
+  setUserState,
+  selector,
+  setSelector,
+}) {
   const [files, setFiles] = React.useState([]);
   const [saveFiles, setSaveFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
   const [sameFolder, setSameFolder] = React.useState(false);
-  const formData = new FormData();
+  const [selectedFolder, setSelectedFolder] = React.useState('');
+
+  const selectFolder = (folderName) => {
+    setSelectedFolder((prev) => prev + '/' + folderName);
+
+    getFilesOrFolders(
+      selectedFolder ? selectedFolder + '/' + folderName : folderName,
+    );
+  };
 
   const getFilesOrFolders = async (folderName) => {
     if (folderName) {
@@ -54,12 +67,16 @@ export default function DisplayContainer({ selector, setSelector }) {
       setFolders(res.data.folders);
       setFiles(res.data.files);
       setSelector({ ...selector, folderName: '' });
+      setSelectedFolder('');
     }
   };
 
-  const deleteFile = async (fileNameWithExt) => {
+  const deleteFile = async (fileNameWithExt, folder) => {
     const res = await axios.delete(
-      'http://localhost:5000/api/upload?fileOrFolderName=' + fileNameWithExt,
+      'http://localhost:5000/api/upload?fileOrFolderName=' +
+        fileNameWithExt +
+        '&folder=' +
+        folder,
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -73,9 +90,20 @@ export default function DisplayContainer({ selector, setSelector }) {
   };
 
   const uploadFiles = async () => {
+    const formData = new FormData();
+    let size = 0;
+
     for (let i = 0; i < saveFiles.length; i++) {
+      size += saveFiles[i].size;
+
       formData.append('files', saveFiles[i]);
     }
+
+    if (
+      userstate?.currentStorage + size / 1024 / 1024 / 1024 >=
+      userstate?.storageLimit
+    )
+      return alert('Uploaded files size is greater than your storage limit');
 
     if (selector.folderName) {
       const res = await axios.post(
@@ -96,7 +124,13 @@ export default function DisplayContainer({ selector, setSelector }) {
       setSaveFiles([]);
       setSameFolder(false);
 
-      getFilesOrFolders(selector.folderName);
+      if (res.data.success) {
+        setUserState(res.data.user);
+
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+
+        getFilesOrFolders(selector.folderName);
+      }
     }
   };
 
@@ -161,11 +195,11 @@ export default function DisplayContainer({ selector, setSelector }) {
                     }}>
                     {item.folderName}
                     <span>
-                      <IconButton
-                        onClick={() => getFilesOrFolders(item.folderName)}>
+                      <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
-                      <IconButton onClick={() => deleteFile(item.folderName)}>
+                      <IconButton
+                        onClick={() => deleteFile(item.folderName, true)}>
                         <Delete />
                       </IconButton>
                     </span>
@@ -214,7 +248,9 @@ export default function DisplayContainer({ selector, setSelector }) {
                         actionIcon={
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
+                            onClick={() =>
+                              deleteFile(item.fileNameWithExt, false)
+                            }>
                             <DeleteOutlined />
                           </IconButton>
                         }
@@ -254,7 +290,9 @@ export default function DisplayContainer({ selector, setSelector }) {
                         actionIcon={
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
+                            onClick={() =>
+                              deleteFile(item.fileNameWithExt, false)
+                            }>
                             <DeleteOutlined />
                           </IconButton>
                         }
@@ -292,7 +330,9 @@ export default function DisplayContainer({ selector, setSelector }) {
                         actionIcon={
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
+                            onClick={() =>
+                              deleteFile(item.fileNameWithExt, false)
+                            }>
                             <DeleteOutlined />
                           </IconButton>
                         }
@@ -337,7 +377,9 @@ export default function DisplayContainer({ selector, setSelector }) {
                           </a>
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
+                            onClick={() =>
+                              deleteFile(item.fileNameWithExt, false)
+                            }>
                             <DeleteOutlined />
                           </IconButton>
                         </ListItemIcon>
