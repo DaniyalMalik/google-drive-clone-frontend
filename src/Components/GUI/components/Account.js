@@ -125,46 +125,46 @@ export default function Account({ userstate, setUserState }) {
     }
   };
 
-  const handleEmailVerification = async (e) => {
-    e.preventDefault();
+  // const handleEmailVerification = async (e) => {
+  //   e.preventDefault();
 
-    const res = await axios.get(
-      'http://localhost:5000/api/user/sendverifyemail/?email=' + profile.email,
-      {
-        headers: {
-          'x-auth-token': localStorage.getItem('token'),
-        },
-      },
-    );
+  //   const res = await axios.get(
+  //     'http://localhost:5000/api/user/sendverifyemail/?email=' + profile.email,
+  //     {
+  //       headers: {
+  //         'x-auth-token': localStorage.getItem('token'),
+  //       },
+  //     },
+  //   );
 
-    alert(res.data.message);
+  //   alert(res.data.message);
 
-    if (res.data.success) handleChange(null, 2);
-  };
+  //   if (res.data.success) handleChange(null, 2);
+  // };
 
-  const handleVerifyCode = async (e) => {
-    e.preventDefault();
+  // const handleVerifyCode = async (e) => {
+  //   e.preventDefault();
 
-    const res = await axios.post(
-      'http://localhost:5000/api/user/verifyemail/',
-      { resetToken: e.target.verificationCode.value },
-      {
-        headers: {
-          'x-auth-token': localStorage.getItem('token'),
-        },
-      },
-    );
+  //   const res = await axios.post(
+  //     'http://localhost:5000/api/user/verifyemail/',
+  //     { resetToken: e.target.verificationCode.value },
+  //     {
+  //       headers: {
+  //         'x-auth-token': localStorage.getItem('token'),
+  //       },
+  //     },
+  //   );
 
-    alert(res.data.message);
+  //   alert(res.data.message);
 
-    if (res.data.success) {
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+  //   if (res.data.success) {
+  //     localStorage.setItem('user', JSON.stringify(res.data.user));
 
-      handleChange(null, 0);
+  //     handleChange(null, 0);
 
-      setUserState({ ...res.data.user });
-    }
-  };
+  //     setUserState({ ...res.data.user });
+  //   }
+  // };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -189,9 +189,9 @@ export default function Account({ userstate, setUserState }) {
             aria-label='nav tabs example'>
             <LinkTab label='Profile' {...a11yProps(0)} />
             <LinkTab label='Change Password' {...a11yProps(1)} />
-            {!profile?.isEmailVerified && (
+            {/* {!profile?.isEmailVerified && (
               <LinkTab label='Verify Email' {...a11yProps(2)} />
-            )}
+            )} */}
           </Tabs>
         </AppBar>
         <TabPanel value={value} index={0}>
@@ -206,7 +206,7 @@ export default function Account({ userstate, setUserState }) {
                 value={profile?.email}
                 disabled
               />
-              <Button
+              {/* <Button
                 variant='contained'
                 disabled={profile?.isEmailVerified}
                 onClick={handleEmailVerification}
@@ -214,7 +214,7 @@ export default function Account({ userstate, setUserState }) {
                 onChange={onProfileChange}
                 size='small'>
                 Verify Email
-              </Button>
+              </Button> */}
               <br />
               <TextField
                 style={{ margin: '10px' }}
@@ -287,7 +287,7 @@ export default function Account({ userstate, setUserState }) {
             </form>
           </div>
         </TabPanel>
-        <TabPanel value={value} index={2}>
+        {/* <TabPanel value={value} index={2}>
           <div id='contentDisplayer'>
             <form autoComplete='off' onSubmit={handleVerifyCode}>
               <TextField
@@ -307,7 +307,7 @@ export default function Account({ userstate, setUserState }) {
               </Button>
             </form>
           </div>
-        </TabPanel>
+        </TabPanel> */}
       </div>
     </div>
   );

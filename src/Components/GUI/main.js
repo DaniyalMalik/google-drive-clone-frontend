@@ -25,10 +25,16 @@ function Main({ userstate, setUserState }) {
   return (
     <div style={{ width: '95vw' }}>
       {/* {console.log(userstate, 'userstate')} */}
-      <Navbar userstate={userstate} setUserState={setUserState} />
+      <Navbar
+        userstate={userstate}
+        setUserState={setUserState}
+        selector={selector}
+        setSelector={setSelector}
+      />
       <div id='mainCont'>
         <SideBar
           userstate={userstate}
+          setUserState={setUserState}
           selector={selector}
           setSelector={setSelector}
         />
@@ -52,15 +58,42 @@ function Main({ userstate, setUserState }) {
           <FolderUpload
             userstate={userstate}
             setUserState={setUserState}
+            selector={selector}
             setSelector={setSelector}
           />
         )}
-        {selector.createFolder && <CreateFolder setSelector={setSelector} />}
-        {selector.account && (
-          <Account userstate={userstate} setUserState={setUserState} />
+        {selector.createFolder && (
+          <CreateFolder
+            userstate={userstate}
+            setUserState={setUserState}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
-        {selector.trash && <Trash setSelector={setSelector} />}
-        {selector.shared && <Shared setSelector={setSelector} />}
+        {selector.account && (
+          <Account
+            userstate={userstate}
+            setUserState={setUserState}
+            selector={selector}
+            setSelector={setSelector}
+          />
+        )}
+        {selector.trash && (
+          <Trash
+            userstate={userstate}
+            setUserState={setUserState}
+            selector={selector}
+            setSelector={setSelector}
+          />
+        )}
+        {selector.shared && (
+          <Shared
+            userstate={userstate}
+            setUserState={setUserState}
+            selector={selector}
+            setSelector={setSelector}
+          />
+        )}
       </div>
     </div>
   );

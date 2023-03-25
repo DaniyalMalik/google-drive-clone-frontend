@@ -16,9 +16,24 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Dialog,
+  TextField,
+  ListItemSecondaryAction,
 } from '@material-ui/core';
 import { Delete, Visibility } from '@material-ui/icons';
+import { makeStyles } from '@material-ui/core/styles';
 import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper,
+  },
+}));
 
 export default function DisplayContainer({
   userstate,
@@ -31,6 +46,27 @@ export default function DisplayContainer({
   const [folders, setFolders] = React.useState([]);
   const [sameFolder, setSameFolder] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
+  const [open_1, setOpen_1] = React.useState(false);
+  const [open_2, setOpen_2] = React.useState(false);
+  const classes = useStyles();
+  const [email, setEmail] = React.useState('');
+
+  const handleClickOpen_1 = () => {
+    setOpen_1(true);
+  };
+
+  const handleClickOpen_2 = () => {
+    setOpen_2(true);
+  };
+
+  const handleClose_1 = () => {
+    setOpen_1(false);
+  };
+
+  const handleClose_2 = () => {
+    setOpen_2(false);
+    setEmail('');
+  };
 
   const selectFolder = (folderName) => {
     setSelectedFolder((prev) => prev + '/' + folderName);
@@ -153,11 +189,110 @@ export default function DisplayContainer({
     setSameFolder(true);
   };
 
+  const shareFolder = async () => {
+    if (!email) alert('Email address is required!');
+
+    const res = await axios.put(
+      'http://localhost:5000/api/upload/share?email=' + email,
+      {},
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) handleClose_2();
+  };
+
+  const handleDelete = async (userId) => {
+    const res = await axios.put(
+      'http://localhost:5000/api/upload/unshare?userId=' + userId,
+      {},
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) handleClose_2();
+  };
+
+  const onEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
+
   return (
     <div>
+      <Dialog
+        open={open_1}
+        onClose={handleClose_1}
+        aria-labelledby='form-dialog-title-1'>
+        <DialogTitle id='form-dialog-title-1'>Share with</DialogTitle>
+        <DialogContent>
+          <List className={classes.root}>
+            {userstate.sharedWith.length !== 0 ? (
+              userstate.sharedWith.map((item, index) => (
+                <ListItem key={index} role={undefined} dense>
+                  <ListItemText
+                    id={index}
+                    primary={item.firstName + ' ' + item.lastName}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge='end'
+                      aria-label='comments'
+                      onClick={() => handleDelete(item._id)}>
+                      <Delete />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))
+            ) : (
+              <Typography variant='h6'>Not shared with anyone!</Typography>
+            )}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose_1} color='primary'>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={open_2}
+        onClose={handleClose_2}
+        aria-labelledby='form-dialog-title-2'>
+        <DialogTitle id='form-dialog-title-2'>Share with</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin='dense'
+            id='email'
+            value={email}
+            onChange={onEmailChange}
+            label='Email Address'
+            type='email'
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose_2} color='primary'>
+            Close
+          </Button>
+          <Button onClick={shareFolder} color='primary'>
+            Share
+          </Button>
+        </DialogActions>
+      </Dialog>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
-        {selector.folderName && (
+        {selector.folderName ? (
           <div>
             <input
               style={{ display: 'none' }}
@@ -173,6 +308,15 @@ export default function DisplayContainer({
             </label>
             <Button variant='outlined' onClick={() => getFilesOrFolders()}>
               back to root folder
+            </Button>
+          </div>
+        ) : (
+          <div>
+            <Button variant='outlined' onClick={handleClickOpen_1}>
+              Shared With
+            </Button>
+            <Button variant='outlined' onClick={handleClickOpen_2}>
+              Share
             </Button>
           </div>
         )}

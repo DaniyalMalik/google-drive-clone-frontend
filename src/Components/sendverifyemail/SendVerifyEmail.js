@@ -1,47 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import basestyle from '../Base.module.css';
-import loginstyle from './ForgotPassword.module.css';
+import loginstyle from './SendVerifyEmail.module.css';
 import axios from 'axios';
 import { useNavigate, NavLink } from 'react-router-dom';
 
-const ForgotPassword = () => {
+const SendVerifyEmail = () => {
   const navigate = useNavigate();
 
-  const forgotPasswordHandler = (e) => {
+  const handleEmailVerification = async (e) => {
     e.preventDefault();
 
-    axios
-      .post(
-        'http://localhost:5000/api/user/forgotpassword?email=' +
-          e.target.email.value,
-      )
-      .then((res) => {
-        alert(res.data.message);
+    const res = await axios.get(
+      'http://localhost:5000/api/user/sendverifyemail/?email=' +
+        e.target.email.value,
+    );
 
-        if (res.data.success) navigate('/', { replace: true });
-      });
+    alert(res.data.message);
+
+    if (res.data.success) navigate('/login', { replace: true });
   };
 
   return (
     <div className={loginstyle.login}>
-      <form onSubmit={forgotPasswordHandler}>
-        <h1>ForgotPassword</h1>
+      <form onSubmit={handleEmailVerification}>
+        <h1>Send Verification Email</h1>
         <input
           type='email'
           name='email'
           id='email'
-          placeholder='Email'
+          placeholder='Enter your email'
           required
         />
         <NavLink to='/' style={{ float: 'right' }}>
           Back to login
         </NavLink>
         <button className={basestyle.button_common} type='submit'>
-          Send Email
+          Send
         </button>
       </form>
     </div>
   );
 };
 
-export default ForgotPassword;
+export default SendVerifyEmail;

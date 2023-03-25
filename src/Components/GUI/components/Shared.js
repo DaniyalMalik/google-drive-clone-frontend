@@ -16,16 +16,49 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Select,
+  FormControl,
+  MenuItem,
+  InputLabel,
 } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { Delete, Visibility } from '@material-ui/icons';
 import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
 
-export default function Shared({ selector, setSelector }) {
+const useStyles = makeStyles((theme) => ({
+  button: {
+    display: 'block',
+    marginTop: theme.spacing(2),
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 180,
+  },
+}));
+
+export default function Shared({
+  userstate,
+  setUserState,
+  selector,
+  setSelector,
+}) {
+  const classes = useStyles();
   const [files, setFiles] = React.useState([]);
-  const [saveFiles, setSaveFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
-  const [sameFolder, setSameFolder] = React.useState(false);
-  const formData = new FormData();
+  const [sharedFolderPath, setSharedFolderPath] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+
+  const handleChange = (event) => {
+    setSharedFolderPath(event.target.value);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
   const getFilesOrFolders = async (folderName) => {
     if (folderName) {
@@ -43,7 +76,7 @@ export default function Shared({ selector, setSelector }) {
       setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=',
+        'http://localhost:5000/api/upload?folderName=' + sharedFolderPath,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -57,91 +90,39 @@ export default function Shared({ selector, setSelector }) {
     }
   };
 
-  const deleteFile = async (fileNameWithExt) => {
-    const res = await axios.delete(
-      'http://localhost:5000/api/upload?fileOrFolderName=' + fileNameWithExt,
-      {
-        headers: {
-          'x-auth-token': localStorage.getItem('token'),
-        },
-      },
-    );
-
-    alert(res.data.message);
-
-    getFilesOrFolders();
-  };
-
-  const uploadFiles = async () => {
-    for (let i = 0; i < saveFiles.length; i++) {
-      formData.append('files', saveFiles[i]);
-    }
-
-    if (selector.folderName) {
-      const res = await axios.post(
-        'http://localhost:5000/api/upload?folderName=' +
-          selector.folderName +
-          '&sameFolder=' +
-          sameFolder,
-        formData,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
-        },
-      );
-
-      alert(res.data.message);
-
-      setSaveFiles([]);
-      setSameFolder(false);
-
-      getFilesOrFolders(selector.folderName);
-    }
-  };
-
   React.useEffect(() => {
-    getFilesOrFolders();
-  }, []);
-
-  React.useEffect(() => {
-    saveFiles.length > 0 && uploadFiles();
-  }, [saveFiles]);
-
-  const onUploadFiles = (e) => {
-    const arr = [];
-
-    for (let i = 0; i < e.target.files.length; i++) {
-      arr.push(e.target.files[i]);
-    }
-
-    setSaveFiles(arr);
-    setSameFolder(true);
-  };
+    if (sharedFolderPath) getFilesOrFolders();
+  }, [sharedFolderPath]);
 
   return (
     <div>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
-        {selector.folderName && (
-          <div>
-            <input
-              style={{ display: 'none' }}
-              id='contained-button-file'
-              multiple
-              type='file'
-              onChange={onUploadFiles}
-            />
-            <label htmlFor='contained-button-file'>
-              <Button variant='outlined' component='span'>
-                upload files in Folder: <b>{selector.folderName}</b>
-              </Button>
-            </label>
-            <Button variant='outlined' onClick={() => getFilesOrFolders()}>
-              back to root folder
-            </Button>
-          </div>
-        )}
+        <div>
+          <FormControl className={classes.formControl}>
+            <InputLabel id='demo-controlled-open-select-label'>
+              Shared Folder
+            </InputLabel>
+            <Select
+              labelId='demo-controlled-open-select-label'
+              id='demo-controlled-open-select'
+              open={open}
+              onClose={handleClose}
+              onOpen={handleOpen}
+              value={sharedFolderPath}
+              onChange={handleChange}>
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {userstate?.sharedWithMe.map((item) => (
+                <MenuItem value={item.folderPath}>item.name</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* <Button variant='outlined' onClick={() => getFilesOrFolders()}>
+            back to root folder
+          </Button> */}
+        </div>
       </div>
       <div id='contentDisplayer'>
         {folders?.length > 0 ? (
@@ -164,9 +145,6 @@ export default function Shared({ selector, setSelector }) {
                       <IconButton
                         onClick={() => getFilesOrFolders(item.folderName)}>
                         <Visibility />
-                      </IconButton>
-                      <IconButton onClick={() => deleteFile(item.folderName)}>
-                        <Delete />
                       </IconButton>
                     </span>
                   </Typography>
@@ -211,13 +189,6 @@ export default function Shared({ selector, setSelector }) {
                             {item.fileName}
                           </Typography>
                         }
-                        actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
-                            <DeleteOutlined />
-                          </IconButton>
-                        }
                       />
                     </ImageListItem>
                   ),
@@ -251,13 +222,6 @@ export default function Shared({ selector, setSelector }) {
                             {item.fileName}
                           </Typography>
                         }
-                        actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
-                            <DeleteOutlined />
-                          </IconButton>
-                        }
                       />
                     </ImageListItem>
                   ),
@@ -288,13 +252,6 @@ export default function Shared({ selector, setSelector }) {
                             style={{ color: 'white' }}>
                             {item.fileName}
                           </Typography>
-                        }
-                        actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
-                            <DeleteOutlined />
-                          </IconButton>
                         }
                       />
                     </ImageListItem>
@@ -335,11 +292,6 @@ export default function Shared({ selector, setSelector }) {
                               <GetAppOutlined color='primary' />
                             </IconButton>
                           </a>
-                          <IconButton
-                            color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
-                            <DeleteOutlined />
-                          </IconButton>
                         </ListItemIcon>
                       </ListItem>
                       <Divider variant='inset' component='li' />

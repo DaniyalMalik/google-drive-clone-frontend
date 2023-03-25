@@ -1,10 +1,11 @@
-import Login from './Components/Login/Login';
-import Register from './Components/Register/Register';
+import Login from './Components/login/Login';
+import Register from './Components/register/Register';
 import Main from './Components/GUI/Main';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
-import ForgotPassword from './Components/ForgotPassword/ForgotPassword';
-import ResetPassword from './Components/Resetpassword/ResetPassword';
+import ForgotPassword from './Components/forgotpassword/ForgotPassword';
+import ResetPassword from './Components/resetpassword/ResetPassword';
+import SendVerifyEmail from './Components/sendverifyemail/SendVerifyEmail';
 
 function App() {
   const [userstate, setUserState] = useState(
@@ -50,6 +51,19 @@ function App() {
                 }
               />
               <Route
+                path='/login/:verifyEmailToken'
+                element={
+                  <div
+                    style={{
+                      height: '100vh',
+                      alignItems: 'center',
+                      display: 'flex',
+                    }}>
+                    <Login setUserState={setUserState} />
+                  </div>
+                }
+              />
+              <Route
                 path='/signup'
                 element={
                   <div
@@ -76,7 +90,7 @@ function App() {
                 }
               />
               <Route
-                path='/resetpassword/:token'
+                path='/resetpassword/:resetPasswordToken'
                 element={
                   <div
                     style={{
@@ -85,6 +99,19 @@ function App() {
                       display: 'flex',
                     }}>
                     <ResetPassword />
+                  </div>
+                }
+              />
+              <Route
+                path='/VerifyEmail'
+                element={
+                  <div
+                    style={{
+                      height: '100vh',
+                      alignItems: 'center',
+                      display: 'flex',
+                    }}>
+                    <SendVerifyEmail />
                   </div>
                 }
               />

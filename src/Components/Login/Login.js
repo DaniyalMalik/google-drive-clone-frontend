@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import basestyle from '../Base.module.css';
 import loginstyle from './Login.module.css';
 import axios from 'axios';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useNavigate, NavLink, useParams } from 'react-router-dom';
 
 const Login = ({ setUserState }) => {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ const Login = ({ setUserState }) => {
     email: '',
     password: '',
   });
+  const { verifyEmailToken } = useParams();
 
   const changeHandler = (e) => {
     const { name, value } = e.target;
@@ -53,11 +54,26 @@ const Login = ({ setUserState }) => {
         localStorage.setItem('user', JSON.stringify(res.data.user));
         localStorage.setItem('token', res.data.token);
 
+        if (res.data.message === 'Verify your email address first!')
+          return navigate('/verifyemail', { replace: true });
+
         setUserState(res.data.user);
         navigate('/', { replace: true });
       });
     }
   }, [formErrors]);
+
+  const handleVerifyCode = async () => {
+    const res = await axios.post('http://localhost:5000/api/user/verifyemail', {
+      resetToken: verifyEmailToken,
+    });
+
+    alert(res.data.message);
+  };
+
+  useEffect(() => {
+    if (verifyEmailToken) handleVerifyCode();
+  }, []);
 
   return (
     <div className={loginstyle.login}>

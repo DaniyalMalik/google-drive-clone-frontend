@@ -1,20 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import basestyle from '../Base.module.css';
 import loginstyle from './ResetPassword.module.css';
 import axios from 'axios';
-import { useNavigate, NavLink } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
+import { useNavigate, NavLink, useParams } from 'react-router-dom';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
-  let { token } = useParams();
+  const { resetPasswordToken } = useParams();
 
   const resetPasswordHandler = (e) => {
     e.preventDefault();
-    console.log(token, 'token');
-    console.log(e.target.password.value, 'e.target.password.value');
-    console.log(e.target.repeatPassword.value, 'e.target.repeatPassword.value');
-    if (!token) {
+
+    if (!resetPasswordToken) {
       alert('Token is required!');
     }
 
@@ -25,7 +22,7 @@ const ResetPassword = () => {
     axios
       .post('http://localhost:5000/api/user/resetpassword', {
         password: e.target.password.value,
-        resetToken: token,
+        resetToken: resetPasswordToken,
       })
       .then((res) => {
         alert(res.data.message);
