@@ -35,12 +35,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function DisplayContainer({
-  userstate,
-  setUserState,
-  selector,
-  setSelector,
-}) {
+export default function DisplayContainer({ selector, setSelector }) {
   const [files, setFiles] = React.useState([]);
   const [saveFiles, setSaveFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
@@ -50,6 +45,21 @@ export default function DisplayContainer({
   const [open_2, setOpen_2] = React.useState(false);
   const classes = useStyles();
   const [email, setEmail] = React.useState('');
+  const [user, setUser] = React.useState({});
+
+  const getUser = async () => {
+    const res = await axios.get('http://localhost:5000/api/user', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setUser(res.data.user);
+  };
+
+  React.useEffect(() => {
+    getUser();
+  }, []);
 
   const handleClickOpen_1 = () => {
     setOpen_1(true);
@@ -135,10 +145,7 @@ export default function DisplayContainer({
       formData.append('files', saveFiles[i]);
     }
 
-    if (
-      userstate?.currentStorage + size / 1024 / 1024 / 1024 >=
-      userstate?.storageLimit
-    )
+    if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
       return alert('Uploaded files size is greater than your storage limit');
 
     if (selector.folderName) {
@@ -161,10 +168,7 @@ export default function DisplayContainer({
       setSameFolder(false);
 
       if (res.data.success) {
-        setUserState(res.data.user);
-
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-
+        getUser();
         getFilesOrFolders(selector.folderName);
       }
     }
@@ -190,7 +194,7 @@ export default function DisplayContainer({
   };
 
   const shareFolder = async () => {
-    if (!email) alert('Email address is required!');
+    if (!email) return alert('Email address is required!');
 
     const res = await axios.put(
       'http://localhost:5000/api/upload/share?email=' + email,
@@ -204,7 +208,10 @@ export default function DisplayContainer({
 
     alert(res.data.message);
 
-    if (res.data.success) handleClose_2();
+    if (res.data.success) {
+      getUser();
+      handleClose_2();
+    }
   };
 
   const handleDelete = async (userId) => {
@@ -220,7 +227,10 @@ export default function DisplayContainer({
 
     alert(res.data.message);
 
-    if (res.data.success) handleClose_2();
+    if (res.data.success) {
+      getUser();
+      handleClose_1();
+    }
   };
 
   const onEmailChange = (e) => {
@@ -233,11 +243,11 @@ export default function DisplayContainer({
         open={open_1}
         onClose={handleClose_1}
         aria-labelledby='form-dialog-title-1'>
-        <DialogTitle id='form-dialog-title-1'>Share with</DialogTitle>
+        <DialogTitle id='form-dialog-title-1'>Shared with</DialogTitle>
         <DialogContent>
           <List className={classes.root}>
-            {userstate.sharedWith.length !== 0 ? (
-              userstate.sharedWith.map((item, index) => (
+            {user?.sharedWith && user?.sharedWith.length !== 0 ? (
+              user.sharedWith.map((item, index) => (
                 <ListItem key={index} role={undefined} dense>
                   <ListItemText
                     id={index}

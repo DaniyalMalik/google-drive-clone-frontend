@@ -4,7 +4,7 @@ import loginstyle from './Login.module.css';
 import axios from 'axios';
 import { useNavigate, NavLink, useParams } from 'react-router-dom';
 
-const Login = ({ setUserState }) => {
+const Login = ({ setToken }) => {
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({});
   const [isSubmit, setIsSubmit] = useState(false);
@@ -51,13 +51,13 @@ const Login = ({ setUserState }) => {
       axios.post('http://localhost:5000/api/user/login', user).then((res) => {
         alert(res.data.message);
 
-        localStorage.setItem('user', JSON.stringify(res.data.user));
         localStorage.setItem('token', res.data.token);
+
+        setToken(res.data.token);
 
         if (res.data.message === 'Verify your email address first!')
           return navigate('/verifyemail', { replace: true });
 
-        setUserState(res.data.user);
         navigate('/', { replace: true });
       });
     }

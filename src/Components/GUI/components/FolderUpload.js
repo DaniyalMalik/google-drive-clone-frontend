@@ -1,14 +1,25 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
 import { Button } from '@material-ui/core';
 
-export default function FileUploadForm({
-  userstate,
-  setUserState,
-  setSelector,
-}) {
+export default function FolderUpload({ setSelector }) {
   const fileInput = useRef(null);
+  const [user, setUser] = React.useState({});
+
+  const getUser = async () => {
+    const res = await axios.get('http://localhost:5000/api/user', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setUser(res.data.user);
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,10 +43,7 @@ export default function FileUploadForm({
       folderName = fileInput.current.files[i].webkitRelativePath;
     }
 
-    if (
-      userstate?.currentStorage + size / 1024 / 1024 / 1024 >=
-      userstate?.storageLimit
-    )
+    if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
       return alert('Uploaded folder size is greater than your storage limit');
 
     folderName = folderName.split('/')[0];
@@ -64,9 +72,7 @@ export default function FileUploadForm({
         folderName: '',
       });
 
-      setUserState(res.data.user);
-
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      getUser();
     }
   };
 

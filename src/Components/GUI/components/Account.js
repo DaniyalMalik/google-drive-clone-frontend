@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Account({ userstate, setUserState }) {
+export default function Account({ setUpdated }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
   const [changePassword, setChangePassword] = useState({
@@ -70,11 +70,21 @@ export default function Account({ userstate, setUserState }) {
     newPassword: '',
     repeatNewPassword: '',
   });
-  const [profile, setProfile] = useState({});
+  const [user, setUser] = React.useState({});
+
+  const getUser = async () => {
+    const res = await axios.get('http://localhost:5000/api/user', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setUser(res.data.user);
+  };
 
   useEffect(() => {
-    setProfile(userstate);
-  }, [userstate]);
+    getUser();
+  }, []);
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -84,7 +94,7 @@ export default function Account({ userstate, setUserState }) {
     }
 
     const res = await axios.put(
-      'http://localhost:5000/api/user/updatepassword/' + profile._id,
+      'http://localhost:5000/api/user/updatepassword/' + user._id,
       { ...changePassword },
       {
         headers: {
@@ -107,8 +117,8 @@ export default function Account({ userstate, setUserState }) {
     e.preventDefault();
 
     const res = await axios.put(
-      'http://localhost:5000/api/user/' + profile._id,
-      { ...profile },
+      'http://localhost:5000/api/user/' + user._id,
+      { ...user },
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -119,9 +129,9 @@ export default function Account({ userstate, setUserState }) {
     alert(res.data.message);
 
     if (res.data.success) {
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      getUser();
 
-      setUserState({ ...res.data.user });
+      setUpdated(true);
     }
   };
 
@@ -129,7 +139,7 @@ export default function Account({ userstate, setUserState }) {
   //   e.preventDefault();
 
   //   const res = await axios.get(
-  //     'http://localhost:5000/api/user/sendverifyemail/?email=' + profile.email,
+  //     'http://localhost:5000/api/user/sendverifyemail/?email=' + user.email,
   //     {
   //       headers: {
   //         'x-auth-token': localStorage.getItem('token'),
@@ -175,7 +185,7 @@ export default function Account({ userstate, setUserState }) {
   };
 
   const onProfileChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
+    setUser({ ...user, [e.target.name]: e.target.value });
   };
 
   return (
@@ -189,7 +199,7 @@ export default function Account({ userstate, setUserState }) {
             aria-label='nav tabs example'>
             <LinkTab label='Profile' {...a11yProps(0)} />
             <LinkTab label='Change Password' {...a11yProps(1)} />
-            {/* {!profile?.isEmailVerified && (
+            {/* {!user?.isEmailVerified && (
               <LinkTab label='Verify Email' {...a11yProps(2)} />
             )} */}
           </Tabs>
@@ -203,12 +213,12 @@ export default function Account({ userstate, setUserState }) {
                 variant='outlined'
                 onChange={onProfileChange}
                 name='email'
-                value={profile?.email}
+                value={user?.email}
                 disabled
               />
               {/* <Button
                 variant='contained'
-                disabled={profile?.isEmailVerified}
+                disabled={user?.isEmailVerified}
                 onClick={handleEmailVerification}
                 style={{ margin: '10px' }}
                 onChange={onProfileChange}
@@ -219,19 +229,21 @@ export default function Account({ userstate, setUserState }) {
               <TextField
                 style={{ margin: '10px' }}
                 onChange={onProfileChange}
-                label='Name'
+                label='First Name'
                 variant='outlined'
                 name='firstName'
-                value={profile?.firstName}
+                id='firstName'
+                value={user?.firstName}
               />
               <br />
               <TextField
                 style={{ margin: '10px' }}
                 onChange={onProfileChange}
-                label='Name'
+                label='Last Name'
                 variant='outlined'
                 name='lastName'
-                value={profile?.lastName}
+                id='lastName'
+                value={user?.lastName}
               />
               <br />
               <Button

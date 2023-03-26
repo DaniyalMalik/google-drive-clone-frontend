@@ -2,16 +2,17 @@ import Navbar from './components/Navbar';
 import SideBar from './components/SideBar';
 import DisplayContainer from './components/DisplayContainer';
 import FileUpload from './components/FileUpload';
+import axios from 'axios';
 import FolderUpload from './components/FolderUpload';
 import CreateFolder from './components/CreateFolder';
 import Account from './components/Account';
 import Shared from './components/Shared';
 import Trash from './components/Trash';
 import './main.css';
-import { useState } from 'react';
+import React from 'react';
 
-function Main({ userstate, setUserState }) {
-  const [selector, setSelector] = useState({
+function Main({ setToken }) {
+  const [selector, setSelector] = React.useState({
     account: false,
     trash: false,
     shared: false,
@@ -21,78 +22,58 @@ function Main({ userstate, setUserState }) {
     createFolder: false,
     folderName: '',
   });
+  const [user, setUser] = React.useState({});
+  const [updated, setUpdated] = React.useState(true);
+
+  const getUser = async () => {
+    const res = await axios.get('http://localhost:5000/api/user', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setUser(res.data.user);
+    setUpdated(false);
+  };
+
+  React.useEffect(() => {
+    if (updated) getUser();
+  }, [updated]);
 
   return (
     <div style={{ width: '95vw' }}>
-      {/* {console.log(userstate, 'userstate')} */}
       <Navbar
-        userstate={userstate}
-        setUserState={setUserState}
+        user={user}
+        setToken={setToken}
         selector={selector}
         setSelector={setSelector}
       />
       <div id='mainCont'>
-        <SideBar
-          userstate={userstate}
-          setUserState={setUserState}
-          selector={selector}
-          setSelector={setSelector}
-        />
+        <SideBar selector={selector} setSelector={setSelector} />
         {selector.files && (
-          <DisplayContainer
-            userstate={userstate}
-            setUserState={setUserState}
-            selector={selector}
-            setSelector={setSelector}
-          />
+          <DisplayContainer selector={selector} setSelector={setSelector} />
         )}
         {selector.uploadFile && (
-          <FileUpload
-            userstate={userstate}
-            setUserState={setUserState}
-            selector={selector}
-            setSelector={setSelector}
-          />
+          <FileUpload selector={selector} setSelector={setSelector} />
         )}
         {selector.uploadFolder && (
-          <FolderUpload
-            userstate={userstate}
-            setUserState={setUserState}
-            selector={selector}
-            setSelector={setSelector}
-          />
+          <FolderUpload selector={selector} setSelector={setSelector} />
         )}
         {selector.createFolder && (
-          <CreateFolder
-            userstate={userstate}
-            setUserState={setUserState}
-            selector={selector}
-            setSelector={setSelector}
-          />
+          <CreateFolder selector={selector} setSelector={setSelector} />
         )}
         {selector.account && (
           <Account
-            userstate={userstate}
-            setUserState={setUserState}
+            setUpdated={setUpdated}
             selector={selector}
             setSelector={setSelector}
           />
         )}
         {selector.trash && (
-          <Trash
-            userstate={userstate}
-            setUserState={setUserState}
-            selector={selector}
-            setSelector={setSelector}
-          />
+          <Trash selector={selector} setSelector={setSelector} />
         )}
         {selector.shared && (
-          <Shared
-            userstate={userstate}
-            setUserState={setUserState}
-            selector={selector}
-            setSelector={setSelector}
-          />
+          <Shared selector={selector} setSelector={setSelector} />
         )}
       </div>
     </div>

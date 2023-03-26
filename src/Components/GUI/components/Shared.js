@@ -36,17 +36,36 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Shared({
-  userstate,
-  setUserState,
-  selector,
-  setSelector,
-}) {
+export default function Shared({ selector, setSelector }) {
   const classes = useStyles();
   const [files, setFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
   const [sharedFolderPath, setSharedFolderPath] = React.useState('');
   const [open, setOpen] = React.useState(false);
+  const [selectedFolder, setSelectedFolder] = React.useState('');
+  const [user, setUser] = React.useState({});
+
+  const getUser = async () => {
+    const res = await axios.get('http://localhost:5000/api/user', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setUser(res.data.user);
+  };
+
+  React.useEffect(() => {
+    getUser();
+  }, []);
+
+  const selectFolder = (folderName) => {
+    setSelectedFolder((prev) => prev + '/' + folderName);
+
+    getFilesOrFolders(
+      selectedFolder ? selectedFolder + '/' + folderName : folderName,
+    );
+  };
 
   const handleChange = (event) => {
     setSharedFolderPath(event.target.value);
@@ -63,7 +82,10 @@ export default function Shared({
   const getFilesOrFolders = async (folderName) => {
     if (folderName) {
       const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=' + folderName,
+        'http://localhost:5000/api/upload?folderName=' +
+          folderName +
+          '&userPath=' +
+          sharedFolderPath,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -76,7 +98,7 @@ export default function Shared({
       setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=' + sharedFolderPath,
+        'http://localhost:5000/api/upload?userPath=' + sharedFolderPath,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -98,7 +120,12 @@ export default function Shared({
     <div>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {selector.folderName && (
+            <Button variant='outlined' onClick={() => getFilesOrFolders()}>
+              back to root folder
+            </Button>
+          )}
           <FormControl className={classes.formControl}>
             <InputLabel id='demo-controlled-open-select-label'>
               Shared Folder
@@ -114,9 +141,12 @@ export default function Shared({
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {userstate?.sharedWithMe.map((item) => (
-                <MenuItem value={item.folderPath}>item.name</MenuItem>
-              ))}
+              {user?.sharedWithMe &&
+                user.sharedWithMe.map((item) => (
+                  <MenuItem value={item.folderPath}>
+                    {item.firstName + ' ' + item.lastName}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
           {/* <Button variant='outlined' onClick={() => getFilesOrFolders()}>
@@ -142,8 +172,7 @@ export default function Shared({
                     }}>
                     {item.folderName}
                     <span>
-                      <IconButton
-                        onClick={() => getFilesOrFolders(item.folderName)}>
+                      <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
                     </span>

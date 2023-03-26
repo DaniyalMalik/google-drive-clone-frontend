@@ -1,17 +1,14 @@
 import React from 'react';
 import icon from '../pics/drive_icon.png';
-// import search from '../pics/search.png';
-// import filters from '../pics/filters.png';
 import { Link } from 'react-router-dom';
 import { IconButton, Typography } from '@material-ui/core';
 import { ExitToApp } from '@material-ui/icons';
 
-export default function Navbar({ userstate, setUserState }) {
+export default function Navbar({ setToken, user }) {
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
 
-    setUserState({});
+    setToken('');
   };
 
   return (
@@ -53,7 +50,7 @@ export default function Navbar({ userstate, setUserState }) {
           alignItems: 'center',
         }}>
         <Typography variant='h6'>
-          {userstate.firstName + ' ' + userstate.lastName}
+          {user?.firstName && user.firstName + ' ' + user.lastName}
         </Typography>
         <IconButton onClick={logout} aria-label='delete'>
           <ExitToApp />

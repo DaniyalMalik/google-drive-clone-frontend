@@ -1,18 +1,14 @@
+import React from 'react';
 import Login from './Components/login/Login';
 import Register from './Components/register/Register';
 import Main from './Components/GUI/Main';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
 import ForgotPassword from './Components/forgotpassword/ForgotPassword';
 import ResetPassword from './Components/resetpassword/ResetPassword';
 import SendVerifyEmail from './Components/sendverifyemail/SendVerifyEmail';
 
 function App() {
-  const [userstate, setUserState] = useState(
-    localStorage.getItem('user') && localStorage.getItem('user') !== 'undefined'
-      ? JSON.parse(localStorage.getItem('user'))
-      : {},
-  );
+  const [token, setToken] = React.useState(localStorage.getItem('token'));
 
   return (
     <div>
@@ -21,8 +17,8 @@ function App() {
           <Route
             path='/'
             element={
-              userstate && userstate._id ? (
-                <Main userstate={userstate} setUserState={setUserState} />
+              token ? (
+                <Main setToken={setToken} />
               ) : (
                 <div
                   style={{
@@ -30,12 +26,12 @@ function App() {
                     alignItems: 'center',
                     display: 'flex',
                   }}>
-                  <Login setUserState={setUserState} />
+                  <Login setToken={setToken} />
                 </div>
               )
             }
           />
-          {!userstate?._id && (
+          {!token && (
             <>
               <Route
                 path='/login'
@@ -46,7 +42,7 @@ function App() {
                       alignItems: 'center',
                       display: 'flex',
                     }}>
-                    <Login setUserState={setUserState} />
+                    <Login />
                   </div>
                 }
               />
@@ -59,7 +55,7 @@ function App() {
                       alignItems: 'center',
                       display: 'flex',
                     }}>
-                    <Login setUserState={setUserState} />
+                    <Login />
                   </div>
                 }
               />

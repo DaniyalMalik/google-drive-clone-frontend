@@ -3,7 +3,7 @@ import '../css/DisplayContainer.css';
 import axios from 'axios';
 import { Button, TextField } from '@material-ui/core';
 
-export default function FileUploadForm({ setSelector }) {
+export default function CreateFolder({ setSelector }) {
   const createFolder = async (e) => {
     e.preventDefault();
 

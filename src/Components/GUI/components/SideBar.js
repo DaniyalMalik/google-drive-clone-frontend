@@ -2,6 +2,7 @@ import React from 'react';
 // import icon from '../pics/drive_icon.png';
 import drive from '../pics/myDrive.png';
 import computers from '../pics/computers.png';
+import axios from 'axios';
 import shared from '../pics/shared.png';
 import trash from '../pics/trash.png';
 import cloud from '../pics/cloud.png';
@@ -9,7 +10,23 @@ import cloud from '../pics/cloud.png';
 import '../css/SideBar.css';
 import { ExitToApp } from '@material-ui/icons';
 
-export default function SideBar({ userstate, selector, setSelector }) {
+export default function SideBar({ selector, setSelector }) {
+  const [user, setUser] = React.useState({});
+
+  const getUser = async () => {
+    const res = await axios.get('http://localhost:5000/api/user', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setUser(res.data.user);
+  };
+
+  React.useEffect(() => {
+    getUser();
+  }, []);
+
   return (
     <>
       <div id='sideBar'>
@@ -149,7 +166,9 @@ export default function SideBar({ userstate, selector, setSelector }) {
             <div id='storageLoader'>
               <div
                 style={{
-                  width: `${(userstate?.currentStorage / 5) * 100}%`,
+                  width: `${
+                    user?.currentStorage ? (user?.currentStorage / 5) * 100 : 0
+                  }%`,
                   height: '3px',
                   borderRadius: '30px',
                   backgroundColor: 'dodgerblue',
@@ -158,7 +177,10 @@ export default function SideBar({ userstate, selector, setSelector }) {
             </div>
           </div>
           <div id='storageNumericalInfo'>
-            <p>{(userstate?.currentStorage).toFixed(2)} GB of 5 GB Used</p>
+            <p>
+              {user?.currentStorage ? (user?.currentStorage).toFixed(2) : 0} GB
+              of 5 GB Used
+            </p>
           </div>
           {/* <button id='buyStorage'>Buy storage</button> */}
         </div>
