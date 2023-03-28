@@ -70,7 +70,11 @@ export default function Account({ setUpdated }) {
     newPassword: '',
     repeatNewPassword: '',
   });
-  const [user, setUser] = React.useState({});
+  const [user, setUser] = React.useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
 
   const getUser = async () => {
     const res = await axios.get('http://localhost:5000/api/user', {

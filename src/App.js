@@ -31,7 +31,7 @@ function App() {
               )
             }
           />
-          {!token && (
+          {(!token || token == 'undefined') && (
             <>
               <Route
                 path='/login'
@@ -42,7 +42,7 @@ function App() {
                       alignItems: 'center',
                       display: 'flex',
                     }}>
-                    <Login />
+                    <Login setToken={setToken} />
                   </div>
                 }
               />
@@ -55,7 +55,7 @@ function App() {
                       alignItems: 'center',
                       display: 'flex',
                     }}>
-                    <Login />
+                    <Login setToken={setToken} />
                   </div>
                 }
               />

@@ -23,9 +23,13 @@ import {
   TextField,
   ListItemSecondaryAction,
 } from '@material-ui/core';
-import { Delete, Visibility } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
-import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
+import {
+  DeleteOutlined,
+  GetAppOutlined,
+  Delete,
+  Visibility,
+} from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -347,6 +351,7 @@ export default function DisplayContainer({ selector, setSelector }) {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
+                    {console.log(item, 'item')}
                     {item.folderName}
                     <span>
                       <IconButton onClick={() => selectFolder(item.folderName)}>
@@ -400,13 +405,26 @@ export default function DisplayContainer({ selector, setSelector }) {
                           </Typography>
                         }
                         actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() =>
-                              deleteFile(item.fileNameWithExt, false)
-                            }>
-                            <DeleteOutlined />
-                          </IconButton>
+                          <>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                deleteFile(item.fileNameWithExt, false)
+                              }>
+                              <DeleteOutlined />
+                            </IconButton>
+                            {console.log(item, 'item')}
+                            <a
+                              style={{
+                                textDecoration: 'none',
+                              }}
+                              download={item.fileNameWithExt}
+                              href={`data:${item.mimeType};base64,${item.file}`}>
+                              <IconButton color='primary'>
+                                <GetAppOutlined />
+                              </IconButton>
+                            </a>
+                          </>
                         }
                       />
                     </ImageListItem>
