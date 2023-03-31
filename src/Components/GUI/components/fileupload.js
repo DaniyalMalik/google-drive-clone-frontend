@@ -3,23 +3,8 @@ import '../css/DisplayContainer.css';
 import axios from 'axios';
 import { Button } from '@material-ui/core';
 
-export default function FileUpload({ setSelector }) {
+export default function FileUpload({ setSelector, user, getUser }) {
   const fileInput = useRef(null);
-  const [user, setUser] = React.useState({});
-
-  const getUser = async () => {
-    const res = await axios.get('http://localhost:5000/api/user', {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-
-    setUser(res.data.user);
-  };
-
-  React.useEffect(() => {
-    getUser();
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

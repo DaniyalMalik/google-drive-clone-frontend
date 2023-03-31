@@ -26,9 +26,12 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import {
   DeleteOutlined,
+  Create,
+  Info,
   GetAppOutlined,
   Delete,
   Visibility,
+  InfoOutlined,
 } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
@@ -39,7 +42,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function DisplayContainer({ selector, setSelector }) {
+export default function DisplayContainer({
+  user,
+  getUser,
+  selector,
+  setSelector,
+}) {
   const [files, setFiles] = React.useState([]);
   const [saveFiles, setSaveFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
@@ -47,23 +55,11 @@ export default function DisplayContainer({ selector, setSelector }) {
   const [selectedFolder, setSelectedFolder] = React.useState('');
   const [open_1, setOpen_1] = React.useState(false);
   const [open_2, setOpen_2] = React.useState(false);
+  const [open_3, setOpen_3] = React.useState(false);
+  const [open_4, setOpen_4] = React.useState(false);
   const classes = useStyles();
   const [email, setEmail] = React.useState('');
-  const [user, setUser] = React.useState({});
-
-  const getUser = async () => {
-    const res = await axios.get('http://localhost:5000/api/user', {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-
-    setUser(res.data.user);
-  };
-
-  React.useEffect(() => {
-    getUser();
-  }, []);
+  const [itemDetails, setItemDetails] = React.useState({});
 
   const handleClickOpen_1 = () => {
     setOpen_1(true);
@@ -73,6 +69,16 @@ export default function DisplayContainer({ selector, setSelector }) {
     setOpen_2(true);
   };
 
+  const handleClickOpen_3 = (item) => {
+    setOpen_3(true);
+    setItemDetails(item);
+  };
+
+  const handleClickOpen_4 = (item) => {
+    setOpen_4(true);
+    setItemDetails(item);
+  };
+
   const handleClose_1 = () => {
     setOpen_1(false);
   };
@@ -80,6 +86,16 @@ export default function DisplayContainer({ selector, setSelector }) {
   const handleClose_2 = () => {
     setOpen_2(false);
     setEmail('');
+  };
+
+  const handleClose_3 = () => {
+    setOpen_3(false);
+    setItemDetails({});
+  };
+
+  const handleClose_4 = () => {
+    setOpen_4(false);
+    setItemDetails({});
   };
 
   const selectFolder = (folderName) => {
@@ -136,7 +152,10 @@ export default function DisplayContainer({ selector, setSelector }) {
 
     alert(res.data.message);
 
-    getFilesOrFolders();
+    if (res.data.success) {
+      getUser();
+      getFilesOrFolders();
+    }
   };
 
   const uploadFiles = async () => {
@@ -237,6 +256,59 @@ export default function DisplayContainer({ selector, setSelector }) {
     }
   };
 
+  const handleNameChange = async (e) => {
+    e.preventDefault();
+
+    console.log(e.target.name.value, 'e.target.name.value');
+    console.log(itemDetails.location, 'itemDetails.location');
+    console.log(
+      itemDetails.location
+        .split('\\')
+        [itemDetails.location.split('\\').length - 1].split('.')[
+        itemDetails.location
+          .split('\\')
+          [itemDetails.location.split('\\').length - 1].split('.').length - 1
+      ],
+    );
+    let newPath = itemDetails.location.split('\\');
+    console.log(newPath);
+    newPath.pop();
+    console.log(newPath);
+    !itemDetails.isFolder
+      ? newPath.push(
+          e.target.name.value +
+            '.' +
+            itemDetails.location
+              .split('\\')
+              [itemDetails.location.split('\\').length - 1].split('.')[
+              itemDetails.location
+                .split('\\')
+                [itemDetails.location.split('\\').length - 1].split('.')
+                .length - 1
+            ],
+        )
+      : newPath.push(e.target.name.value);
+    console.log(newPath);
+    newPath = newPath.join('\\');
+    console.log(newPath);
+    const res = await axios.put(
+      'http://localhost:5000/api/upload/rename',
+      { newPath, oldPath: itemDetails.location },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) {
+      getFilesOrFolders();
+      handleClose_4();
+    }
+  };
+
   const onEmailChange = (e) => {
     setEmail(e.target.value);
   };
@@ -304,6 +376,67 @@ export default function DisplayContainer({ selector, setSelector }) {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog
+        open={open_3}
+        onClose={handleClose_3}
+        aria-labelledby='form-dialog-title-2'>
+        <DialogTitle id='form-dialog-title-2'>
+          {itemDetails.isFolder ? 'Folder details' : 'File details'}
+        </DialogTitle>
+        <DialogContent>
+          {itemDetails.isFolder ? (
+            <Typography variant='p'>
+              <b>Folder size (MB):</b>{' '}
+              {(itemDetails.size / 1024 / 1024).toFixed(2)}
+              <br />
+              <b>Folder name:</b> {itemDetails.folderName}
+              <br />
+              <b>Folder location:</b> {itemDetails.location}
+            </Typography>
+          ) : (
+            <Typography variant='p'>
+              <b>File size (MB):</b>
+              {(itemDetails.size / 1024 / 1024).toFixed(2)}
+              <br />
+              <b>File type:</b> {itemDetails.mimeType}
+              <br />
+              <b>File location:</b> {itemDetails.location}
+              <br />
+              <b>File name:</b> {itemDetails.fileNameWithExt}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose_3} color='primary'>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={open_4}
+        onClose={handleClose_4}
+        aria-labelledby='form-dialog-title-2'>
+        <DialogTitle id='form-dialog-title-2'>Edit name</DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleNameChange}>
+            <TextField
+              variant='outlined'
+              size='small'
+              required
+              label='Name'
+              name='name'
+            />
+            <Button type='submit' variant='contained'>
+              Save
+            </Button>
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose_4} color='primary'>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
         {selector.folderName ? (
@@ -339,7 +472,7 @@ export default function DisplayContainer({ selector, setSelector }) {
         {folders?.length > 0 ? (
           folders.map((item) => (
             <Card
-              style={{ maxHeight: '80px', maxWidth: '250px', margin: '10px' }}>
+              style={{ maxHeight: '80px', maxWidth: '300px', margin: '10px' }}>
               <CardActionArea>
                 <CardContent>
                   <Typography
@@ -351,9 +484,20 @@ export default function DisplayContainer({ selector, setSelector }) {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
-                    {console.log(item, 'item')}
-                    {item.folderName}
+                    <span>{item.folderName}</span>
                     <span>
+                      <IconButton
+                        onClick={() =>
+                          handleClickOpen_4({ ...item, isFolder: true })
+                        }>
+                        <Create />
+                      </IconButton>
+                      <IconButton
+                        onClick={() =>
+                          handleClickOpen_3({ ...item, isFolder: true })
+                        }>
+                        <Info />
+                      </IconButton>
                       <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
@@ -405,7 +549,21 @@ export default function DisplayContainer({ selector, setSelector }) {
                           </Typography>
                         }
                         actionIcon={
-                          <>
+                          <div style={{ display: 'flex' }}>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_4({ ...item, isFolder: false })
+                              }>
+                              <Create />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_3({ ...item, isFolder: false })
+                              }>
+                              <InfoOutlined />
+                            </IconButton>
                             <IconButton
                               color='primary'
                               onClick={() =>
@@ -413,7 +571,6 @@ export default function DisplayContainer({ selector, setSelector }) {
                               }>
                               <DeleteOutlined />
                             </IconButton>
-                            {console.log(item, 'item')}
                             <a
                               style={{
                                 textDecoration: 'none',
@@ -424,7 +581,7 @@ export default function DisplayContainer({ selector, setSelector }) {
                                 <GetAppOutlined />
                               </IconButton>
                             </a>
-                          </>
+                          </div>
                         }
                       />
                     </ImageListItem>
@@ -460,13 +617,29 @@ export default function DisplayContainer({ selector, setSelector }) {
                           </Typography>
                         }
                         actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() =>
-                              deleteFile(item.fileNameWithExt, false)
-                            }>
-                            <DeleteOutlined />
-                          </IconButton>
+                          <>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_4({ ...item, isFolder: false })
+                              }>
+                              <Create />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_3({ ...item, isFolder: false })
+                              }>
+                              <InfoOutlined />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                deleteFile(item.fileNameWithExt, false)
+                              }>
+                              <DeleteOutlined />
+                            </IconButton>
+                          </>
                         }
                       />
                     </ImageListItem>
@@ -500,13 +673,29 @@ export default function DisplayContainer({ selector, setSelector }) {
                           </Typography>
                         }
                         actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() =>
-                              deleteFile(item.fileNameWithExt, false)
-                            }>
-                            <DeleteOutlined />
-                          </IconButton>
+                          <>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_4({ ...item, isFolder: false })
+                              }>
+                              <Create />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_3({ ...item, isFolder: false })
+                              }>
+                              <InfoOutlined />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                deleteFile(item.fileNameWithExt, false)
+                              }>
+                              <DeleteOutlined />
+                            </IconButton>
+                          </>
                         }
                       />
                     </ImageListItem>
@@ -534,6 +723,20 @@ export default function DisplayContainer({ selector, setSelector }) {
                       <ListItem alignItems='flex-start'>
                         <ListItemText primary={item.fileName} />
                         <ListItemIcon>
+                          <IconButton
+                            color='primary'
+                            onClick={() =>
+                              handleClickOpen_4({ ...item, isFolder: false })
+                            }>
+                            <Create />
+                          </IconButton>
+                          <IconButton
+                            color='primary'
+                            onClick={() =>
+                              handleClickOpen_3({ ...item, isFolder: false })
+                            }>
+                            <InfoOutlined />
+                          </IconButton>
                           <a
                             href={`data:${item.mimeType};base64,${item.file}`}
                             download={

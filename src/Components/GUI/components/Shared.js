@@ -45,20 +45,6 @@ export default function Shared({ selector, setSelector }) {
   const [selectedFolder, setSelectedFolder] = React.useState('');
   const [user, setUser] = React.useState({});
 
-  const getUser = async () => {
-    const res = await axios.get('http://localhost:5000/api/user', {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-
-    setUser(res.data.user);
-  };
-
-  React.useEffect(() => {
-    getUser();
-  }, []);
-
   const selectFolder = (folderName) => {
     setSelectedFolder((prev) => prev + '/' + folderName);
 

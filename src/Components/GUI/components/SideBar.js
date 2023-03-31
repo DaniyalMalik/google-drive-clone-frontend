@@ -10,23 +10,7 @@ import cloud from '../pics/cloud.png';
 import '../css/SideBar.css';
 import { ExitToApp } from '@material-ui/icons';
 
-export default function SideBar({ selector, setSelector }) {
-  const [user, setUser] = React.useState({});
-
-  const getUser = async () => {
-    const res = await axios.get('http://localhost:5000/api/user', {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-
-    setUser(res.data.user);
-  };
-
-  React.useEffect(() => {
-    getUser();
-  }, []);
-
+export default function SideBar({ user, selector, setSelector }) {
   return (
     <>
       <div id='sideBar'>

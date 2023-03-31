@@ -23,7 +23,6 @@ function Main({ setToken }) {
     folderName: '',
   });
   const [user, setUser] = React.useState({});
-  const [updated, setUpdated] = React.useState(true);
 
   const getUser = async () => {
     const res = await axios.get('http://localhost:5000/api/user', {
@@ -33,47 +32,83 @@ function Main({ setToken }) {
     });
 
     setUser(res.data.user);
-    setUpdated(false);
   };
 
   React.useEffect(() => {
-    if (updated) getUser();
-  }, [updated]);
+    getUser();
+  }, []);
 
   return (
     <div style={{ width: '95vw' }}>
       <Navbar
         user={user}
+        getUser={getUser}
         setToken={setToken}
         selector={selector}
         setSelector={setSelector}
       />
       <div id='mainCont'>
-        <SideBar selector={selector} setSelector={setSelector} />
+        <SideBar
+          user={user}
+          getUser={getUser}
+          selector={selector}
+          setSelector={setSelector}
+        />
         {selector.files && (
-          <DisplayContainer selector={selector} setSelector={setSelector} />
+          <DisplayContainer
+            user={user}
+            getUser={getUser}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
         {selector.uploadFile && (
-          <FileUpload selector={selector} setSelector={setSelector} />
+          <FileUpload
+            user={user}
+            getUser={getUser}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
         {selector.uploadFolder && (
-          <FolderUpload selector={selector} setSelector={setSelector} />
+          <FolderUpload
+            user={user}
+            getUser={getUser}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
         {selector.createFolder && (
-          <CreateFolder selector={selector} setSelector={setSelector} />
+          <CreateFolder
+            user={user}
+            getUser={getUser}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
         {selector.account && (
           <Account
-            setUpdated={setUpdated}
+            user={user}
+            getUser={getUser}
             selector={selector}
             setSelector={setSelector}
           />
         )}
         {selector.trash && (
-          <Trash selector={selector} setSelector={setSelector} />
+          <Trash
+            user={user}
+            getUser={getUser}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
         {selector.shared && (
-          <Shared selector={selector} setSelector={setSelector} />
+          <Shared
+            user={user}
+            getUser={getUser}
+            selector={selector}
+            setSelector={setSelector}
+          />
         )}
       </div>
     </div>

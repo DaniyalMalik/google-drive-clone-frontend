@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Account({ setUpdated }) {
+export default function Account({ getUser: changeUser }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
   const [changePassword, setChangePassword] = useState({
@@ -109,12 +109,15 @@ export default function Account({ setUpdated }) {
 
     alert(res.data.message);
 
-    if (res.data.success)
+    if (res.data.success) {
+      changeUser();
+
       setChangePassword({
         oldPassword: '',
         newPassword: '',
         repeatNewPassword: '',
       });
+    }
   };
 
   const handleProfileSubmit = async (e) => {
@@ -133,9 +136,7 @@ export default function Account({ setUpdated }) {
     alert(res.data.message);
 
     if (res.data.success) {
-      getUser();
-
-      setUpdated(true);
+      changeUser();
     }
   };
 
