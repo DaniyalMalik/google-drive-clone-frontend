@@ -12,54 +12,51 @@ import {
   ListItemText,
   List,
   ImageList,
-  Button,
   Card,
   CardActionArea,
   CardContent,
 } from '@material-ui/core';
-import { Delete, Visibility } from '@material-ui/icons';
-import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
+import { DeleteOutlined, Cached, Delete } from '@material-ui/icons';
 
-export default function Trash({ selector, setSelector }) {
+export default function Trash({ user, getUser }) {
   const [files, setFiles] = React.useState([]);
-  const [saveFiles, setSaveFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
-  const [sameFolder, setSameFolder] = React.useState(false);
-  const formData = new FormData();
 
-  const getFilesOrFolders = async (folderName) => {
-    if (folderName) {
-      const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=' + folderName,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
+  const getFilesOrFolders = async () => {
+    let temp = user.folderPath.split('\\');
+
+    temp.splice(temp.length - 1, 0, 'trash');
+
+    const customPath = temp.join('\\');
+    const res = await axios.get(
+      'http://localhost:5000/api/upload?customPath=' + customPath,
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
         },
-      );
+      },
+    );
 
+    if (res.data.success) {
       setFolders(res.data.folders);
       setFiles(res.data.files);
-      setSelector({ ...selector, folderName });
-    } else {
-      const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=',
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
-        },
-      );
-
-      setFolders(res.data.folders);
-      setFiles(res.data.files);
-      setSelector({ ...selector, folderName: '' });
     }
   };
 
-  const deleteFile = async (fileNameWithExt) => {
-    const res = await axios.delete(
-      'http://localhost:5000/api/upload?fileOrFolderName=' + fileNameWithExt,
+  React.useEffect(() => {
+    getFilesOrFolders();
+  }, []);
+
+  const recoverFile = async (name) => {
+    let temp = user.folderPath.split('\\');
+
+    temp.splice(temp.length - 1, 0, 'trash');
+
+    const newPath = user.folderPath + '\\' + name;
+    const oldPath = temp.join('\\') + '\\' + name;
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/recover',
+      { oldPath, newPath },
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -69,85 +66,46 @@ export default function Trash({ selector, setSelector }) {
 
     alert(res.data.message);
 
-    getFilesOrFolders();
+    if (res.data.success) {
+      getUser();
+      getFilesOrFolders();
+    }
   };
 
-  const uploadFiles = async () => {
-    for (let i = 0; i < saveFiles.length; i++) {
-      formData.append('files', saveFiles[i]);
-    }
+  const deleteFile = async (fileNameWithExt, folder) => {
+    let temp = user.folderPath.split('\\');
 
-    if (selector.folderName) {
-      const res = await axios.post(
-        'http://localhost:5000/api/upload?folderName=' +
-          selector.folderName +
-          '&sameFolder=' +
-          sameFolder,
-        formData,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
+    temp.splice(temp.length - 1, 0, 'trash');
+
+    const customPath = temp.join('\\') + '\\' + fileNameWithExt;
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/delete',
+      { folder, customPath },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
         },
-      );
+      },
+    );
 
-      alert(res.data.message);
+    alert(res.data.message);
 
-      setSaveFiles([]);
-      setSameFolder(false);
-
-      getFilesOrFolders(selector.folderName);
+    if (res.data.success) {
+      getUser();
+      getFilesOrFolders();
     }
-  };
-
-  React.useEffect(() => {
-    getFilesOrFolders();
-  }, []);
-
-  React.useEffect(() => {
-    saveFiles.length > 0 && uploadFiles();
-  }, [saveFiles]);
-
-  const onUploadFiles = (e) => {
-    const arr = [];
-
-    for (let i = 0; i < e.target.files.length; i++) {
-      arr.push(e.target.files[i]);
-    }
-
-    setSaveFiles(arr);
-    setSameFolder(true);
   };
 
   return (
     <div>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
-        {selector.folderName && (
-          <div>
-            <input
-              style={{ display: 'none' }}
-              id='contained-button-file'
-              multiple
-              type='file'
-              onChange={onUploadFiles}
-            />
-            <label htmlFor='contained-button-file'>
-              <Button variant='outlined' component='span'>
-                upload files in Folder: <b>{selector.folderName}</b>
-              </Button>
-            </label>
-            <Button variant='outlined' onClick={() => getFilesOrFolders()}>
-              back to root folder
-            </Button>
-          </div>
-        )}
       </div>
       <div id='contentDisplayer'>
         {folders?.length > 0 ? (
           folders.map((item) => (
             <Card
-              style={{ maxHeight: '80px', maxWidth: '250px', margin: '10px' }}>
+              style={{ maxHeight: '80px', maxWidth: '300px', margin: '10px' }}>
               <CardActionArea>
                 <CardContent>
                   <Typography
@@ -159,13 +117,13 @@ export default function Trash({ selector, setSelector }) {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
-                    {item.folderName}
+                    <span>{item.folderName}</span>
                     <span>
-                      <IconButton
-                        onClick={() => getFilesOrFolders(item.folderName)}>
-                        <Visibility />
+                      <IconButton onClick={() => recoverFile(item.folderName)}>
+                        <Cached />
                       </IconButton>
-                      <IconButton onClick={() => deleteFile(item.folderName)}>
+                      <IconButton
+                        onClick={() => deleteFile(item.folderName, true)}>
                         <Delete />
                       </IconButton>
                     </span>
@@ -212,11 +170,20 @@ export default function Trash({ selector, setSelector }) {
                           </Typography>
                         }
                         actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
-                            <DeleteOutlined />
-                          </IconButton>
+                          <div style={{ display: 'flex' }}>
+                            <IconButton
+                              color='primary'
+                              onClick={() => recoverFile(item.fileNameWithExt)}>
+                              <Cached />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                deleteFile(item.fileNameWithExt, false)
+                              }>
+                              <DeleteOutlined />
+                            </IconButton>
+                          </div>
                         }
                       />
                     </ImageListItem>
@@ -252,11 +219,20 @@ export default function Trash({ selector, setSelector }) {
                           </Typography>
                         }
                         actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
-                            <DeleteOutlined />
-                          </IconButton>
+                          <>
+                            <IconButton
+                              color='primary'
+                              onClick={() => recoverFile(item.fileNameWithExt)}>
+                              <Cached />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                deleteFile(item.fileNameWithExt, false)
+                              }>
+                              <DeleteOutlined />
+                            </IconButton>
+                          </>
                         }
                       />
                     </ImageListItem>
@@ -290,11 +266,20 @@ export default function Trash({ selector, setSelector }) {
                           </Typography>
                         }
                         actionIcon={
-                          <IconButton
-                            color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
-                            <DeleteOutlined />
-                          </IconButton>
+                          <>
+                            <IconButton
+                              color='primary'
+                              onClick={() => recoverFile(item.fileNameWithExt)}>
+                              <Cached />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                deleteFile(item.fileNameWithExt, false)
+                              }>
+                              <DeleteOutlined />
+                            </IconButton>
+                          </>
                         }
                       />
                     </ImageListItem>
@@ -322,22 +307,16 @@ export default function Trash({ selector, setSelector }) {
                       <ListItem alignItems='flex-start'>
                         <ListItemText primary={item.fileName} />
                         <ListItemIcon>
-                          <a
-                            href={`data:${item.mimeType};base64,${item.file}`}
-                            download={
-                              item.fileNameWithExt.split('.')[1] === 'rar'
-                                ? item.fileNameWithExt
-                                : item.fileName
-                            }
-                            rel='noreferrer'
-                            target='_blank'>
-                            <IconButton>
-                              <GetAppOutlined color='primary' />
-                            </IconButton>
-                          </a>
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
+                            onClick={() => recoverFile(item.fileNameWithExt)}>
+                            <Cached />
+                          </IconButton>
+                          <IconButton
+                            color='primary'
+                            onClick={() =>
+                              deleteFile(item.fileNameWithExt, false)
+                            }>
                             <DeleteOutlined />
                           </IconButton>
                         </ListItemIcon>

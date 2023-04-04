@@ -137,12 +137,16 @@ export default function DisplayContainer({
     }
   };
 
-  const deleteFile = async (fileNameWithExt, folder) => {
-    const res = await axios.delete(
-      'http://localhost:5000/api/upload?fileOrFolderName=' +
-        fileNameWithExt +
-        '&folder=' +
-        folder,
+  const deleteFile = async (name) => {
+    let temp = user.folderPath.split('\\');
+
+    temp.splice(temp.length - 1, 0, 'trash');
+
+    const oldPath = user.folderPath + '\\' + name;
+    const newPath = temp.join('\\') + '\\' + name;
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/trash',
+      { newPath, oldPath },
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -259,21 +263,10 @@ export default function DisplayContainer({
   const handleNameChange = async (e) => {
     e.preventDefault();
 
-    console.log(e.target.name.value, 'e.target.name.value');
-    console.log(itemDetails.location, 'itemDetails.location');
-    console.log(
-      itemDetails.location
-        .split('\\')
-        [itemDetails.location.split('\\').length - 1].split('.')[
-        itemDetails.location
-          .split('\\')
-          [itemDetails.location.split('\\').length - 1].split('.').length - 1
-      ],
-    );
     let newPath = itemDetails.location.split('\\');
-    console.log(newPath);
+
     newPath.pop();
-    console.log(newPath);
+
     !itemDetails.isFolder
       ? newPath.push(
           e.target.name.value +
@@ -288,9 +281,9 @@ export default function DisplayContainer({
             ],
         )
       : newPath.push(e.target.name.value);
-    console.log(newPath);
+
     newPath = newPath.join('\\');
-    console.log(newPath);
+
     const res = await axios.put(
       'http://localhost:5000/api/upload/rename',
       { newPath, oldPath: itemDetails.location },
@@ -501,8 +494,7 @@ export default function DisplayContainer({
                       <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
-                      <IconButton
-                        onClick={() => deleteFile(item.folderName, true)}>
+                      <IconButton onClick={() => deleteFile(item.folderName)}>
                         <Delete />
                       </IconButton>
                     </span>
@@ -566,9 +558,7 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
-                              onClick={() =>
-                                deleteFile(item.fileNameWithExt, false)
-                              }>
+                              onClick={() => deleteFile(item.fileNameWithExt)}>
                               <DeleteOutlined />
                             </IconButton>
                             <a
@@ -634,9 +624,7 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
-                              onClick={() =>
-                                deleteFile(item.fileNameWithExt, false)
-                              }>
+                              onClick={() => deleteFile(item.fileNameWithExt)}>
                               <DeleteOutlined />
                             </IconButton>
                           </>
@@ -690,9 +678,7 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
-                              onClick={() =>
-                                deleteFile(item.fileNameWithExt, false)
-                              }>
+                              onClick={() => deleteFile(item.fileNameWithExt)}>
                               <DeleteOutlined />
                             </IconButton>
                           </>
@@ -752,9 +738,7 @@ export default function DisplayContainer({
                           </a>
                           <IconButton
                             color='primary'
-                            onClick={() =>
-                              deleteFile(item.fileNameWithExt, false)
-                            }>
+                            onClick={() => deleteFile(item.fileNameWithExt)}>
                             <DeleteOutlined />
                           </IconButton>
                         </ListItemIcon>

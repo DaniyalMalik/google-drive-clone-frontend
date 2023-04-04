@@ -123,7 +123,7 @@ export default function SideBar({ user, selector, setSelector }) {
             <img src={shared} alt='Reload page' className='opacity' />
             <h3>Shared with me</h3>
           </div>
-          {/* <div
+          <div
             className={`sideBarOptions ${selector.trash && 'activeSideOpt'}`}
             onClick={() =>
               setSelector({
@@ -139,7 +139,7 @@ export default function SideBar({ user, selector, setSelector }) {
             }>
             <img src={trash} alt='Reload page' className='opacity' />
             <h3>Trash</h3>
-          </div> */}
+          </div>
         </div>
         <div id='storageInfo'>
           <div className='sideBarOptions'>
