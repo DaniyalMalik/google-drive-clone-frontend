@@ -142,7 +142,11 @@ export default function DisplayContainer({
 
     temp.splice(temp.length - 1, 0, 'trash');
 
-    const oldPath = user.folderPath + '\\' + name;
+    if (selector.folderName) temp.splice(temp.length, 0, selector.folderName);
+
+    const oldPath = selector.folderName
+      ? user.folderPath + '\\' + selector.folderName + '\\' + name
+      : user.folderPath + '\\' + name;
     const newPath = temp.join('\\') + '\\' + name;
     const res = await axios.post(
       'http://localhost:5000/api/upload/trash',
@@ -158,7 +162,7 @@ export default function DisplayContainer({
 
     if (res.data.success) {
       getUser();
-      getFilesOrFolders();
+      getFilesOrFolders(selector.folderName);
     }
   };
 
