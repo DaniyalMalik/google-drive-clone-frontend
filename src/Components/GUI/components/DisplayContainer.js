@@ -22,6 +22,10 @@ import {
   Dialog,
   TextField,
   ListItemSecondaryAction,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -40,6 +44,10 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
   },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 180,
+  },
 }));
 
 export default function DisplayContainer({
@@ -54,19 +62,33 @@ export default function DisplayContainer({
   const [sameFolder, setSameFolder] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
   const [open_1, setOpen_1] = React.useState(false);
-  const [open_2, setOpen_2] = React.useState(false);
   const [open_3, setOpen_3] = React.useState(false);
   const [open_4, setOpen_4] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [selectOpen, setSelectOpen] = React.useState(false);
   const classes = useStyles();
-  const [email, setEmail] = React.useState('');
+  const [selectedUser, setSelectedUser] = React.useState('');
+  const [usersList, setUsersList] = React.useState([]);
   const [itemDetails, setItemDetails] = React.useState({});
+
+  const handleChange = (event) => {
+    setSelectedUser(event.target.value);
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleSelectOpen = () => {
+    setSelectOpen(true);
+  };
 
   const handleClickOpen_1 = () => {
     setOpen_1(true);
   };
 
-  const handleClickOpen_2 = () => {
-    setOpen_2(true);
+  const handleClickOpen = () => {
+    setOpen(true);
   };
 
   const handleClickOpen_3 = (item) => {
@@ -83,9 +105,14 @@ export default function DisplayContainer({
     setOpen_1(false);
   };
 
-  const handleClose_2 = () => {
-    setOpen_2(false);
-    setEmail('');
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedUser('');
+  };
+
+  const handleSelectClose = () => {
+    setSelectOpen(false);
+    setSelectedUser('');
   };
 
   const handleClose_3 = () => {
@@ -209,6 +236,16 @@ export default function DisplayContainer({
     getFilesOrFolders();
   }, []);
 
+  React.useEffect(async () => {
+    const res = await axios.get('http://localhost:5000/api/user/all', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setUsersList(res.data.users);
+  }, []);
+
   React.useEffect(() => {
     saveFiles.length > 0 && uploadFiles();
   }, [saveFiles]);
@@ -224,12 +261,16 @@ export default function DisplayContainer({
     setSameFolder(true);
   };
 
-  const shareFolder = async () => {
-    if (!email) return alert('Email address is required!');
+  const shareFolder = async (path) => {
+    if (!selectedUser) return alert('Select a user!');
 
     const res = await axios.put(
-      'http://localhost:5000/api/upload/share?email=' + email,
-      {},
+      'http://localhost:5000/api/upload/share',
+      {
+        userId: selectedUser._id,
+        sharedPath: selectedUser.folderPath,
+        wholeFolder: true,
+      },
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -241,7 +282,7 @@ export default function DisplayContainer({
 
     if (res.data.success) {
       getUser();
-      handleClose_2();
+      handleClose();
     }
   };
 
@@ -306,10 +347,6 @@ export default function DisplayContainer({
     }
   };
 
-  const onEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
-
   return (
     <div>
       <Dialog
@@ -348,24 +385,36 @@ export default function DisplayContainer({
         </DialogActions>
       </Dialog>
       <Dialog
-        open={open_2}
-        onClose={handleClose_2}
+        open={open}
+        onClose={handleClose}
         aria-labelledby='form-dialog-title-2'>
         <DialogTitle id='form-dialog-title-2'>Share with</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin='dense'
-            id='email'
-            value={email}
-            onChange={onEmailChange}
-            label='Email Address'
-            type='email'
-            fullWidth
-          />
+          <FormControl className={classes.formControl}>
+            <InputLabel id='demo-controlled-open-select-label'>
+              Select User
+            </InputLabel>
+            <Select
+              labelId='demo-controlled-open-select-label'
+              id='demo-controlled-open-select'
+              open={selectOpen}
+              onClose={handleSelectClose}
+              onOpen={handleSelectOpen}
+              value={selectedUser}
+              onChange={handleChange}>
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {usersList.map((item) => (
+                <MenuItem value={item}>
+                  {item.firstName + ' ' + item.lastName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose_2} color='primary'>
+          <Button onClick={handleClose} color='primary'>
             Close
           </Button>
           <Button onClick={shareFolder} color='primary'>
@@ -459,7 +508,7 @@ export default function DisplayContainer({
             <Button variant='outlined' onClick={handleClickOpen_1}>
               Shared With
             </Button>
-            <Button variant='outlined' onClick={handleClickOpen_2}>
+            <Button variant='outlined' onClick={handleClickOpen}>
               Share
             </Button>
           </div>

@@ -22,8 +22,8 @@ import {
   InputLabel,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Delete, Visibility } from '@material-ui/icons';
-import { DeleteOutlined, GetAppOutlined } from '@material-ui/icons';
+import { Visibility } from '@material-ui/icons';
+import { GetAppOutlined } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -36,14 +36,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Shared({ selector, setSelector }) {
+export default function Shared({ selector }) {
   const classes = useStyles();
   const [files, setFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
-  const [sharedFolderPath, setSharedFolderPath] = React.useState('');
+  const [shared, setShared] = React.useState([]);
+  const [sharedFolderPaths, setSharedFolderPaths] = React.useState({});
   const [open, setOpen] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
-  const [user, setUser] = React.useState({});
 
   const selectFolder = (folderName) => {
     setSelectedFolder((prev) => prev + '/' + folderName);
@@ -54,7 +54,7 @@ export default function Shared({ selector, setSelector }) {
   };
 
   const handleChange = (event) => {
-    setSharedFolderPath(event.target.value);
+    setSharedFolderPaths(event.target.value);
   };
 
   const handleClose = () => {
@@ -65,42 +65,41 @@ export default function Shared({ selector, setSelector }) {
     setOpen(true);
   };
 
-  const getFilesOrFolders = async (folderName) => {
-    if (folderName) {
-      const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=' +
-          folderName +
-          '&userPath=' +
-          sharedFolderPath,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
+  const getFilesOrFolders = async () => {
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/shared',
+      {
+        paths: sharedFolderPaths.sharedPath,
+        user: sharedFolderPaths.sharedWith,
+      },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
         },
-      );
+      },
+    );
 
+    if (res.data.success) {
       setFolders(res.data.folders);
       setFiles(res.data.files);
-      setSelector({ ...selector, folderName });
     } else {
-      const res = await axios.get(
-        'http://localhost:5000/api/upload?userPath=' + sharedFolderPath,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
-        },
-      );
-
-      setFolders(res.data.folders);
-      setFiles(res.data.files);
-      setSelector({ ...selector, folderName: '' });
+      alert(res.data.message);
     }
   };
 
   React.useEffect(() => {
-    if (sharedFolderPath) getFilesOrFolders();
-  }, [sharedFolderPath]);
+    if (Object.keys(sharedFolderPaths).length > 0) getFilesOrFolders();
+  }, [sharedFolderPaths]);
+
+  React.useEffect(async () => {
+    const res = await axios.get('http://localhost:5000/api/upload/shared', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setShared(res.data.shared);
+  }, []);
 
   return (
     <div>
@@ -122,17 +121,16 @@ export default function Shared({ selector, setSelector }) {
               open={open}
               onClose={handleClose}
               onOpen={handleOpen}
-              value={sharedFolderPath}
+              value={sharedFolderPaths}
               onChange={handleChange}>
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {user?.sharedWithMe &&
-                user.sharedWithMe.map((item) => (
-                  <MenuItem value={item.folderPath}>
-                    {item.firstName + ' ' + item.lastName}
-                  </MenuItem>
-                ))}
+              {shared.map((item) => (
+                <MenuItem value={item}>
+                  {item.sharedBy.firstName + ' ' + item.sharedBy.lastName}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           {/* <Button variant='outlined' onClick={() => getFilesOrFolders()}>

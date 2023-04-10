@@ -40,7 +40,6 @@ function Main({ setToken }) {
 
   return (
     <div style={{ width: '95vw' }}>
-      {console.log(selector, 'selector')}
       <Navbar
         user={user}
         getUser={getUser}
