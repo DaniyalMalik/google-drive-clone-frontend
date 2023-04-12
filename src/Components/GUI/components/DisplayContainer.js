@@ -64,6 +64,7 @@ export default function DisplayContainer({
   const [open_1, setOpen_1] = React.useState(false);
   const [open_3, setOpen_3] = React.useState(false);
   const [open_4, setOpen_4] = React.useState(false);
+  const [shared, setShared] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [selectOpen, setSelectOpen] = React.useState(false);
   const classes = useStyles();
@@ -268,7 +269,7 @@ export default function DisplayContainer({
       'http://localhost:5000/api/upload/share',
       {
         userId: selectedUser._id,
-        sharedPath: selectedUser.folderPath,
+        // sharedPath: null,
         wholeFolder: true,
       },
       {
@@ -286,22 +287,41 @@ export default function DisplayContainer({
     }
   };
 
-  const handleDelete = async (userId) => {
-    const res = await axios.put(
-      'http://localhost:5000/api/upload/unshare?userId=' + userId,
-      {},
-      {
-        headers: {
-          'x-auth-token': localStorage.getItem('token'),
+  const handleDelete = async (userId, wholeFolder, path) => {
+    if (wholeFolder) {
+      const res = await axios.put(
+        'http://localhost:5000/api/upload/unshare',
+        { wholeFolder, userId },
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
         },
-      },
-    );
+      );
 
-    alert(res.data.message);
+      alert(res.data.message);
 
-    if (res.data.success) {
-      getUser();
-      handleClose_1();
+      if (res.data.success) {
+        getSharedList();
+        handleClose_1();
+      }
+    } else {
+      const res = await axios.put(
+        'http://localhost:5000/api/upload/unshare',
+        { userId, path },
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      alert(res.data.message);
+
+      if (res.data.success) {
+        getSharedList();
+        handleClose_1();
+      }
     }
   };
 
@@ -347,6 +367,20 @@ export default function DisplayContainer({
     }
   };
 
+  const getSharedList = async () => {
+    const res = await axios.get('http://localhost:5000/api/upload/sharedby', {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+
+    setShared(res.data.shared);
+  };
+
+  React.useEffect(async () => {
+    getSharedList();
+  }, []);
+
   return (
     <div>
       <Dialog
@@ -356,18 +390,23 @@ export default function DisplayContainer({
         <DialogTitle id='form-dialog-title-1'>Shared with</DialogTitle>
         <DialogContent>
           <List className={classes.root}>
-            {user?.sharedWith && user?.sharedWith.length !== 0 ? (
-              user.sharedWith.map((item, index) => (
+            {shared && shared.length !== 0 ? (
+              shared?.map((item, index) => (
                 <ListItem key={index} role={undefined} dense>
                   <ListItemText
                     id={index}
-                    primary={item.firstName + ' ' + item.lastName}
+                    primary={
+                      item.sharedWith.firstName +
+                      ' ' +
+                      item.sharedWith.lastName +
+                      ' (Delete all shared)'
+                    }
                   />
                   <ListItemSecondaryAction>
                     <IconButton
                       edge='end'
                       aria-label='comments'
-                      onClick={() => handleDelete(item._id)}>
+                      onClick={() => handleDelete(item.sharedWith._id, true)}>
                       <Delete />
                     </IconButton>
                   </ListItemSecondaryAction>

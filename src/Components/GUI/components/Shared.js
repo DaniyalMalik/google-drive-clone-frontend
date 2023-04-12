@@ -65,25 +65,46 @@ export default function Shared({ selector }) {
     setOpen(true);
   };
 
-  const getFilesOrFolders = async () => {
-    const res = await axios.post(
-      'http://localhost:5000/api/upload/shared',
-      {
-        paths: sharedFolderPaths.sharedPath,
-        user: sharedFolderPaths.sharedWith,
-      },
-      {
-        headers: {
-          'x-auth-token': localStorage.getItem('token'),
+  const getFilesOrFolders = async (folderName) => {
+    if (folderName) {
+      const res = await axios.get(
+        'http://localhost:5000/api/upload/?folderName=' +
+          folderName +
+          '&userId=' +
+          sharedFolderPaths.sharedBy._id,
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
         },
-      },
-    );
+      );
 
-    if (res.data.success) {
-      setFolders(res.data.folders);
-      setFiles(res.data.files);
+      if (res.data.success) {
+        setFolders(res.data.folders);
+        setFiles(res.data.files);
+      } else {
+        alert(res.data.message);
+      }
     } else {
-      alert(res.data.message);
+      const res = await axios.post(
+        'http://localhost:5000/api/upload/shared',
+        {
+          paths: sharedFolderPaths.sharedPath,
+          user: sharedFolderPaths.sharedBy,
+        },
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      if (res.data.success) {
+        setFolders(res.data.folders);
+        setFiles(res.data.files);
+      } else {
+        alert(res.data.message);
+      }
     }
   };
 
@@ -92,7 +113,7 @@ export default function Shared({ selector }) {
   }, [sharedFolderPaths]);
 
   React.useEffect(async () => {
-    const res = await axios.get('http://localhost:5000/api/upload/shared', {
+    const res = await axios.get('http://localhost:5000/api/upload/sharedwith', {
       headers: {
         'x-auth-token': localStorage.getItem('token'),
       },
@@ -106,7 +127,7 @@ export default function Shared({ selector }) {
       <div id='displayInfoNav'>
         <h1>Folders</h1>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {selector.folderName && (
+          {selectedFolder && (
             <Button variant='outlined' onClick={() => getFilesOrFolders()}>
               back to root folder
             </Button>
