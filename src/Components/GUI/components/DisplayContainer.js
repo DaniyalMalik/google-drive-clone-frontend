@@ -32,10 +32,10 @@ import {
   DeleteOutlined,
   Create,
   Info,
+  InfoOutlined,
   GetAppOutlined,
   Delete,
   Visibility,
-  InfoOutlined,
 } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({

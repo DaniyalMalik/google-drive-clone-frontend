@@ -17,13 +17,21 @@ import {
   CardActionArea,
   CardContent,
   Select,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   FormControl,
+  Dialog,
   MenuItem,
   InputLabel,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Visibility } from '@material-ui/icons';
-import { GetAppOutlined } from '@material-ui/icons';
+import {
+  Visibility,
+  Info,
+  InfoOutlined,
+  GetAppOutlined,
+} from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -42,6 +50,8 @@ export default function Shared({ selector }) {
   const [folders, setFolders] = React.useState([]);
   const [shared, setShared] = React.useState([]);
   const [sharedFolderPaths, setSharedFolderPaths] = React.useState({});
+  const [open_3, setOpen_3] = React.useState(false);
+  const [itemDetails, setItemDetails] = React.useState({});
   const [open, setOpen] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
 
@@ -108,6 +118,16 @@ export default function Shared({ selector }) {
     }
   };
 
+  const handleClickOpen_3 = (item) => {
+    setOpen_3(true);
+    setItemDetails(item);
+  };
+
+  const handleClose_3 = () => {
+    setOpen_3(false);
+    setItemDetails({});
+  };
+
   React.useEffect(() => {
     if (Object.keys(sharedFolderPaths).length > 0) getFilesOrFolders();
   }, [sharedFolderPaths]);
@@ -124,6 +144,42 @@ export default function Shared({ selector }) {
 
   return (
     <div>
+      <Dialog
+        open={open_3}
+        onClose={handleClose_3}
+        aria-labelledby='form-dialog-title-2'>
+        <DialogTitle id='form-dialog-title-2'>
+          {itemDetails.isFolder ? 'Folder details' : 'File details'}
+        </DialogTitle>
+        <DialogContent>
+          {itemDetails.isFolder ? (
+            <Typography variant='p'>
+              <b>Folder size (MB): </b>
+              {(itemDetails.size / 1024 / 1024).toFixed(2)}
+              <br />
+              <b>Folder name:</b> {itemDetails.folderName}
+              <br />
+              <b>Folder location:</b> {itemDetails.location}
+            </Typography>
+          ) : (
+            <Typography variant='p'>
+              <b>File size (MB): </b>
+              {(itemDetails.size / 1024 / 1024).toFixed(2)}
+              <br />
+              <b>File type:</b> {itemDetails.mimeType}
+              <br />
+              <b>File location:</b> {itemDetails.location}
+              <br />
+              <b>File name:</b> {itemDetails.fileNameWithExt}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose_3} color='primary'>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -180,6 +236,12 @@ export default function Shared({ selector }) {
                       <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
+                      <IconButton
+                        onClick={() =>
+                          handleClickOpen_3({ ...item, isFolder: true })
+                        }>
+                        <Info />
+                      </IconButton>
                     </span>
                   </Typography>
                 </CardContent>
@@ -223,6 +285,27 @@ export default function Shared({ selector }) {
                             {item.fileName}
                           </Typography>
                         }
+                        actionIcon={
+                          <div style={{ display: 'flex' }}>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_3({ ...item, isFolder: false })
+                              }>
+                              <InfoOutlined />
+                            </IconButton>
+                            <a
+                              style={{
+                                textDecoration: 'none',
+                              }}
+                              download={item.fileNameWithExt}
+                              href={`data:${item.mimeType};base64,${item.file}`}>
+                              <IconButton color='primary'>
+                                <GetAppOutlined />
+                              </IconButton>
+                            </a>
+                          </div>
+                        }
                       />
                     </ImageListItem>
                   ),
@@ -256,6 +339,17 @@ export default function Shared({ selector }) {
                             {item.fileName}
                           </Typography>
                         }
+                        actionIcon={
+                          <div style={{ display: 'flex' }}>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_3({ ...item, isFolder: false })
+                              }>
+                              <InfoOutlined />
+                            </IconButton>
+                          </div>
+                        }
                       />
                     </ImageListItem>
                   ),
@@ -287,6 +381,15 @@ export default function Shared({ selector }) {
                             {item.fileName}
                           </Typography>
                         }
+                        actionIcon={
+                          <IconButton
+                            color='primary'
+                            onClick={() =>
+                              handleClickOpen_3({ ...item, isFolder: false })
+                            }>
+                            <InfoOutlined />
+                          </IconButton>
+                        }
                       />
                     </ImageListItem>
                   ),
@@ -313,6 +416,13 @@ export default function Shared({ selector }) {
                       <ListItem alignItems='flex-start'>
                         <ListItemText primary={item.fileName} />
                         <ListItemIcon>
+                          <IconButton
+                            color='primary'
+                            onClick={() =>
+                              handleClickOpen_3({ ...item, isFolder: false })
+                            }>
+                            <InfoOutlined />
+                          </IconButton>
                           <a
                             href={`data:${item.mimeType};base64,${item.file}`}
                             download={
