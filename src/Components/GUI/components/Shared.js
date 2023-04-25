@@ -112,6 +112,7 @@ export default function Shared({ selector }) {
       if (res.data.success) {
         setFolders(res.data.folders);
         setFiles(res.data.files);
+        setSelectedFolder('');
       } else {
         alert(res.data.message);
       }
@@ -210,9 +211,6 @@ export default function Shared({ selector }) {
               ))}
             </Select>
           </FormControl>
-          {/* <Button variant='outlined' onClick={() => getFilesOrFolders()}>
-            back to root folder
-          </Button> */}
         </div>
       </div>
       <div id='contentDisplayer'>

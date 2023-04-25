@@ -22,6 +22,7 @@ import {
   Dialog,
   TextField,
   ListItemSecondaryAction,
+  Menu,
   FormControl,
   InputLabel,
   Select,
@@ -34,6 +35,7 @@ import {
   Info,
   InfoOutlined,
   GetAppOutlined,
+  Share,
   Delete,
   Visibility,
 } from '@material-ui/icons';
@@ -61,6 +63,8 @@ export default function DisplayContainer({
   const [folders, setFolders] = React.useState([]);
   const [sameFolder, setSameFolder] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
+  const [selectedPath, setSelectedPath] = React.useState('');
+  const [whole, setWhole] = React.useState(false);
   const [open_1, setOpen_1] = React.useState(false);
   const [open_3, setOpen_3] = React.useState(false);
   const [open_4, setOpen_4] = React.useState(false);
@@ -71,13 +75,18 @@ export default function DisplayContainer({
   const [selectedUser, setSelectedUser] = React.useState('');
   const [usersList, setUsersList] = React.useState([]);
   const [itemDetails, setItemDetails] = React.useState({});
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleChange = (event) => {
     setSelectedUser(event.target.value);
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
   };
 
   const handleSelectOpen = () => {
@@ -189,7 +198,7 @@ export default function DisplayContainer({
     alert(res.data.message);
 
     if (res.data.success) {
-      getUser();
+      // getUser();
       getFilesOrFolders(selector.folderName);
     }
   };
@@ -227,7 +236,7 @@ export default function DisplayContainer({
       setSameFolder(false);
 
       if (res.data.success) {
-        getUser();
+        // getUser();
         getFilesOrFolders(selector.folderName);
       }
     }
@@ -262,27 +271,44 @@ export default function DisplayContainer({
     setSameFolder(true);
   };
 
-  const shareFolder = async (path) => {
+  const shareFolder = async () => {
     if (!selectedUser) return alert('Select a user!');
 
-    const res = await axios.put(
-      'http://localhost:5000/api/upload/share',
-      {
-        userId: selectedUser._id,
-        // sharedPath: null,
-        wholeFolder: true,
-      },
-      {
-        headers: {
-          'x-auth-token': localStorage.getItem('token'),
+    let res;
+
+    if (whole) {
+      res = await axios.put(
+        'http://localhost:5000/api/upload/share',
+        {
+          userId: selectedUser._id,
+          wholeFolder: whole,
         },
-      },
-    );
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+    } else {
+      res = await axios.put(
+        'http://localhost:5000/api/upload/share',
+        {
+          userId: selectedUser._id,
+          path: selectedPath,
+          wholeFolder: whole,
+        },
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+    }
 
     alert(res.data.message);
 
     if (res.data.success) {
-      getUser();
+      // getUser();
       handleClose();
     }
   };
@@ -383,6 +409,27 @@ export default function DisplayContainer({
 
   return (
     <div>
+      <Menu
+        id='simple-menu'
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}>
+        {/* <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            handleClickOpen_1();
+          }}>
+          Shared with
+        </MenuItem> */}
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            handleClickOpen();
+          }}>
+          Share
+        </MenuItem>
+      </Menu>
       <Dialog
         open={open_1}
         onClose={handleClose_1}
@@ -477,6 +524,8 @@ export default function DisplayContainer({
               <b>Folder name:</b> {itemDetails.folderName}
               <br />
               <b>Folder location:</b> {itemDetails.location}
+              <br />
+              <b>Created at:</b> {itemDetails.createdAt}
             </Typography>
           ) : (
             <Typography variant='p'>
@@ -488,6 +537,8 @@ export default function DisplayContainer({
               <b>File location:</b> {itemDetails.location}
               <br />
               <b>File name:</b> {itemDetails.fileNameWithExt}
+              <br />
+              <b>Created at:</b> {itemDetails.createdAt}
             </Typography>
           )}
         </DialogContent>
@@ -545,7 +596,7 @@ export default function DisplayContainer({
         ) : (
           <div>
             <Button variant='outlined' onClick={handleClickOpen_1}>
-              Shared With
+              Shared with
             </Button>
             <Button variant='outlined' onClick={handleClickOpen}>
               Share
@@ -556,8 +607,7 @@ export default function DisplayContainer({
       <div id='contentDisplayer'>
         {folders?.length > 0 ? (
           folders.map((item) => (
-            <Card
-              style={{ maxHeight: '80px', maxWidth: '300px', margin: '10px' }}>
+            <Card style={{ maxHeight: '80px', margin: '10px' }}>
               <CardActionArea>
                 <CardContent>
                   <Typography
@@ -588,6 +638,14 @@ export default function DisplayContainer({
                       </IconButton>
                       <IconButton onClick={() => deleteFile(item.folderName)}>
                         <Delete />
+                      </IconButton>
+                      <IconButton
+                        onClick={(e) => {
+                          handleClick(e);
+                          // handleClickOpen();
+                          setSelectedPath(item.location);
+                        }}>
+                        <Share />
                       </IconButton>
                     </span>
                   </Typography>
@@ -663,6 +721,15 @@ export default function DisplayContainer({
                                 <GetAppOutlined />
                               </IconButton>
                             </a>
+                            <IconButton
+                              color='primary'
+                              onClick={(e) => {
+                                handleClick(e);
+                                // handleClickOpen();
+                                setSelectedPath(item.location);
+                              }}>
+                              <Share />
+                            </IconButton>
                           </div>
                         }
                       />
@@ -719,6 +786,15 @@ export default function DisplayContainer({
                               onClick={() => deleteFile(item.fileNameWithExt)}>
                               <DeleteOutlined />
                             </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={(e) => {
+                                handleClick(e);
+                                // handleClickOpen();
+                                setSelectedPath(item.location);
+                              }}>
+                              <Share />
+                            </IconButton>
                           </>
                         }
                       />
@@ -772,6 +848,15 @@ export default function DisplayContainer({
                               color='primary'
                               onClick={() => deleteFile(item.fileNameWithExt)}>
                               <DeleteOutlined />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={(e) => {
+                                handleClick(e);
+                                // handleClickOpen();
+                                setSelectedPath(item.location);
+                              }}>
+                              <Share />
                             </IconButton>
                           </>
                         }
@@ -832,6 +917,15 @@ export default function DisplayContainer({
                             color='primary'
                             onClick={() => deleteFile(item.fileNameWithExt)}>
                             <DeleteOutlined />
+                          </IconButton>
+                          <IconButton
+                            color='primary'
+                            onClick={(e) => {
+                              handleClick(e);
+                              // handleClickOpen();
+                              setSelectedPath(item.location);
+                            }}>
+                            <Share />
                           </IconButton>
                         </ListItemIcon>
                       </ListItem>
