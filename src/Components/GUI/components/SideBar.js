@@ -2,13 +2,12 @@ import React from 'react';
 // import icon from '../pics/drive_icon.png';
 import drive from '../pics/myDrive.png';
 import computers from '../pics/computers.png';
-import axios from 'axios';
 import shared from '../pics/shared.png';
 import trash from '../pics/trash.png';
 import cloud from '../pics/cloud.png';
+import starred from '../pics/starred.png';
 // import google from '../pics/google.png';
 import '../css/SideBar.css';
-import { ExitToApp } from '@material-ui/icons';
 
 export default function SideBar({ user, selector, setSelector }) {
   return (
@@ -20,6 +19,7 @@ export default function SideBar({ user, selector, setSelector }) {
             onClick={() =>
               setSelector({
                 folderName: '',
+                starred: false,
                 account: true,
                 trash: false,
                 shared: false,
@@ -39,6 +39,7 @@ export default function SideBar({ user, selector, setSelector }) {
                 ...selector,
                 account: false,
                 trash: false,
+                starred: false,
                 shared: false,
                 files: true,
                 uploadFile: false,
@@ -50,6 +51,24 @@ export default function SideBar({ user, selector, setSelector }) {
             <h3>My Drive</h3>
           </div>
           <div
+            className={`sideBarOptions ${selector.starred && 'activeSideOpt'}`}
+            onClick={() =>
+              setSelector({
+                ...selector,
+                account: false,
+                trash: false,
+                shared: false,
+                starred: true,
+                files: false,
+                uploadFile: false,
+                uploadFolder: false,
+                createFolder: false,
+              })
+            }>
+            <img src={starred} alt='Reload page' className='opacity' />
+            <h3>Favourites</h3>
+          </div>
+          <div
             className={`sideBarOptions ${
               selector.uploadFile && 'activeSideOpt'
             }`}
@@ -57,6 +76,7 @@ export default function SideBar({ user, selector, setSelector }) {
               setSelector({
                 account: false,
                 trash: false,
+                starred: false,
                 shared: false,
                 files: false,
                 uploadFile: true,
@@ -76,6 +96,7 @@ export default function SideBar({ user, selector, setSelector }) {
               setSelector({
                 account: false,
                 trash: false,
+                starred: false,
                 shared: false,
                 files: false,
                 uploadFile: false,
@@ -97,6 +118,7 @@ export default function SideBar({ user, selector, setSelector }) {
                 trash: false,
                 shared: false,
                 files: false,
+                starred: false,
                 uploadFile: false,
                 uploadFolder: false,
                 createFolder: true,
@@ -115,6 +137,7 @@ export default function SideBar({ user, selector, setSelector }) {
                 shared: true,
                 files: false,
                 uploadFile: false,
+                starred: false,
                 uploadFolder: false,
                 createFolder: false,
                 folderName: '',
@@ -130,6 +153,7 @@ export default function SideBar({ user, selector, setSelector }) {
                 account: false,
                 trash: true,
                 shared: false,
+                starred: false,
                 files: false,
                 uploadFile: false,
                 uploadFolder: false,
@@ -163,7 +187,7 @@ export default function SideBar({ user, selector, setSelector }) {
           <div id='storageNumericalInfo'>
             <p>
               {user?.currentStorage ? (user?.currentStorage).toFixed(2) : 0} GB
-              of 5 GB Used
+              of {user?.storageLimit} GB Used
             </p>
           </div>
           {/* <button id='buyStorage'>Buy storage</button> */}

@@ -51,6 +51,7 @@ export default function FolderUpload({ user, getUser, setSelector }) {
         trash: false,
         shared: false,
         files: true,
+        starred: false,
         uploadFile: false,
         uploadFolder: false,
         createFolder: false,

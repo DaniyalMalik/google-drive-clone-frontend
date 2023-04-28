@@ -38,6 +38,7 @@ import {
   Share,
   Delete,
   Visibility,
+  StarOutline,
 } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
@@ -633,6 +634,13 @@ export default function DisplayContainer({
                         }>
                         <Info />
                       </IconButton>
+                      <IconButton
+                      // onClick={() =>
+                      //   handleClickOpen_3({ ...item, isFolder: true })
+                      // }
+                      >
+                        <StarOutline />
+                      </IconButton>
                       <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
@@ -708,6 +716,14 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
+                              // onClick={() =>
+                              //   handleClickOpen_3({ ...item, isFolder: true })
+                              // }
+                            >
+                              <StarOutline />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
                               onClick={() => deleteFile(item.fileNameWithExt)}>
                               <DeleteOutlined />
                             </IconButton>
@@ -776,6 +792,14 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
+                              // onClick={() =>
+                              //   handleClickOpen_3({ ...item, isFolder: true })
+                              // }
+                            >
+                              <StarOutline />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
                               onClick={() =>
                                 handleClickOpen_3({ ...item, isFolder: false })
                               }>
@@ -839,6 +863,14 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
+                              // onClick={() =>
+                              //   handleClickOpen_3({ ...item, isFolder: true })
+                              // }
+                            >
+                              <StarOutline />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
                               onClick={() =>
                                 handleClickOpen_3({ ...item, isFolder: false })
                               }>
@@ -899,6 +931,14 @@ export default function DisplayContainer({
                               handleClickOpen_3({ ...item, isFolder: false })
                             }>
                             <InfoOutlined />
+                          </IconButton>
+                          <IconButton
+                            color='primary'
+                            // onClick={() =>
+                            //   handleClickOpen_3({ ...item, isFolder: true })
+                            // }
+                          >
+                            <StarOutline />
                           </IconButton>
                           <a
                             href={`data:${item.mimeType};base64,${item.file}`}

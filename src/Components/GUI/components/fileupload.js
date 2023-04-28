@@ -63,6 +63,7 @@ export default function FileUpload({ setSelector, user, getUser }) {
         files: true,
         uploadFile: false,
         uploadFolder: false,
+        starred: false,
         createFolder: false,
         folderName: '',
       });

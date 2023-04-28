@@ -10,6 +10,7 @@ import Shared from './components/Shared';
 import Trash from './components/Trash';
 import './main.css';
 import React from 'react';
+import Starred from './components/Starred';
 
 function Main({ setToken }) {
   const [selector, setSelector] = React.useState({
@@ -20,6 +21,7 @@ function Main({ setToken }) {
     uploadFile: false,
     uploadFolder: false,
     createFolder: false,
+    starred: false,
     folderName: '',
   });
   const [user, setUser] = React.useState({});
@@ -40,6 +42,7 @@ function Main({ setToken }) {
 
   return (
     <div style={{ width: '95vw' }}>
+      {/* {console.log(selector, 'selector')} */}
       <Navbar
         user={user}
         getUser={getUser}
@@ -104,6 +107,14 @@ function Main({ setToken }) {
         )}
         {selector.shared && (
           <Shared
+            user={user}
+            getUser={getUser}
+            selector={selector}
+            setSelector={setSelector}
+          />
+        )}
+        {selector.starred && (
+          <Starred
             user={user}
             getUser={getUser}
             selector={selector}

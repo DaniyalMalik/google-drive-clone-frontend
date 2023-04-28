@@ -27,6 +27,7 @@ export default function CreateFolder({ setSelector }) {
         files: true,
         uploadFile: false,
         uploadFolder: false,
+        starred: false,
         createFolder: false,
         folderName: '',
       });
