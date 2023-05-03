@@ -56,9 +56,15 @@ export default function Starred({ user, getUser, selector, setSelector }) {
   };
 
   const getFilesOrFolders = async (folderName) => {
+    const temp = user.folderPath.split('\\');
+
+    temp.splice(temp.length - 1, 0, 'starred');
+
+    const customPath = temp.join('\\');
+
     if (folderName) {
       const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=' + folderName,
+        `http://localhost:5000/api/upload?customPath=${customPath}&folderName=${folderName}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -71,7 +77,7 @@ export default function Starred({ user, getUser, selector, setSelector }) {
       setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=',
+        `http://localhost:5000/api/upload?customPath=${customPath}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -89,6 +95,25 @@ export default function Starred({ user, getUser, selector, setSelector }) {
   React.useEffect(() => {
     getFilesOrFolders();
   }, []);
+
+  const removeFromStarred = async (customPath) => {
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/unstare',
+      { customPath },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) {
+      getUser();
+      getFilesOrFolders();
+    }
+  };
 
   return (
     <div>
@@ -164,10 +189,7 @@ export default function Starred({ user, getUser, selector, setSelector }) {
                         <Info />
                       </IconButton>
                       <IconButton
-                      // onClick={() =>
-                      //   handleClickOpen({ ...item, isFolder: true })
-                      // }
-                      >
+                        onClick={() => removeFromStarred(item.location)}>
                         <Star />
                       </IconButton>
                       <IconButton onClick={() => selectFolder(item.folderName)}>
@@ -227,10 +249,7 @@ export default function Starred({ user, getUser, selector, setSelector }) {
                             </IconButton>
                             <IconButton
                               color='primary'
-                              // onClick={() =>
-                              //   handleClickOpen({ ...item, isFolder: true })
-                              // }
-                            >
+                              onClick={() => removeFromStarred(item.location)}>
                               <Star />
                             </IconButton>
                             <a
@@ -289,10 +308,7 @@ export default function Starred({ user, getUser, selector, setSelector }) {
                             </IconButton>
                             <IconButton
                               color='primary'
-                              // onClick={() =>
-                              //   handleClickOpen({ ...item, isFolder: true })
-                              // }
-                            >
+                              onClick={() => removeFromStarred(item.location)}>
                               <Star />
                             </IconButton>
                           </>
@@ -332,10 +348,7 @@ export default function Starred({ user, getUser, selector, setSelector }) {
                           <>
                             <IconButton
                               color='primary'
-                              // onClick={() =>
-                              //   handleClickOpen({ ...item, isFolder: true })
-                              // }
-                            >
+                              onClick={() => removeFromStarred(item.location)}>
                               <Star />
                             </IconButton>
                             <IconButton
@@ -375,10 +388,7 @@ export default function Starred({ user, getUser, selector, setSelector }) {
                         <ListItemIcon>
                           <IconButton
                             color='primary'
-                            // onClick={() =>
-                            //   handleClickOpen({ ...item, isFolder: true })
-                            // }
-                          >
+                            onClick={() => removeFromStarred(item.location)}>
                             <Star />
                           </IconButton>
                           <IconButton

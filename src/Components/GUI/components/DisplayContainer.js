@@ -175,7 +175,36 @@ export default function DisplayContainer({
     }
   };
 
-  const deleteFile = async (name) => {
+  const addToStarred = async (name) => {
+    let temp = user.folderPath.split('\\');
+
+    temp.splice(temp.length - 1, 0, 'starred');
+
+    if (selector.folderName) temp.splice(temp.length, 0, selector.folderName);
+
+    const oldPath = selector.folderName
+      ? user.folderPath + '\\' + selector.folderName + '\\' + name
+      : user.folderPath + '\\' + name;
+    const newPath = temp.join('\\') + '\\' + name;
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/stare',
+      { newPath, oldPath },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) {
+      // getUser();
+      getFilesOrFolders(selector.folderName);
+    }
+  };
+
+  const deleteFileOrFolder = async (name) => {
     let temp = user.folderPath.split('\\');
 
     temp.splice(temp.length - 1, 0, 'trash');
@@ -634,17 +663,14 @@ export default function DisplayContainer({
                         }>
                         <Info />
                       </IconButton>
-                      <IconButton
-                      // onClick={() =>
-                      //   handleClickOpen_3({ ...item, isFolder: true })
-                      // }
-                      >
+                      <IconButton onClick={() => addToStarred(item.folderName)}>
                         <StarOutline />
                       </IconButton>
                       <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
-                      <IconButton onClick={() => deleteFile(item.folderName)}>
+                      <IconButton
+                        onClick={() => deleteFileOrFolder(item.folderName)}>
                         <Delete />
                       </IconButton>
                       <IconButton
@@ -716,15 +742,16 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
-                              // onClick={() =>
-                              //   handleClickOpen_3({ ...item, isFolder: true })
-                              // }
-                            >
+                              onClick={() =>
+                                addToStarred(item.fileNameWithExt)
+                              }>
                               <StarOutline />
                             </IconButton>
                             <IconButton
                               color='primary'
-                              onClick={() => deleteFile(item.fileNameWithExt)}>
+                              onClick={() =>
+                                deleteFileOrFolder(item.fileNameWithExt)
+                              }>
                               <DeleteOutlined />
                             </IconButton>
                             <a
@@ -792,10 +819,9 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
-                              // onClick={() =>
-                              //   handleClickOpen_3({ ...item, isFolder: true })
-                              // }
-                            >
+                              onClick={() =>
+                                addToStarred(item.fileNameWithExt)
+                              }>
                               <StarOutline />
                             </IconButton>
                             <IconButton
@@ -807,7 +833,9 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
-                              onClick={() => deleteFile(item.fileNameWithExt)}>
+                              onClick={() =>
+                                deleteFileOrFolder(item.fileNameWithExt)
+                              }>
                               <DeleteOutlined />
                             </IconButton>
                             <IconButton
@@ -863,10 +891,9 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
-                              // onClick={() =>
-                              //   handleClickOpen_3({ ...item, isFolder: true })
-                              // }
-                            >
+                              onClick={() =>
+                                addToStarred(item.fileNameWithExt)
+                              }>
                               <StarOutline />
                             </IconButton>
                             <IconButton
@@ -878,7 +905,9 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
-                              onClick={() => deleteFile(item.fileNameWithExt)}>
+                              onClick={() =>
+                                deleteFileOrFolder(item.fileNameWithExt)
+                              }>
                               <DeleteOutlined />
                             </IconButton>
                             <IconButton
@@ -934,10 +963,7 @@ export default function DisplayContainer({
                           </IconButton>
                           <IconButton
                             color='primary'
-                            // onClick={() =>
-                            //   handleClickOpen_3({ ...item, isFolder: true })
-                            // }
-                          >
+                            onClick={() => addToStarred(item.fileNameWithExt)}>
                             <StarOutline />
                           </IconButton>
                           <a
@@ -955,7 +981,9 @@ export default function DisplayContainer({
                           </a>
                           <IconButton
                             color='primary'
-                            onClick={() => deleteFile(item.fileNameWithExt)}>
+                            onClick={() =>
+                              deleteFileOrFolder(item.fileNameWithExt)
+                            }>
                             <DeleteOutlined />
                           </IconButton>
                           <IconButton
