@@ -39,6 +39,7 @@ import {
   Delete,
   Visibility,
   StarOutline,
+  Star,
 } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
@@ -663,9 +664,16 @@ export default function DisplayContainer({
                         }>
                         <Info />
                       </IconButton>
-                      <IconButton onClick={() => addToStarred(item.folderName)}>
-                        <StarOutline />
-                      </IconButton>
+                      {item.favourite ? (
+                        <IconButton>
+                          <Star />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          onClick={() => addToStarred(item.folderName)}>
+                          <StarOutline />
+                        </IconButton>
+                      )}
                       <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
@@ -740,13 +748,19 @@ export default function DisplayContainer({
                               }>
                               <InfoOutlined />
                             </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                addToStarred(item.fileNameWithExt)
-                              }>
-                              <StarOutline />
-                            </IconButton>
+                            {item.favourite ? (
+                              <IconButton color='primary'>
+                                <Star />
+                              </IconButton>
+                            ) : (
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  addToStarred(item.fileNameWithExt)
+                                }>
+                                <StarOutline />
+                              </IconButton>
+                            )}
                             <IconButton
                               color='primary'
                               onClick={() =>
@@ -817,13 +831,19 @@ export default function DisplayContainer({
                               }>
                               <Create />
                             </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                addToStarred(item.fileNameWithExt)
-                              }>
-                              <StarOutline />
-                            </IconButton>
+                            {item.favourite ? (
+                              <IconButton color='primary'>
+                                <Star />
+                              </IconButton>
+                            ) : (
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  addToStarred(item.fileNameWithExt)
+                                }>
+                                <StarOutline />
+                              </IconButton>
+                            )}
                             <IconButton
                               color='primary'
                               onClick={() =>
@@ -889,13 +909,19 @@ export default function DisplayContainer({
                               }>
                               <Create />
                             </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                addToStarred(item.fileNameWithExt)
-                              }>
-                              <StarOutline />
-                            </IconButton>
+                            {item.favourite ? (
+                              <IconButton color='primary'>
+                                <Star />
+                              </IconButton>
+                            ) : (
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  addToStarred(item.fileNameWithExt)
+                                }>
+                                <StarOutline />
+                              </IconButton>
+                            )}
                             <IconButton
                               color='primary'
                               onClick={() =>
@@ -961,11 +987,19 @@ export default function DisplayContainer({
                             }>
                             <InfoOutlined />
                           </IconButton>
-                          <IconButton
-                            color='primary'
-                            onClick={() => addToStarred(item.fileNameWithExt)}>
-                            <StarOutline />
-                          </IconButton>
+                          {item.favourite ? (
+                            <IconButton color='primary'>
+                              <Star />
+                            </IconButton>
+                          ) : (
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                addToStarred(item.fileNameWithExt)
+                              }>
+                              <StarOutline />
+                            </IconButton>
+                          )}
                           <a
                             href={`data:${item.mimeType};base64,${item.file}`}
                             download={
