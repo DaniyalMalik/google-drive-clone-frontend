@@ -85,7 +85,7 @@
   text-align: center;
 }
 
-/* #buyStorage {
+#buyStorage {
   display: block;
   background: transparent;
   font-size: 14px;
@@ -96,12 +96,12 @@
   margin: 15px auto;
   border: 1px solid silver;
   padding: 10px;
-} */
+}
 
-/* #buyStorage:hover {
+#buyStorage:hover {
   transition: 0.3s;
   background: rgb(239, 239, 255);
-} */
+}
 
 /* #sponsor {
   display: flex;
