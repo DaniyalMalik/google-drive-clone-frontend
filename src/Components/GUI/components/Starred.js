@@ -135,6 +135,8 @@ export default function Starred({ user, getUser, selector, setSelector }) {
               <b>Folder location:</b> {itemDetails.location}
               <br />
               <b>Created at:</b> {itemDetails.createdAt}
+              <br />
+              <b>Updated at:</b> {itemDetails.updatedAt}
             </Typography>
           ) : (
             <Typography variant='p'>
@@ -148,6 +150,8 @@ export default function Starred({ user, getUser, selector, setSelector }) {
               <b>File name:</b> {itemDetails.fileNameWithExt}
               <br />
               <b>Created at:</b> {itemDetails.createdAt}
+              <br />
+              <b>Updated at:</b> {itemDetails.updatedAt}
             </Typography>
           )}
         </DialogContent>

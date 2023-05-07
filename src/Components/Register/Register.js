@@ -8,6 +8,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({});
   const [isSubmit, setIsSubmit] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [user, setUserDetails] = useState({
     fname: '',
     lname: '',
@@ -28,37 +29,62 @@ const Register = () => {
   const validateForm = (values) => {
     const error = {};
     const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
+
     if (!values.fname) {
-      error.fname = 'First Name is required';
+      setDisabled(false);
+
+      error.fname = 'First Name is required!';
     }
+
     if (!values.lname) {
-      error.lname = 'Last Name is required';
+      setDisabled(false);
+
+      error.lname = 'Last Name is required!';
     }
+
     if (!values.email) {
-      error.email = 'Email is required';
+      setDisabled(false);
+
+      error.email = 'Email is required!';
     } else if (!regex.test(values.email)) {
+      setDisabled(false);
+
       error.email = 'This is not a valid email format!';
     }
+
     if (!values.password) {
-      error.password = 'Password is required';
+      setDisabled(false);
+
+      error.password = 'Password is required!';
     } else if (values.password.length < 4) {
-      error.password = 'Password must be more than 4 characters';
+      setDisabled(false);
+
+      error.password = 'Password must be more than 4 characters!';
     } else if (values.password.length > 10) {
-      error.password = 'Password cannot exceed more than 10 characters';
+      setDisabled(false);
+
+      error.password = 'Password cannot exceed more than 10 characters!';
     }
+
     if (!values.cpassword) {
-      error.cpassword = 'Confirm Password is required';
+      setDisabled(false);
+
+      error.cpassword = 'Confirm Password is required!';
     } else if (values.cpassword !== values.password) {
-      error.cpassword = 'Confirm password and password should be same';
+      setDisabled(false);
+
+      error.cpassword = 'Confirm password and password should be same!';
     }
 
     return error;
   };
+
   const signupHandler = (e) => {
     e.preventDefault();
 
     setFormErrors(validateForm(user));
     setIsSubmit(true);
+
     // if (!formErrors) {
     //   setIsSubmit(true);
     // }
@@ -76,6 +102,8 @@ const Register = () => {
         })
         .then((res) => {
           alert(res.data.message);
+
+          setDisabled(false);
 
           navigate('/login', { replace: true });
         });
@@ -131,7 +159,17 @@ const Register = () => {
           value={user.cpassword}
         />
         <p className={basestyle.error}>{formErrors.cpassword}</p>
-        <button className={basestyle.button_common} onClick={signupHandler}>
+        <button
+          className={basestyle.button_common}
+          style={{
+            backgroundColor: `${disabled ? 'grey' : 'olivedrab'}`,
+            cursor: `${!disabled && 'pointer'}`,
+          }}
+          disabled={disabled}
+          onClick={(e) => {
+            setDisabled(true);
+            signupHandler(e);
+          }}>
           Register
         </button>
       </form>

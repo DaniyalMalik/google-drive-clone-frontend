@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Button, TextField } from '@material-ui/core';
 
 export default function CreateFolder({ setSelector }) {
+  const [disabled, setDisabled] = React.useState(false);
+
   const createFolder = async (e) => {
     e.preventDefault();
 
@@ -16,6 +18,8 @@ export default function CreateFolder({ setSelector }) {
         },
       },
     );
+
+    setDisabled(false);
 
     alert(res.data.message);
 
@@ -39,13 +43,24 @@ export default function CreateFolder({ setSelector }) {
         <h1>Create a Folder</h1>
       </div>
       <div id='contentDisplayer'>
-        <form onSubmit={createFolder}>
+        <form
+          onSubmit={(e) => {
+            setDisabled(true);
+            createFolder(e);
+          }}>
           <TextField
             name='folderName'
             placeholder='Folder Name'
+            required
             style={{ padding: '10px' }}
           />
-          <Button variant='outlined' type='submit' style={{ padding: '10px' }}>
+          <Button
+            variant='outlined'
+            type='submit'
+            style={{
+              padding: '10px',
+            }}
+            disabled={disabled}>
             Create Folder
           </Button>
         </form>

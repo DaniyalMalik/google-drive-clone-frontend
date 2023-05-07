@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import basestyle from '../Base.module.css';
 import loginstyle from './SendVerifyEmail.module.css';
 import axios from 'axios';
@@ -6,6 +6,7 @@ import { useNavigate, NavLink } from 'react-router-dom';
 
 const SendVerifyEmail = () => {
   const navigate = useNavigate();
+  const [disabled, setDisabled] = React.useState(false);
 
   const handleEmailVerification = async (e) => {
     e.preventDefault();
@@ -15,6 +16,8 @@ const SendVerifyEmail = () => {
         e.target.email.value,
     );
 
+    setDisabled(false);
+
     alert(res.data.message);
 
     if (res.data.success) navigate('/login', { replace: true });
@@ -22,7 +25,11 @@ const SendVerifyEmail = () => {
 
   return (
     <div className={loginstyle.login}>
-      <form onSubmit={handleEmailVerification}>
+      <form
+        onSubmit={(e) => {
+          setDisabled(true);
+          handleEmailVerification(e);
+        }}>
         <h1>Send Verification Email</h1>
         <input
           type='email'
@@ -34,7 +41,14 @@ const SendVerifyEmail = () => {
         <NavLink to='/' style={{ float: 'right' }}>
           Back to login
         </NavLink>
-        <button className={basestyle.button_common} type='submit'>
+        <button
+          className={basestyle.button_common}
+          style={{
+            backgroundColor: `${disabled ? 'grey' : 'olivedrab'}`,
+            cursor: `${!disabled && 'pointer'}`,
+          }}
+          disabled={disabled}
+          type='submit'>
           Send
         </button>
       </form>

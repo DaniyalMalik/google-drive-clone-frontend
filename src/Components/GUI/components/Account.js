@@ -64,6 +64,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Account({ getUser: changeUser }) {
   const classes = useStyles();
+  const [disabled_1, setDisabled_1] = useState(false);
+  const [disabled_2, setDisabled_2] = useState(false);
   const [value, setValue] = React.useState(0);
   const [changePassword, setChangePassword] = useState({
     oldPassword: '',
@@ -107,6 +109,8 @@ export default function Account({ getUser: changeUser }) {
       },
     );
 
+    setDisabled_2(false);
+
     alert(res.data.message);
 
     if (res.data.success) {
@@ -132,6 +136,8 @@ export default function Account({ getUser: changeUser }) {
         },
       },
     );
+
+    setDisabled_1(false);
 
     alert(res.data.message);
 
@@ -211,7 +217,11 @@ export default function Account({ getUser: changeUser }) {
         </AppBar>
         <TabPanel value={value} index={0}>
           <div id='contentDisplayer'>
-            <form noValidate autoComplete='off' onSubmit={handleProfileSubmit}>
+            <form
+              onSubmit={(e) => {
+                setDisabled_1(true);
+                handleProfileSubmit(e);
+              }}>
               <TextField
                 label='Email'
                 style={{ margin: '10px' }}
@@ -219,6 +229,7 @@ export default function Account({ getUser: changeUser }) {
                 onChange={onProfileChange}
                 name='email'
                 value={user?.email}
+                required
                 disabled
               />
               {/* <Button
@@ -236,6 +247,7 @@ export default function Account({ getUser: changeUser }) {
                 onChange={onProfileChange}
                 label='First Name'
                 variant='outlined'
+                required
                 name='firstName'
                 id='firstName'
                 value={user?.firstName}
@@ -246,6 +258,7 @@ export default function Account({ getUser: changeUser }) {
                 onChange={onProfileChange}
                 label='Last Name'
                 variant='outlined'
+                required
                 name='lastName'
                 id='lastName'
                 value={user?.lastName}
@@ -255,6 +268,7 @@ export default function Account({ getUser: changeUser }) {
                 style={{ margin: '10px' }}
                 variant='contained'
                 type='submit'
+                disabled={disabled_1}
                 size='small'>
                 Update Profile
               </Button>
@@ -263,7 +277,11 @@ export default function Account({ getUser: changeUser }) {
         </TabPanel>
         <TabPanel value={value} index={1}>
           <div id='contentDisplayer'>
-            <form autoComplete='off' onSubmit={handlePasswordSubmit}>
+            <form
+              onSubmit={(e) => {
+                setDisabled_2(true);
+                handlePasswordSubmit(e);
+              }}>
               <TextField
                 label='Old Password'
                 style={{ margin: '10px' }}
@@ -271,6 +289,7 @@ export default function Account({ getUser: changeUser }) {
                 onChange={onPasswordsChange}
                 name='oldPassword'
                 required
+                type='password'
                 value={changePassword.oldPassword}
               />
               <br />
@@ -280,6 +299,7 @@ export default function Account({ getUser: changeUser }) {
                 label='New Password'
                 required
                 variant='outlined'
+                type='password'
                 name='newPassword'
                 value={changePassword.newPassword}
               />
@@ -288,6 +308,7 @@ export default function Account({ getUser: changeUser }) {
                 style={{ margin: '10px' }}
                 onChange={onPasswordsChange}
                 label='Repeat New Password'
+                type='password'
                 variant='outlined'
                 required
                 name='repeatNewPassword'
@@ -296,6 +317,7 @@ export default function Account({ getUser: changeUser }) {
               <br />
               <Button
                 style={{ margin: '10px' }}
+                disabled={disabled_2}
                 type='submit'
                 variant='contained'
                 size='small'>

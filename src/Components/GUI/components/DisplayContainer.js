@@ -27,6 +27,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Box,
+  CircularProgress,
+  Backdrop,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -52,7 +55,33 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     minWidth: 180,
   },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
 }));
+
+function CircularProgressWithLabel(props) {
+  return (
+    <Box position='relative' display='inline-flex'>
+      <CircularProgress variant='indeterminate' {...props} />
+      <Box
+        top={0}
+        left={0}
+        bottom={0}
+        right={0}
+        position='absolute'
+        display='flex'
+        alignItems='center'
+        justifyContent='center'>
+        <Typography
+          variant='p'
+          component='div'
+          color='textSecondary'>{`${props.value}%`}</Typography>
+      </Box>
+    </Box>
+  );
+}
 
 export default function DisplayContainer({
   user,
@@ -78,6 +107,8 @@ export default function DisplayContainer({
   const [usersList, setUsersList] = React.useState([]);
   const [itemDetails, setItemDetails] = React.useState({});
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [percentage, setPercentage] = React.useState(0);
+  const [openBackDrop, setOpenBackDrop] = React.useState(false);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -255,6 +286,13 @@ export default function DisplayContainer({
           sameFolder,
         formData,
         {
+          onUploadProgress: (progressEvent) => {
+            const { loaded, total } = progressEvent;
+
+            // if (percent <= 100) {
+            setPercentage(Math.floor((loaded * 100) / total));
+            // }
+          },
           headers: {
             'x-auth-token': localStorage.getItem('token'),
           },
@@ -267,7 +305,11 @@ export default function DisplayContainer({
       setSameFolder(false);
 
       if (res.data.success) {
+        setOpenBackDrop(false);
+        setPercentage(0);
+
         // getUser();
+
         getFilesOrFolders(selector.folderName);
       }
     }
@@ -288,7 +330,10 @@ export default function DisplayContainer({
   }, []);
 
   React.useEffect(() => {
-    saveFiles.length > 0 && uploadFiles();
+    if (saveFiles.length > 0) {
+      uploadFiles();
+      setOpenBackDrop(true);
+    }
   }, [saveFiles]);
 
   const onUploadFiles = (e) => {
@@ -440,6 +485,13 @@ export default function DisplayContainer({
 
   return (
     <div>
+      <Backdrop className={classes.backdrop} open={openBackDrop}>
+        <CircularProgressWithLabel
+          color='primary'
+          value={percentage}
+          size={80}
+        />
+      </Backdrop>
       <Menu
         id='simple-menu'
         anchorEl={anchorEl}
@@ -557,6 +609,8 @@ export default function DisplayContainer({
               <b>Folder location:</b> {itemDetails.location}
               <br />
               <b>Created at:</b> {itemDetails.createdAt}
+              <br />
+              <b>Updated at:</b> {itemDetails.updatedAt}
             </Typography>
           ) : (
             <Typography variant='p'>
@@ -570,6 +624,8 @@ export default function DisplayContainer({
               <b>File name:</b> {itemDetails.fileNameWithExt}
               <br />
               <b>Created at:</b> {itemDetails.createdAt}
+              <br />
+              <b>Updated at:</b> {itemDetails.updatedAt}
             </Typography>
           )}
         </DialogContent>
@@ -592,6 +648,11 @@ export default function DisplayContainer({
               required
               label='Name'
               name='name'
+              defaultValue={
+                itemDetails.isFolder
+                  ? itemDetails.folderName
+                  : itemDetails.fileName
+              }
             />
             <Button type='submit' variant='contained'>
               Save

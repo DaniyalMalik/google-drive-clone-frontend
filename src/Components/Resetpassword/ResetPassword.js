@@ -7,16 +7,21 @@ import { useNavigate, NavLink, useParams } from 'react-router-dom';
 const ResetPassword = () => {
   const navigate = useNavigate();
   const { resetPasswordToken } = useParams();
+  const [disabled, setDisabled] = React.useState(false);
 
   const resetPasswordHandler = (e) => {
     e.preventDefault();
 
     if (!resetPasswordToken) {
-      alert('Token is required!');
+      setDisabled(false);
+
+      return alert('Token is required!');
     }
 
     if (e.target.password.value !== e.target.repeatPassword.value) {
-      alert('Passwords do not match!');
+      setDisabled(false);
+
+      return alert('Passwords do not match!');
     }
 
     axios
@@ -25,6 +30,8 @@ const ResetPassword = () => {
         resetToken: resetPasswordToken,
       })
       .then((res) => {
+        setDisabled(false);
+
         alert(res.data.message);
 
         if (res.data.success) navigate('/', { replace: true });
@@ -33,17 +40,21 @@ const ResetPassword = () => {
 
   return (
     <div className={loginstyle.login}>
-      <form onSubmit={resetPasswordHandler}>
+      <form
+        onSubmit={(e) => {
+            setDisabled(true);
+            resetPasswordHandler(e);
+        }}>
         <h1>ResetPassword</h1>
         <input
-          type='text'
+          type='password'
           name='password'
           id='password'
           placeholder='Enter password'
           required
         />
         <input
-          type='text'
+          type='password'
           name='repeatPassword'
           id='repeatPassword'
           required
@@ -52,7 +63,14 @@ const ResetPassword = () => {
         <NavLink to='/' style={{ float: 'right' }}>
           Back to login
         </NavLink>
-        <button className={basestyle.button_common} type='submit'>
+        <button
+          className={basestyle.button_common}
+          style={{
+            backgroundColor: `${disabled ? 'grey' : 'olivedrab'}`,
+            cursor: `${!disabled && 'pointer'}`,
+          }}
+          disabled={disabled}
+          type='submit'>
           Change Password
         </button>
       </form>

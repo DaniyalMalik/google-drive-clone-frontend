@@ -6,6 +6,7 @@ import { useNavigate, NavLink } from 'react-router-dom';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
+  const [disabled, setDisabled] = useState(false);
 
   const forgotPasswordHandler = (e) => {
     e.preventDefault();
@@ -18,13 +19,19 @@ const ForgotPassword = () => {
       .then((res) => {
         alert(res.data.message);
 
+        setDisabled(false);
+
         if (res.data.success) navigate('/', { replace: true });
       });
   };
 
   return (
     <div className={loginstyle.login}>
-      <form onSubmit={forgotPasswordHandler}>
+      <form
+        onSubmit={(e) => {
+          forgotPasswordHandler(e);
+          setDisabled(true);
+        }}>
         <h1>ForgotPassword</h1>
         <input
           type='email'
@@ -33,10 +40,18 @@ const ForgotPassword = () => {
           placeholder='Email'
           required
         />
+        {console.log(disabled, 'disabled')}
         <NavLink to='/' style={{ float: 'right' }}>
           Back to login
         </NavLink>
-        <button className={basestyle.button_common} type='submit'>
+        <button
+          className={basestyle.button_common}
+          style={{
+            backgroundColor: `${disabled ? 'grey' : 'olivedrab'}`,
+            cursor: `${!disabled && 'pointer'}`,
+          }}
+          disabled={disabled}
+          type='submit'>
           Send Email
         </button>
       </form>

@@ -8,6 +8,7 @@ const Login = ({ setToken }) => {
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({});
   const [isSubmit, setIsSubmit] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [user, setUserDetails] = useState({
     email: '',
     password: '',
@@ -28,12 +29,19 @@ const Login = ({ setToken }) => {
     const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
     if (!values.email) {
+      setDisabled(false);
+
       error.email = 'Email is required';
     } else if (!regex.test(values.email)) {
-      error.email = 'Please enter a valid email address';
+      setDisabled(false);
+
+      error.email = 'Please enter a valid email address!';
     }
+
     if (!values.password) {
-      error.password = 'Password is required';
+      setDisabled(false);
+
+      error.password = 'Password is required!';
     }
 
     return error;
@@ -53,6 +61,7 @@ const Login = ({ setToken }) => {
 
         localStorage.setItem('token', res.data.token);
 
+        setDisabled(false);
         setToken(res.data.token);
 
         if (res.data.message === 'Verify your email address first!')
@@ -100,7 +109,17 @@ const Login = ({ setToken }) => {
           Forgot Passsword
         </NavLink>
         <p className={basestyle.error}>{formErrors.password}</p>
-        <button className={basestyle.button_common} onClick={loginHandler}>
+        <button
+          className={basestyle.button_common}
+          style={{
+            backgroundColor: `${disabled ? 'grey' : 'olivedrab'}`,
+            cursor: `${!disabled && 'pointer'}`,
+          }}
+          disabled={disabled}
+          onClick={(e) => {
+            setDisabled(true);
+            loginHandler(e);
+          }}>
           Login
         </button>
       </form>

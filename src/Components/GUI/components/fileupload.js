@@ -1,10 +1,49 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
-import { Button } from '@material-ui/core';
+import {
+  Typography,
+  Box,
+  Button,
+  CircularProgress,
+  Backdrop,
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+}));
+
+function CircularProgressWithLabel(props) {
+  return (
+    <Box position='relative' display='inline-flex'>
+      <CircularProgress variant='indeterminate' {...props} />
+      <Box
+        top={0}
+        left={0}
+        bottom={0}
+        right={0}
+        position='absolute'
+        display='flex'
+        alignItems='center'
+        justifyContent='center'>
+        <Typography
+          variant='p'
+          component='div'
+          color='textSecondary'>{`${props.value}%`}</Typography>
+      </Box>
+    </Box>
+  );
+}
 
 export default function FileUpload({ setSelector, user, getUser }) {
-  const fileInput = useRef(null);
+  const classes = useStyles();
+  const fileInput = React.useRef(null);
+  const [percentage, setPercentage] = React.useState(0);
+  const [open, setOpen] = React.useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +86,15 @@ export default function FileUpload({ setSelector, user, getUser }) {
     //       folderName: '',
     //     });
     // } else {
+
     const res = await axios.post('http://localhost:5000/api/upload', formData, {
+      onUploadProgress: (progressEvent) => {
+        const { loaded, total } = progressEvent;
+
+        // if (percent <= 100) {
+        setPercentage(Math.floor((loaded * 100) / total));
+        // }
+      },
       headers: {
         'x-auth-token': localStorage.getItem('token'),
       },
@@ -67,6 +114,8 @@ export default function FileUpload({ setSelector, user, getUser }) {
         createFolder: false,
         folderName: '',
       });
+      setOpen(false);
+      setPercentage(0);
 
       getUser();
     }
@@ -75,11 +124,22 @@ export default function FileUpload({ setSelector, user, getUser }) {
 
   return (
     <div id='displayCont'>
+      <Backdrop className={classes.backdrop} open={open}>
+        <CircularProgressWithLabel
+          color='primary'
+          value={percentage}
+          size={80}
+        />
+      </Backdrop>
       <div id='displayInfoNav'>
         <h1>Upload Files</h1>
       </div>
       <div id='contentDisplayer'>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={(e) => {
+            setOpen(true);
+            handleSubmit(e);
+          }}>
           <input multiple type='file' ref={fileInput} />
           <Button variant='outlined' type='submit'>
             Upload
