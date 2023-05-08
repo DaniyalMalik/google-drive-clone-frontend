@@ -49,6 +49,8 @@ export default function FolderUpload({ user, getUser, setSelector }) {
     e.preventDefault();
 
     if (fileInput.current.files.length === 0) {
+      setOpen(false);
+
       return alert('No folder selected or it is empty!');
     }
 

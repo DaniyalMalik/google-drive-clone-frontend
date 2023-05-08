@@ -49,6 +49,8 @@ export default function FileUpload({ setSelector, user, getUser }) {
     e.preventDefault();
 
     if (fileInput.current.files.length === 0) {
+      setOpen(false);
+
       return alert('No files selected!');
     }
 

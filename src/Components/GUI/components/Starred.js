@@ -110,7 +110,6 @@ export default function Starred({ user, getUser, selector, setSelector }) {
     alert(res.data.message);
 
     if (res.data.success) {
-      getUser();
       getFilesOrFolders();
     }
   };

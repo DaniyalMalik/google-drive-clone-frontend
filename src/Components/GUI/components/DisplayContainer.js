@@ -37,6 +37,8 @@ import {
   Create,
   Info,
   InfoOutlined,
+  Forward,
+  FileCopy,
   GetAppOutlined,
   Share,
   Delete,
@@ -94,14 +96,19 @@ export default function DisplayContainer({
   const [folders, setFolders] = React.useState([]);
   const [sameFolder, setSameFolder] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
+  const [oldFolder, setOldFolder] = React.useState('');
+  const [newPath, setNewPath] = React.useState('');
   const [selectedPath, setSelectedPath] = React.useState('');
   const [whole, setWhole] = React.useState(false);
+  const [move, setMove] = React.useState(false);
   const [open_1, setOpen_1] = React.useState(false);
+  const [open_2, setOpen_2] = React.useState(false);
   const [open_3, setOpen_3] = React.useState(false);
   const [open_4, setOpen_4] = React.useState(false);
   const [shared, setShared] = React.useState([]);
   const [open, setOpen] = React.useState(false);
-  const [selectOpen, setSelectOpen] = React.useState(false);
+  const [selectOpen1, setSelectOpen1] = React.useState(false);
+  const [selectOpen2, setSelectOpen2] = React.useState(false);
   const classes = useStyles();
   const [selectedUser, setSelectedUser] = React.useState('');
   const [usersList, setUsersList] = React.useState([]);
@@ -122,8 +129,12 @@ export default function DisplayContainer({
     setSelectedUser(event.target.value);
   };
 
-  const handleSelectOpen = () => {
-    setSelectOpen(true);
+  const handleSelectOpen1 = () => {
+    setSelectOpen1(true);
+  };
+
+  const handleSelectOpen2 = () => {
+    setSelectOpen2(true);
   };
 
   const handleClickOpen_1 = () => {
@@ -137,6 +148,10 @@ export default function DisplayContainer({
   const handleClickOpen_3 = (item) => {
     setOpen_3(true);
     setItemDetails(item);
+  };
+
+  const handleClickOpen_2 = () => {
+    setOpen_2(true);
   };
 
   const handleClickOpen_4 = (item) => {
@@ -153,9 +168,13 @@ export default function DisplayContainer({
     setSelectedUser('');
   };
 
-  const handleSelectClose = () => {
-    setSelectOpen(false);
+  const handleSelectClose1 = () => {
+    setSelectOpen1(false);
     setSelectedUser('');
+  };
+
+  const handleSelectClose2 = () => {
+    setSelectOpen2(false);
   };
 
   const handleClose_3 = () => {
@@ -166,6 +185,13 @@ export default function DisplayContainer({
   const handleClose_4 = () => {
     setOpen_4(false);
     setItemDetails({});
+  };
+
+  const handleClose_2 = () => {
+    setOpen_2(false);
+    setMove(false);
+    setOldFolder('');
+    setNewPath('');
   };
 
   const selectFolder = (folderName) => {
@@ -483,6 +509,51 @@ export default function DisplayContainer({
     getSharedList();
   }, []);
 
+  const moveOrCopy = async () => {
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/moveorcopy',
+      { oldPath: oldFolder.location, newPath, move },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) {
+      handleClose_2();
+      getFilesOrFolders();
+    }
+  };
+
+  const removeFromStarred = async (path) => {
+    let starredTemp = path.split('\\');
+    const index = starredTemp.indexOf(
+      `${user.firstName}-${user.lastName}-${user._id}`,
+    );
+
+    starredTemp.splice(index, 0, 'starred');
+    starredTemp = starredTemp.join('\\');
+
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/unstare',
+      { customPath: starredTemp },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) {
+      getFilesOrFolders();
+    }
+  };
+
   return (
     <div>
       <Backdrop className={classes.backdrop} open={openBackDrop}>
@@ -566,9 +637,9 @@ export default function DisplayContainer({
             <Select
               labelId='demo-controlled-open-select-label'
               id='demo-controlled-open-select'
-              open={selectOpen}
-              onClose={handleSelectClose}
-              onOpen={handleSelectOpen}
+              open={selectOpen1}
+              onClose={handleSelectClose1}
+              onOpen={handleSelectOpen1}
               value={selectedUser}
               onChange={handleChange}>
               <MenuItem value=''>
@@ -665,6 +736,48 @@ export default function DisplayContainer({
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog
+        open={open_2}
+        onClose={handleClose_2}
+        aria-labelledby='form-dialog-title-2'>
+        <DialogTitle id='form-dialog-title-2'>
+          {move ? 'Move' : 'Copy'} to
+        </DialogTitle>
+        <DialogContent>
+          <FormControl className={classes.formControl}>
+            <InputLabel id='demo-controlled-open-select-label'>
+              Select folder
+            </InputLabel>
+            <Select
+              labelId='demo-controlled-open-select-label'
+              id='demo-controlled-open-select'
+              open={selectOpen2}
+              onClose={handleSelectClose2}
+              onOpen={handleSelectOpen2}
+              value={newPath ? newPath : 'None'}
+              onChange={(e) => setNewPath(e.target.value)}>
+              <MenuItem value='None'>
+                <em>None</em>
+              </MenuItem>
+              {folders.map((item) => {
+                return (
+                  item.folderName !== oldFolder.folderName && (
+                    <MenuItem value={item.location}>{item.folderName}</MenuItem>
+                  )
+                );
+              })}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose_2} color='primary'>
+            Close
+          </Button>
+          <Button onClick={() => moveOrCopy()} color='primary'>
+            {move ? 'Move' : 'Copy'}
+          </Button>
+        </DialogActions>
+      </Dialog>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
         {selector.folderName ? (
@@ -720,13 +833,30 @@ export default function DisplayContainer({
                         <Create />
                       </IconButton>
                       <IconButton
+                        onClick={() => {
+                          setMove(true);
+                          setOldFolder(item);
+                          handleClickOpen_2();
+                        }}>
+                        <Forward />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => {
+                          setOldFolder(item);
+                          setMove(false);
+                          handleClickOpen_2();
+                        }}>
+                        <FileCopy />
+                      </IconButton>
+                      <IconButton
                         onClick={() =>
                           handleClickOpen_3({ ...item, isFolder: true })
                         }>
                         <Info />
                       </IconButton>
                       {item.favourite ? (
-                        <IconButton>
+                        <IconButton
+                          onClick={() => removeFromStarred(item.location)}>
                           <Star />
                         </IconButton>
                       ) : (
@@ -804,13 +934,35 @@ export default function DisplayContainer({
                             </IconButton>
                             <IconButton
                               color='primary'
+                              onClick={() => {
+                                setMove(true);
+                                setOldFolder(item);
+                                handleClickOpen_2();
+                              }}>
+                              <Forward />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() => {
+                                setOldFolder(item);
+                                setMove(false);
+                                handleClickOpen_2();
+                              }}>
+                              <FileCopy />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
                               onClick={() =>
                                 handleClickOpen_3({ ...item, isFolder: false })
                               }>
                               <InfoOutlined />
                             </IconButton>
                             {item.favourite ? (
-                              <IconButton color='primary'>
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  removeFromStarred(item.location)
+                                }>
                                 <Star />
                               </IconButton>
                             ) : (
@@ -892,8 +1044,30 @@ export default function DisplayContainer({
                               }>
                               <Create />
                             </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() => {
+                                setOldFolder(item);
+                                setMove(true);
+                                handleClickOpen_2();
+                              }}>
+                              <Forward />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() => {
+                                setOldFolder(item);
+                                setMove(false);
+                                handleClickOpen_2();
+                              }}>
+                              <FileCopy />
+                            </IconButton>
                             {item.favourite ? (
-                              <IconButton color='primary'>
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  removeFromStarred(item.location)
+                                }>
                                 <Star />
                               </IconButton>
                             ) : (
@@ -970,8 +1144,30 @@ export default function DisplayContainer({
                               }>
                               <Create />
                             </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() => {
+                                setOldFolder(item);
+                                setMove(true);
+                                handleClickOpen_2();
+                              }}>
+                              <Forward />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() => {
+                                setOldFolder(item);
+                                setMove(false);
+                                handleClickOpen_2();
+                              }}>
+                              <FileCopy />
+                            </IconButton>
                             {item.favourite ? (
-                              <IconButton color='primary'>
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  removeFromStarred(item.location)
+                                }>
                                 <Star />
                               </IconButton>
                             ) : (
@@ -1043,13 +1239,33 @@ export default function DisplayContainer({
                           </IconButton>
                           <IconButton
                             color='primary'
+                            onClick={() => {
+                              setMove(true);
+                              setOldFolder(item);
+                              handleClickOpen_2();
+                            }}>
+                            <Forward />
+                          </IconButton>
+                          <IconButton
+                            color='primary'
+                            onClick={() => {
+                              setOldFolder(item);
+                              setMove(false);
+                              handleClickOpen_2();
+                            }}>
+                            <FileCopy />
+                          </IconButton>
+                          <IconButton
+                            color='primary'
                             onClick={() =>
                               handleClickOpen_3({ ...item, isFolder: false })
                             }>
                             <InfoOutlined />
                           </IconButton>
                           {item.favourite ? (
-                            <IconButton color='primary'>
+                            <IconButton
+                              color='primary'
+                              onClick={() => removeFromStarred(item.location)}>
                               <Star />
                             </IconButton>
                           ) : (
