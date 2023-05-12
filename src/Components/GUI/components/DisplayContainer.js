@@ -116,6 +116,7 @@ export default function DisplayContainer({
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [percentage, setPercentage] = React.useState(0);
   const [openBackDrop, setOpenBackDrop] = React.useState(false);
+  const [folder, setFolder] = React.useState(false);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -512,7 +513,7 @@ export default function DisplayContainer({
   const moveOrCopy = async () => {
     const res = await axios.post(
       'http://localhost:5000/api/upload/moveorcopy',
-      { oldPath: oldFolder.location, newPath, move },
+      { oldPath: oldFolder.location, newPath, move, folder },
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -835,6 +836,7 @@ export default function DisplayContainer({
                       <IconButton
                         onClick={() => {
                           setMove(true);
+                          setFolder(true);
                           setOldFolder(item);
                           handleClickOpen_2();
                         }}>
@@ -844,6 +846,7 @@ export default function DisplayContainer({
                         onClick={() => {
                           setOldFolder(item);
                           setMove(false);
+                          setFolder(true);
                           handleClickOpen_2();
                         }}>
                         <FileCopy />
@@ -936,6 +939,7 @@ export default function DisplayContainer({
                               color='primary'
                               onClick={() => {
                                 setMove(true);
+                                setFolder(false);
                                 setOldFolder(item);
                                 handleClickOpen_2();
                               }}>
@@ -945,6 +949,7 @@ export default function DisplayContainer({
                               color='primary'
                               onClick={() => {
                                 setOldFolder(item);
+                                setFolder(false);
                                 setMove(false);
                                 handleClickOpen_2();
                               }}>
@@ -1048,6 +1053,7 @@ export default function DisplayContainer({
                               color='primary'
                               onClick={() => {
                                 setOldFolder(item);
+                                setFolder(false);
                                 setMove(true);
                                 handleClickOpen_2();
                               }}>
@@ -1057,6 +1063,7 @@ export default function DisplayContainer({
                               color='primary'
                               onClick={() => {
                                 setOldFolder(item);
+                                setFolder(false);
                                 setMove(false);
                                 handleClickOpen_2();
                               }}>
@@ -1148,6 +1155,7 @@ export default function DisplayContainer({
                               color='primary'
                               onClick={() => {
                                 setOldFolder(item);
+                                setFolder(false);
                                 setMove(true);
                                 handleClickOpen_2();
                               }}>
@@ -1157,6 +1165,7 @@ export default function DisplayContainer({
                               color='primary'
                               onClick={() => {
                                 setOldFolder(item);
+                                setFolder(false);
                                 setMove(false);
                                 handleClickOpen_2();
                               }}>
@@ -1241,6 +1250,7 @@ export default function DisplayContainer({
                             color='primary'
                             onClick={() => {
                               setMove(true);
+                              setFolder(false);
                               setOldFolder(item);
                               handleClickOpen_2();
                             }}>
@@ -1249,6 +1259,7 @@ export default function DisplayContainer({
                           <IconButton
                             color='primary'
                             onClick={() => {
+                              setFolder(false);
                               setOldFolder(item);
                               setMove(false);
                               handleClickOpen_2();
