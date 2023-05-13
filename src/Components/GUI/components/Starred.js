@@ -30,7 +30,12 @@ import {
   Star,
 } from '@material-ui/icons';
 
-export default function Starred({ user, getUser, selector, setSelector }) {
+export default function Starred({
+  user,
+  search,
+  selector,
+  setSelector,
+}) {
   const [files, setFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
   const [selectedFolder, setSelectedFolder] = React.useState('');
@@ -64,7 +69,7 @@ export default function Starred({ user, getUser, selector, setSelector }) {
 
     if (folderName) {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?customPath=${customPath}&folderName=${folderName}`,
+        `http://localhost:5000/api/upload?customPath=${customPath}&folderName=${folderName}&search=${search}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -77,7 +82,7 @@ export default function Starred({ user, getUser, selector, setSelector }) {
       setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?customPath=${customPath}`,
+        `http://localhost:5000/api/upload?customPath=${customPath}&search=${search}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -93,8 +98,8 @@ export default function Starred({ user, getUser, selector, setSelector }) {
   };
 
   React.useEffect(() => {
-    getFilesOrFolders();
-  }, []);
+    getFilesOrFolders(selector.folderName);
+  }, [search]);
 
   const removeFromStarred = async (customPath) => {
     const res = await axios.post(

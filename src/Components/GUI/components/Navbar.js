@@ -1,15 +1,36 @@
 import React from 'react';
 import icon from '../pics/drive_icon.png';
 import { Link } from 'react-router-dom';
-import { IconButton, Typography } from '@material-ui/core';
-import { ExitToApp } from '@material-ui/icons';
+import {
+  IconButton,
+  Typography,
+  InputAdornment,
+  OutlinedInput,
+  InputLabel,
+  FormControl,
+} from '@material-ui/core';
+import { ExitToApp, Search } from '@material-ui/icons';
+import { makeStyles } from '@material-ui/core/styles';
 
-export default function Navbar({ setToken, user }) {
+const useStyles = makeStyles((theme) => ({
+  margin: {
+    margin: theme.spacing(1),
+  },
+}));
+
+export default function Navbar({ search, setToken, user, setSearch, selector }) {
+  const classes = useStyles();
+  const [tempSearch, setTempSearch] = React.useState('');
+
   const logout = () => {
     localStorage.removeItem('token');
 
     setToken('');
   };
+
+  React.useEffect(() => {
+    if (search !== tempSearch) setTempSearch(search);
+  }, [search]);
 
   return (
     <div
@@ -33,17 +54,36 @@ export default function Navbar({ setToken, user }) {
           </Typography>
         </Link>
       </div>
-      {/* <li>
-          <div id='searchBar'>
-            <button>
-              <img src={search} alt='Reload page' className='opacity' />
-            </button>
-            <input type='text' placeholder='Search in Drive' />
-            <button>
-              <img src={filters} alt='Reload page' className='opacity' />
-            </button>
-          </div>
-        </li> */}
+      {(selector.trash ||
+        selector.shared ||
+        selector.starred ||
+        selector.files) && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            setSearch(tempSearch);
+          }}>
+          <FormControl className={classes.margin} variant='outlined'>
+            <InputLabel htmlFor='search'>Search file/folder</InputLabel>
+            <OutlinedInput
+              id='search'
+              name='search'
+              value={tempSearch}
+              onChange={(e) => setTempSearch(e.target.value)}
+              endAdornment={
+                <InputAdornment position='end'>
+                  <IconButton type='submit' edge='end'>
+                    {<Search />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              fullWidth
+              labelWidth={125}
+            />
+          </FormControl>
+        </form>
+      )}
       <div
         style={{
           display: 'flex',

@@ -44,12 +44,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Shared({ selector }) {
+export default function Shared({ search }) {
   const classes = useStyles();
   const [files, setFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
   const [shared, setShared] = React.useState([]);
-  const [sharedFolderPaths, setSharedFolderPaths] = React.useState({});
+  const [sharedFolderPaths, setSharedFolderPaths] = React.useState('None');
   const [open_3, setOpen_3] = React.useState(false);
   const [itemDetails, setItemDetails] = React.useState({});
   const [open, setOpen] = React.useState(false);
@@ -81,7 +81,9 @@ export default function Shared({ selector }) {
         'http://localhost:5000/api/upload/?folderName=' +
           folderName +
           '&userId=' +
-          sharedFolderPaths.sharedBy._id,
+          sharedFolderPaths.sharedBy._id +
+          '&search=' +
+          search,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -96,12 +98,16 @@ export default function Shared({ selector }) {
         alert(res.data.message);
       }
     } else {
-      const res = await axios.post(
-        'http://localhost:5000/api/upload/shared',
-        {
-          paths: sharedFolderPaths.sharedPath,
-          user: sharedFolderPaths.sharedBy,
-        },
+      const res = await axios.get(
+        'http://localhost:5000/api/upload?&customPath=' +
+          sharedFolderPaths.sharedPath +
+          '&search=' +
+          search,
+        // {
+        //   path: sharedFolderPaths.sharedPath,
+        //   user: sharedFolderPaths.sharedBy,
+        //   search,
+        // },
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -130,8 +136,12 @@ export default function Shared({ selector }) {
   };
 
   React.useEffect(() => {
-    if (Object.keys(sharedFolderPaths).length > 0) getFilesOrFolders();
-  }, [sharedFolderPaths]);
+    if (
+      typeof sharedFolderPaths === 'object' &&
+      Object.keys(sharedFolderPaths).length > 0
+    )
+      getFilesOrFolders(selectedFolder);
+  }, [sharedFolderPaths, search]);
 
   React.useEffect(async () => {
     const res = await axios.get('http://localhost:5000/api/upload/sharedwith', {
@@ -201,7 +211,7 @@ export default function Shared({ selector }) {
               onOpen={handleOpen}
               value={sharedFolderPaths}
               onChange={handleChange}>
-              <MenuItem value=''>
+              <MenuItem value='None'>
                 <em>None</em>
               </MenuItem>
               {shared.map((item) => (

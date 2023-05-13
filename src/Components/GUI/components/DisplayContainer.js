@@ -87,9 +87,9 @@ function CircularProgressWithLabel(props) {
 
 export default function DisplayContainer({
   user,
-  getUser,
   selector,
   setSelector,
+  search,
 }) {
   const [files, setFiles] = React.useState([]);
   const [saveFiles, setSaveFiles] = React.useState([]);
@@ -99,7 +99,6 @@ export default function DisplayContainer({
   const [oldFolder, setOldFolder] = React.useState('');
   const [newPath, setNewPath] = React.useState('');
   const [selectedPath, setSelectedPath] = React.useState('');
-  const [whole, setWhole] = React.useState(false);
   const [move, setMove] = React.useState(false);
   const [open_1, setOpen_1] = React.useState(false);
   const [open_2, setOpen_2] = React.useState(false);
@@ -167,6 +166,7 @@ export default function DisplayContainer({
   const handleClose = () => {
     setOpen(false);
     setSelectedUser('');
+    setSelectedPath('');
   };
 
   const handleSelectClose1 = () => {
@@ -206,7 +206,7 @@ export default function DisplayContainer({
   const getFilesOrFolders = async (folderName) => {
     if (folderName) {
       const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=' + folderName,
+        `http://localhost:5000/api/upload?folderName=${folderName}&search=${search}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -219,7 +219,7 @@ export default function DisplayContainer({
       setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
-        'http://localhost:5000/api/upload?folderName=',
+        `http://localhost:5000/api/upload?folderName=&search=${search}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -343,8 +343,8 @@ export default function DisplayContainer({
   };
 
   React.useEffect(() => {
-    getFilesOrFolders();
-  }, []);
+    getFilesOrFolders(selector.folderName);
+  }, [search]);
 
   React.useEffect(async () => {
     const res = await axios.get('http://localhost:5000/api/user/all', {
@@ -379,12 +379,12 @@ export default function DisplayContainer({
 
     let res;
 
-    if (whole) {
+    if (!selectedPath) {
       res = await axios.put(
         'http://localhost:5000/api/upload/share',
         {
           userId: selectedUser._id,
-          wholeFolder: whole,
+          wholeFolder: true,
         },
         {
           headers: {
@@ -398,7 +398,7 @@ export default function DisplayContainer({
         {
           userId: selectedUser._id,
           path: selectedPath,
-          wholeFolder: whole,
+          wholeFolder: false,
         },
         {
           headers: {
@@ -555,6 +555,10 @@ export default function DisplayContainer({
     }
   };
 
+  React.useEffect(() => {
+    if (!anchorEl && !open) setSelectedPath('');
+  }, [anchorEl, open]);
+
   return (
     <div>
       <Backdrop className={classes.backdrop} open={openBackDrop}>
@@ -579,8 +583,8 @@ export default function DisplayContainer({
         </MenuItem> */}
         <MenuItem
           onClick={() => {
-            handleMenuClose();
             handleClickOpen();
+            handleMenuClose();
           }}>
           Share
         </MenuItem>
@@ -643,9 +647,11 @@ export default function DisplayContainer({
               onOpen={handleSelectOpen1}
               value={selectedUser}
               onChange={handleChange}>
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
+              {(!usersList || usersList.length === 0) && (
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+              )}
               {usersList.map((item) => (
                 <MenuItem value={item}>
                   {item.firstName + ' ' + item.lastName}

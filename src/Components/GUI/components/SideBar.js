@@ -56,7 +56,13 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />;
 });
 
-export default function SideBar({ user, getUser, selector, setSelector }) {
+export default function SideBar({
+  user,
+  getUser,
+  selector,
+  setSelector,
+  setSearch,
+}) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [paidPlan, setPaidPlan] = React.useState(0);
@@ -446,7 +452,7 @@ export default function SideBar({ user, getUser, selector, setSelector }) {
           </div>
           <div
             className={`sideBarOptions ${selector.files && 'activeSideOpt'}`}
-            onClick={() =>
+            onClick={() => {
               setSelector({
                 ...selector,
                 account: false,
@@ -457,14 +463,15 @@ export default function SideBar({ user, getUser, selector, setSelector }) {
                 uploadFile: false,
                 uploadFolder: false,
                 createFolder: false,
-              })
-            }>
+              });
+              setSearch('');
+            }}>
             <img src={drive} alt='Reload page' className='opacity' />
             <h3>My Drive</h3>
           </div>
           <div
             className={`sideBarOptions ${selector.starred && 'activeSideOpt'}`}
-            onClick={() =>
+            onClick={() => {
               setSelector({
                 ...selector,
                 account: false,
@@ -475,8 +482,9 @@ export default function SideBar({ user, getUser, selector, setSelector }) {
                 uploadFile: false,
                 uploadFolder: false,
                 createFolder: false,
-              })
-            }>
+              });
+              setSearch('');
+            }}>
             <img src={starred} alt='Reload page' className='opacity' />
             <h3>Favourites</h3>
           </div>
@@ -542,7 +550,7 @@ export default function SideBar({ user, getUser, selector, setSelector }) {
           </div>
           <div
             className={`sideBarOptions ${selector.shared && 'activeSideOpt'}`}
-            onClick={() =>
+            onClick={() => {
               setSelector({
                 account: false,
                 trash: false,
@@ -553,14 +561,15 @@ export default function SideBar({ user, getUser, selector, setSelector }) {
                 uploadFolder: false,
                 createFolder: false,
                 folderName: '',
-              })
-            }>
+              });
+              setSearch('');
+            }}>
             <img src={shared} alt='Reload page' className='opacity' />
             <h3>Shared with me</h3>
           </div>
           <div
             className={`sideBarOptions ${selector.trash && 'activeSideOpt'}`}
-            onClick={() =>
+            onClick={() => {
               setSelector({
                 account: false,
                 trash: true,
@@ -571,8 +580,9 @@ export default function SideBar({ user, getUser, selector, setSelector }) {
                 uploadFolder: false,
                 createFolder: false,
                 folderName: '',
-              })
-            }>
+              });
+              setSearch('');
+            }}>
             <img src={trash} alt='Reload page' className='opacity' />
             <h3>Trash</h3>
           </div>

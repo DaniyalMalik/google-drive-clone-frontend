@@ -18,7 +18,7 @@ import {
 } from '@material-ui/core';
 import { DeleteOutlined, Cached, Delete } from '@material-ui/icons';
 
-export default function Trash({ user, getUser }) {
+export default function Trash({ user, getUser, search }) {
   const [files, setFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
 
@@ -29,7 +29,7 @@ export default function Trash({ user, getUser }) {
 
     const customPath = temp.join('\\');
     const res = await axios.get(
-      'http://localhost:5000/api/upload?customPath=' + customPath,
+      `http://localhost:5000/api/upload?customPath=${customPath}&search=${search}`,
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -45,7 +45,7 @@ export default function Trash({ user, getUser }) {
 
   React.useEffect(() => {
     getFilesOrFolders();
-  }, []);
+  }, [search]);
 
   const recoverFile = async (name) => {
     let temp = user.folderPath.split('\\');

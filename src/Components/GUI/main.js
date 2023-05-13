@@ -25,6 +25,7 @@ function Main({ setToken }) {
     folderName: '',
   });
   const [user, setUser] = React.useState({});
+  const [search, setSearch] = React.useState('');
 
   const getUser = async () => {
     const res = await axios.get('http://localhost:5000/api/user', {
@@ -42,17 +43,19 @@ function Main({ setToken }) {
 
   return (
     <div style={{ width: '95vw' }}>
-      {/* {console.log(selector, 'selector')} */}
       <Navbar
         user={user}
         getUser={getUser}
         setToken={setToken}
         selector={selector}
         setSelector={setSelector}
+        setSearch={setSearch}
+        search={search}
       />
       <div id='mainCont'>
         <SideBar
           user={user}
+          setSearch={setSearch}
           getUser={getUser}
           selector={selector}
           setSelector={setSelector}
@@ -63,6 +66,8 @@ function Main({ setToken }) {
             getUser={getUser}
             selector={selector}
             setSelector={setSelector}
+            setSearch={setSearch}
+            search={search}
           />
         )}
         {selector.uploadFile && (
@@ -103,6 +108,8 @@ function Main({ setToken }) {
             getUser={getUser}
             selector={selector}
             setSelector={setSelector}
+            setSearch={setSearch}
+            search={search}
           />
         )}
         {selector.shared && (
@@ -111,12 +118,16 @@ function Main({ setToken }) {
             getUser={getUser}
             selector={selector}
             setSelector={setSelector}
+            setSearch={setSearch}
+            search={search}
           />
         )}
         {selector.starred && (
           <Starred
             user={user}
+            setSearch={setSearch}
             getUser={getUser}
+            search={search}
             selector={selector}
             setSelector={setSelector}
           />

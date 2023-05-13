@@ -40,7 +40,6 @@ const ForgotPassword = () => {
           placeholder='Email'
           required
         />
-        {console.log(disabled, 'disabled')}
         <NavLink to='/' style={{ float: 'right' }}>
           Back to login
         </NavLink>
