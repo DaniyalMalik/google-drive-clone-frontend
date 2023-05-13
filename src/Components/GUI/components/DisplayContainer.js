@@ -96,6 +96,7 @@ export default function DisplayContainer({
   const [folders, setFolders] = React.useState([]);
   const [sameFolder, setSameFolder] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
+  const [selectedFolderPath, setSelectedFolderPath] = React.useState('');
   const [oldFolder, setOldFolder] = React.useState('');
   const [newPath, setNewPath] = React.useState('');
   const [selectedPath, setSelectedPath] = React.useState('');
@@ -104,6 +105,7 @@ export default function DisplayContainer({
   const [open_2, setOpen_2] = React.useState(false);
   const [open_3, setOpen_3] = React.useState(false);
   const [open_4, setOpen_4] = React.useState(false);
+  const [open_5, setOpen_5] = React.useState(false);
   const [shared, setShared] = React.useState([]);
   const [open, setOpen] = React.useState(false);
   const [selectOpen1, setSelectOpen1] = React.useState(false);
@@ -159,6 +161,10 @@ export default function DisplayContainer({
     setItemDetails(item);
   };
 
+  const handleClickOpen_5 = (item) => {
+    setOpen_5(true);
+  };
+
   const handleClose_1 = () => {
     setOpen_1(false);
   };
@@ -188,6 +194,10 @@ export default function DisplayContainer({
     setItemDetails({});
   };
 
+  const handleClose_5 = () => {
+    setOpen_5(false);
+  };
+
   const handleClose_2 = () => {
     setOpen_2(false);
     setMove(false);
@@ -195,8 +205,9 @@ export default function DisplayContainer({
     setNewPath('');
   };
 
-  const selectFolder = (folderName) => {
+  const selectFolder = (folderName, path) => {
     setSelectedFolder((prev) => prev + '/' + folderName);
+    setSelectedFolderPath(path);
 
     getFilesOrFolders(
       selectedFolder ? selectedFolder + '/' + folderName : folderName,
@@ -231,6 +242,7 @@ export default function DisplayContainer({
       setFiles(res.data.files);
       setSelector({ ...selector, folderName: '' });
       setSelectedFolder('');
+      selectedFolderPath('');
     }
   };
 
@@ -559,6 +571,27 @@ export default function DisplayContainer({
     if (!anchorEl && !open) setSelectedPath('');
   }, [anchorEl, open]);
 
+  const createFolder = async (e) => {
+    e.preventDefault();
+
+    const res = await axios.post(
+      'http://localhost:5000/api/upload/create',
+      { folderName: e.target.folderName.value, createPath: selectedFolderPath },
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    alert(res.data.message);
+
+    if (res.data.success) {
+      handleClose_5();
+      getFilesOrFolders(selectedFolder);
+    }
+  };
+
   return (
     <div>
       <Backdrop className={classes.backdrop} open={openBackDrop}>
@@ -568,6 +601,32 @@ export default function DisplayContainer({
           size={80}
         />
       </Backdrop>
+      <Dialog
+        open={open_5}
+        onClose={handleClose_5}
+        aria-labelledby='form-dialog-title-2'>
+        <DialogTitle id='form-dialog-title-2'>Create folder</DialogTitle>
+        <form onSubmit={createFolder}>
+          <DialogContent>
+            <FormControl className={classes.formControl}>
+              <TextField
+                label='Folder Name'
+                name='folderName'
+                variant='outlined'
+                required
+              />
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose_5} color='primary'>
+              Close
+            </Button>
+            <Button type='submit' color='primary'>
+              Create
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
       <Menu
         id='simple-menu'
         anchorEl={anchorEl}
@@ -789,6 +848,12 @@ export default function DisplayContainer({
         <h1>Folders</h1>
         {selector.folderName ? (
           <div>
+            <Button
+              variant='outlined'
+              component='span'
+              onClick={handleClickOpen_5}>
+              create folder in folder: <b>{selector.folderName}</b>
+            </Button>
             <input
               style={{ display: 'none' }}
               id='contained-button-file'
@@ -874,7 +939,10 @@ export default function DisplayContainer({
                           <StarOutline />
                         </IconButton>
                       )}
-                      <IconButton onClick={() => selectFolder(item.folderName)}>
+                      <IconButton
+                        onClick={() =>
+                          selectFolder(item.folderName, item.location)
+                        }>
                         <Visibility />
                       </IconButton>
                       <IconButton
