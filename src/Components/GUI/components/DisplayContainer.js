@@ -957,17 +957,19 @@ export default function DisplayContainer({
                         }>
                         <Info />
                       </IconButton>
-                      {item.favourite ? (
-                        <IconButton
-                          onClick={() => removeFromStarred(item.location)}>
-                          <Star />
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          onClick={() => addToStarred(item.folderName)}>
-                          <StarOutline />
-                        </IconButton>
-                      )}
+                      {item.favourite
+                        ? !selectedFolder && (
+                            <IconButton
+                              onClick={() => removeFromStarred(item.location)}>
+                              <Star />
+                            </IconButton>
+                          )
+                        : !selectedFolder && (
+                            <IconButton
+                              onClick={() => addToStarred(item.folderName)}>
+                              <StarOutline />
+                            </IconButton>
+                          )}
                       <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>

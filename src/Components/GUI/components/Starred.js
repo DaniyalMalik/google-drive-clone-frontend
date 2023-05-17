@@ -221,10 +221,12 @@ export default function Starred({ user, search, selector, setSelector }) {
                         }>
                         <Info />
                       </IconButton>
-                      <IconButton
-                        onClick={() => removeFromStarred(item.location)}>
-                        <Star />
-                      </IconButton>
+                      {!selectedFolder && (
+                        <IconButton
+                          onClick={() => removeFromStarred(item.location)}>
+                          <Star />
+                        </IconButton>
+                      )}
                       <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
