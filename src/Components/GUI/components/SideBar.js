@@ -436,7 +436,6 @@ export default function SideBar({
             className={`sideBarOptions ${selector.account && 'activeSideOpt'}`}
             onClick={() =>
               setSelector({
-                folderName: '',
                 starred: false,
                 account: true,
                 trash: false,
@@ -454,7 +453,6 @@ export default function SideBar({
             className={`sideBarOptions ${selector.files && 'activeSideOpt'}`}
             onClick={() => {
               setSelector({
-                ...selector,
                 account: false,
                 trash: false,
                 starred: false,
@@ -473,7 +471,6 @@ export default function SideBar({
             className={`sideBarOptions ${selector.starred && 'activeSideOpt'}`}
             onClick={() => {
               setSelector({
-                ...selector,
                 account: false,
                 trash: false,
                 shared: false,
@@ -502,7 +499,6 @@ export default function SideBar({
                 uploadFile: true,
                 uploadFolder: false,
                 createFolder: false,
-                folderName: '',
               })
             }>
             <img src={computers} alt='Reload page' className='opacity' />
@@ -522,7 +518,6 @@ export default function SideBar({
                 uploadFile: false,
                 uploadFolder: true,
                 createFolder: false,
-                folderName: '',
               })
             }>
             <img src={computers} alt='Reload page' className='opacity' />
@@ -542,7 +537,6 @@ export default function SideBar({
                 uploadFile: false,
                 uploadFolder: false,
                 createFolder: true,
-                folderName: '',
               })
             }>
             <img src={computers} alt='Reload page' className='opacity' />
@@ -560,7 +554,6 @@ export default function SideBar({
                 starred: false,
                 uploadFolder: false,
                 createFolder: false,
-                folderName: '',
               });
               setSearch('');
             }}>
@@ -579,7 +572,6 @@ export default function SideBar({
                 uploadFile: false,
                 uploadFolder: false,
                 createFolder: false,
-                folderName: '',
               });
               setSearch('');
             }}>

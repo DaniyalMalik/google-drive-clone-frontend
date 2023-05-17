@@ -66,29 +66,6 @@ export default function FileUpload({ setSelector, user, getUser }) {
     if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
       return alert('Uploaded files size is greater than your storage limit');
 
-    // if (selector.folderName) {
-    //   const res = await axios.post(
-    //     'http://localhost:5000/api/upload?folderName=' + selector.folderName,
-    //     formData,
-    //     {
-    //       headers: {
-    //         'x-auth-token': localStorage.getItem('token'),
-    //       },
-    //     },
-    //   );
-
-    //   alert(res.data.message);
-
-    //   if (res.data.success)
-    //     setSelector({
-    //       files: true,
-    //       uploadFile: false,
-    //       uploadFolder: false,
-    //       createFolder: false,
-    //       folderName: '',
-    //     });
-    // } else {
-
     const res = await axios.post('http://localhost:5000/api/upload', formData, {
       onUploadProgress: (progressEvent) => {
         const { loaded, total } = progressEvent;

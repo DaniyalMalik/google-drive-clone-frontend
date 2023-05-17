@@ -30,6 +30,8 @@ import {
   Box,
   CircularProgress,
   Backdrop,
+  Breadcrumbs,
+  Link,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -205,13 +207,24 @@ export default function DisplayContainer({
     setNewPath('');
   };
 
-  const selectFolder = (folderName, path) => {
-    setSelectedFolder((prev) => prev + '/' + folderName);
-    setSelectedFolderPath(path);
+  const selectFolder = (folderName, index) => {
+    if (folderName && !index) {
+      setSelectedFolder((prev) => prev + '/' + folderName);
 
-    getFilesOrFolders(
-      selectedFolder ? selectedFolder + '/' + folderName : folderName,
-    );
+      getFilesOrFolders(
+        selectedFolder ? selectedFolder + '/' + folderName : folderName,
+      );
+    } else if (folderName && index) {
+      let temp = selectedFolder.split('/');
+
+      temp.splice(index + 1, temp.length - index - 1);
+      temp = temp.join('/');
+
+      setSelectedFolder(temp);
+      getFilesOrFolders(temp);
+    } else {
+      getFilesOrFolders();
+    }
   };
 
   const getFilesOrFolders = async (folderName) => {
@@ -242,7 +255,7 @@ export default function DisplayContainer({
       setFiles(res.data.files);
       setSelector({ ...selector, folderName: '' });
       setSelectedFolder('');
-      selectedFolderPath('');
+      setSelectedFolderPath([]);
     }
   };
 
@@ -251,10 +264,10 @@ export default function DisplayContainer({
 
     temp.splice(temp.length - 1, 0, 'starred');
 
-    if (selector.folderName) temp.splice(temp.length, 0, selector.folderName);
+    if (selectedFolder) temp.splice(temp.length, 0, selectedFolder);
 
-    const oldPath = selector.folderName
-      ? user.folderPath + '\\' + selector.folderName + '\\' + name
+    const oldPath = selectedFolder
+      ? user.folderPath + '\\' + selectedFolder + '\\' + name
       : user.folderPath + '\\' + name;
     const newPath = temp.join('\\') + '\\' + name;
     const res = await axios.post(
@@ -271,7 +284,7 @@ export default function DisplayContainer({
 
     if (res.data.success) {
       // getUser();
-      getFilesOrFolders(selector.folderName);
+      getFilesOrFolders(selectedFolder);
     }
   };
 
@@ -280,10 +293,10 @@ export default function DisplayContainer({
 
     temp.splice(temp.length - 1, 0, 'trash');
 
-    if (selector.folderName) temp.splice(temp.length, 0, selector.folderName);
+    if (selectedFolder) temp.splice(temp.length, 0, selectedFolder);
 
-    const oldPath = selector.folderName
-      ? user.folderPath + '\\' + selector.folderName + '\\' + name
+    const oldPath = selectedFolder
+      ? user.folderPath + '\\' + selectedFolder + '\\' + name
       : user.folderPath + '\\' + name;
     const newPath = temp.join('\\') + '\\' + name;
     const res = await axios.post(
@@ -300,7 +313,7 @@ export default function DisplayContainer({
 
     if (res.data.success) {
       // getUser();
-      getFilesOrFolders(selector.folderName);
+      getFilesOrFolders(selectedFolder);
     }
   };
 
@@ -317,10 +330,10 @@ export default function DisplayContainer({
     if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
       return alert('Uploaded files size is greater than your storage limit');
 
-    if (selector.folderName) {
+    if (selectedFolder) {
       const res = await axios.post(
         'http://localhost:5000/api/upload?folderName=' +
-          selector.folderName +
+          selectedFolder +
           '&sameFolder=' +
           sameFolder,
         formData,
@@ -349,13 +362,13 @@ export default function DisplayContainer({
 
         // getUser();
 
-        getFilesOrFolders(selector.folderName);
+        getFilesOrFolders(selectedFolder);
       }
     }
   };
 
   React.useEffect(() => {
-    getFilesOrFolders(selector.folderName);
+    getFilesOrFolders(selectedFolder);
   }, [search]);
 
   React.useEffect(async () => {
@@ -594,6 +607,22 @@ export default function DisplayContainer({
 
   return (
     <div>
+      <Breadcrumbs aria-label='breadcrumb'>
+        {selectedFolder.split('/').map((item, index) =>
+          index === selectedFolder.split('/').length - 1 ? (
+            <Typography color='textPrimary'>
+              {item ? item : 'My Drive'}
+            </Typography>
+          ) : (
+            <Link
+              style={{ cursor: 'pointer' }}
+              color='inherit'
+              onClick={() => selectFolder(item, index)}>
+              {item ? item : 'My Drive'}
+            </Link>
+          ),
+        )}
+      </Breadcrumbs>
       <Backdrop className={classes.backdrop} open={openBackDrop}>
         <CircularProgressWithLabel
           color='primary'
@@ -846,13 +875,13 @@ export default function DisplayContainer({
       </Dialog>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
-        {selector.folderName ? (
+        {selectedFolder ? (
           <div>
             <Button
               variant='outlined'
               component='span'
               onClick={handleClickOpen_5}>
-              create folder in folder: <b>{selector.folderName}</b>
+              create folder in folder: <b>{selectedFolder}</b>
             </Button>
             <input
               style={{ display: 'none' }}
@@ -863,7 +892,7 @@ export default function DisplayContainer({
             />
             <label htmlFor='contained-button-file'>
               <Button variant='outlined' component='span'>
-                upload files in Folder: <b>{selector.folderName}</b>
+                upload files in Folder: <b>{selectedFolder}</b>
               </Button>
             </label>
             <Button variant='outlined' onClick={() => getFilesOrFolders()}>
@@ -939,10 +968,7 @@ export default function DisplayContainer({
                           <StarOutline />
                         </IconButton>
                       )}
-                      <IconButton
-                        onClick={() =>
-                          selectFolder(item.folderName, item.location)
-                        }>
+                      <IconButton onClick={() => selectFolder(item.folderName)}>
                         <Visibility />
                       </IconButton>
                       <IconButton

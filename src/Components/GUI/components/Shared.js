@@ -24,6 +24,8 @@ import {
   Dialog,
   MenuItem,
   InputLabel,
+  Breadcrumbs,
+  Link,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -55,12 +57,24 @@ export default function Shared({ search }) {
   const [open, setOpen] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
 
-  const selectFolder = (folderName) => {
-    setSelectedFolder((prev) => prev + '/' + folderName);
+  const selectFolder = (folderName, index) => {
+    if (folderName && !index) {
+      setSelectedFolder((prev) => prev + '/' + folderName);
 
-    getFilesOrFolders(
-      selectedFolder ? selectedFolder + '/' + folderName : folderName,
-    );
+      getFilesOrFolders(
+        selectedFolder ? selectedFolder + '/' + folderName : folderName,
+      );
+    } else if (folderName && index) {
+      let temp = selectedFolder.split('/');
+
+      temp.splice(index + 1, temp.length - index - 1);
+      temp = temp.join('/');
+
+      setSelectedFolder(temp);
+      getFilesOrFolders(temp);
+    } else {
+      getFilesOrFolders();
+    }
   };
 
   const handleChange = (event) => {
@@ -155,6 +169,22 @@ export default function Shared({ search }) {
 
   return (
     <div>
+      <Breadcrumbs aria-label='breadcrumb'>
+        {selectedFolder.split('/').map((item, index) =>
+          index === selectedFolder.split('/').length - 1 ? (
+            <Typography color='textPrimary'>
+              {item ? item : 'My Drive'}
+            </Typography>
+          ) : (
+            <Link
+              style={{ cursor: 'pointer' }}
+              color='inherit'
+              onClick={() => selectFolder(item, index)}>
+              {item ? item : 'My Drive'}
+            </Link>
+          ),
+        )}
+      </Breadcrumbs>
       <Dialog
         open={open_3}
         onClose={handleClose_3}

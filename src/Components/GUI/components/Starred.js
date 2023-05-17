@@ -20,6 +20,8 @@ import {
   DialogContent,
   DialogActions,
   Dialog,
+  Breadcrumbs,
+  Link,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -30,12 +32,7 @@ import {
   Star,
 } from '@material-ui/icons';
 
-export default function Starred({
-  user,
-  search,
-  selector,
-  setSelector,
-}) {
+export default function Starred({ user, search, selector, setSelector }) {
   const [files, setFiles] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
   const [selectedFolder, setSelectedFolder] = React.useState('');
@@ -52,12 +49,24 @@ export default function Starred({
     setItemDetails({});
   };
 
-  const selectFolder = (folderName) => {
-    setSelectedFolder((prev) => prev + '/' + folderName);
+  const selectFolder = (folderName, index) => {
+    if (folderName && !index) {
+      setSelectedFolder((prev) => prev + '/' + folderName);
 
-    getFilesOrFolders(
-      selectedFolder ? selectedFolder + '/' + folderName : folderName,
-    );
+      getFilesOrFolders(
+        selectedFolder ? selectedFolder + '/' + folderName : folderName,
+      );
+    } else if (folderName && index) {
+      let temp = selectedFolder.split('/');
+
+      temp.splice(index + 1, temp.length - index - 1);
+      temp = temp.join('/');
+
+      setSelectedFolder(temp);
+      getFilesOrFolders(temp);
+    } else {
+      getFilesOrFolders();
+    }
   };
 
   const getFilesOrFolders = async (folderName) => {
@@ -98,7 +107,7 @@ export default function Starred({
   };
 
   React.useEffect(() => {
-    getFilesOrFolders(selector.folderName);
+    getFilesOrFolders(selectedFolder);
   }, [search]);
 
   const removeFromStarred = async (customPath) => {
@@ -121,6 +130,22 @@ export default function Starred({
 
   return (
     <div>
+      <Breadcrumbs aria-label='breadcrumb'>
+        {selectedFolder.split('/').map((item, index) =>
+          index === selectedFolder.split('/').length - 1 ? (
+            <Typography color='textPrimary'>
+              {item ? item : 'My Drive'}
+            </Typography>
+          ) : (
+            <Link
+              style={{ cursor: 'pointer' }}
+              color='inherit'
+              onClick={() => selectFolder(item, index)}>
+              {item ? item : 'My Drive'}
+            </Link>
+          ),
+        )}
+      </Breadcrumbs>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -167,7 +192,7 @@ export default function Starred({
       </Dialog>
       <div id='displayInfoNav'>
         <h1>Folders</h1>
-        {selector.folderName && (
+        {selectedFolder && (
           <Button variant='outlined' onClick={() => getFilesOrFolders()}>
             back to root folder
           </Button>

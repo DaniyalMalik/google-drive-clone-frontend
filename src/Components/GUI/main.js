@@ -22,7 +22,6 @@ function Main({ setToken }) {
     uploadFolder: false,
     createFolder: false,
     starred: false,
-    folderName: '',
   });
   const [user, setUser] = React.useState({});
   const [search, setSearch] = React.useState('');
