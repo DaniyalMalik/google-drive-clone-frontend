@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ForgotPassword from './Components/forgotpassword/ForgotPassword';
 import ResetPassword from './Components/resetpassword/ResetPassword';
 import SendVerifyEmail from './Components/sendverifyemail/SendVerifyEmail';
+import DisplayLinkShare from './Components/GUI/components/DisplayLinkShare';
 
 function App() {
   const [token, setToken] = React.useState(localStorage.getItem('token'));
@@ -14,6 +15,20 @@ function App() {
     <div>
       <Router>
         <Routes>
+          <Route
+            path='/share/link/:userId'
+            element={
+              <div
+              // style={{
+              //   height: '100vh',
+              //   alignItems: 'center',
+              //   display: 'flex',
+              // }}
+              >
+                <DisplayLinkShare />
+              </div>
+            }
+          />
           <Route
             path='/'
             element={

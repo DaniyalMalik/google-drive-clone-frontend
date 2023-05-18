@@ -48,6 +48,7 @@ import {
   StarOutline,
   Star,
 } from '@material-ui/icons';
+import { ToggleButton } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -116,18 +117,19 @@ export default function DisplayContainer({
   const [selectedUser, setSelectedUser] = React.useState('');
   const [usersList, setUsersList] = React.useState([]);
   const [itemDetails, setItemDetails] = React.useState({});
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  // const [anchorEl, setAnchorEl] = React.useState(null);
   const [percentage, setPercentage] = React.useState(0);
   const [openBackDrop, setOpenBackDrop] = React.useState(false);
   const [folder, setFolder] = React.useState(false);
+  const [show, setShow] = React.useState(false);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // const handleClick = (event) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  // const handleMenuClose = () => {
+  //   setAnchorEl(null);
+  // };
 
   const handleChange = (event) => {
     setSelectedUser(event.target.value);
@@ -581,8 +583,8 @@ export default function DisplayContainer({
   };
 
   React.useEffect(() => {
-    if (!anchorEl && !open) setSelectedPath('');
-  }, [anchorEl, open]);
+    if (!open) setSelectedPath('');
+  }, [open]);
 
   const createFolder = async (e) => {
     e.preventDefault();
@@ -656,19 +658,19 @@ export default function DisplayContainer({
           </DialogActions>
         </form>
       </Dialog>
-      <Menu
+      {/* <Menu
         id='simple-menu'
         anchorEl={anchorEl}
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}>
-        {/* <MenuItem
+        <MenuItem
           onClick={() => {
             handleMenuClose();
             handleClickOpen_1();
           }}>
           Shared with
-        </MenuItem> */}
+        </MenuItem>
         <MenuItem
           onClick={() => {
             handleClickOpen();
@@ -676,7 +678,7 @@ export default function DisplayContainer({
           }}>
           Share
         </MenuItem>
-      </Menu>
+      </Menu> */}
       <Dialog
         open={open_1}
         onClose={handleClose_1}
@@ -723,6 +725,28 @@ export default function DisplayContainer({
         aria-labelledby='form-dialog-title-2'>
         <DialogTitle id='form-dialog-title-2'>Share with</DialogTitle>
         <DialogContent>
+          <ToggleButton
+            // value={false}
+            selected={show}
+            onChange={() => {
+              setShow((prev) => !prev);
+            }}>
+            Share via link&nbsp;
+            <Share />
+          </ToggleButton>
+          {show && (
+            <div>
+              <br />
+              <Typography variant='body'>
+                <Link href={`http://localhost:3000/share/link/${user._id}`}>
+                  http://localhost:3000/share/link/{user._id}
+                </Link>
+              </Typography>
+            </div>
+          )}
+          <br />
+          <br />
+          <Divider />
           <FormControl className={classes.formControl}>
             <InputLabel id='demo-controlled-open-select-label'>
               Select User
@@ -979,8 +1003,8 @@ export default function DisplayContainer({
                       </IconButton>
                       <IconButton
                         onClick={(e) => {
-                          handleClick(e);
-                          // handleClickOpen();
+                          // handleClick(e);
+                          handleClickOpen();
                           setSelectedPath(item.location);
                         }}>
                         <Share />
@@ -1101,8 +1125,8 @@ export default function DisplayContainer({
                             <IconButton
                               color='primary'
                               onClick={(e) => {
-                                handleClick(e);
-                                // handleClickOpen();
+                                // handleClick(e);
+                                handleClickOpen();
                                 setSelectedPath(item.location);
                               }}>
                               <Share />
@@ -1205,8 +1229,8 @@ export default function DisplayContainer({
                             <IconButton
                               color='primary'
                               onClick={(e) => {
-                                handleClick(e);
-                                // handleClickOpen();
+                                // handleClick(e);
+                                handleClickOpen();
                                 setSelectedPath(item.location);
                               }}>
                               <Share />
@@ -1307,8 +1331,8 @@ export default function DisplayContainer({
                             <IconButton
                               color='primary'
                               onClick={(e) => {
-                                handleClick(e);
-                                // handleClickOpen();
+                                // handleClick(e);
+                                handleClickOpen();
                                 setSelectedPath(item.location);
                               }}>
                               <Share />
@@ -1413,8 +1437,8 @@ export default function DisplayContainer({
                           <IconButton
                             color='primary'
                             onClick={(e) => {
-                              handleClick(e);
-                              // handleClickOpen();
+                              // handleClick(e);
+                              handleClickOpen();
                               setSelectedPath(item.location);
                             }}>
                             <Share />

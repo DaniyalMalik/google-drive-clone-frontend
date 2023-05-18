@@ -18,7 +18,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Navbar({ search, setToken, user, setSearch, selector }) {
+export default function Navbar({
+  search,
+  setToken,
+  user,
+  setSearch,
+  selector,
+}) {
   const classes = useStyles();
   const [tempSearch, setTempSearch] = React.useState('');
 
@@ -54,48 +60,51 @@ export default function Navbar({ search, setToken, user, setSearch, selector }) 
           </Typography>
         </Link>
       </div>
-      {(selector.trash ||
-        selector.shared ||
-        selector.starred ||
-        selector.files) && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
+      {selector &&
+        (selector.trash ||
+          selector.shared ||
+          selector.starred ||
+          selector.files) && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
 
-            setSearch(tempSearch);
+              setSearch(tempSearch);
+            }}>
+            <FormControl className={classes.margin} variant='outlined'>
+              <InputLabel htmlFor='search'>Search file/folder</InputLabel>
+              <OutlinedInput
+                id='search'
+                name='search'
+                value={tempSearch}
+                onChange={(e) => setTempSearch(e.target.value)}
+                endAdornment={
+                  <InputAdornment position='end'>
+                    <IconButton type='submit' edge='end'>
+                      {<Search />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                fullWidth
+                labelWidth={125}
+              />
+            </FormControl>
+          </form>
+        )}
+      {user && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
           }}>
-          <FormControl className={classes.margin} variant='outlined'>
-            <InputLabel htmlFor='search'>Search file/folder</InputLabel>
-            <OutlinedInput
-              id='search'
-              name='search'
-              value={tempSearch}
-              onChange={(e) => setTempSearch(e.target.value)}
-              endAdornment={
-                <InputAdornment position='end'>
-                  <IconButton type='submit' edge='end'>
-                    {<Search />}
-                  </IconButton>
-                </InputAdornment>
-              }
-              fullWidth
-              labelWidth={125}
-            />
-          </FormControl>
-        </form>
+          <Typography variant='h6'>
+            {user?.firstName && user.firstName + ' ' + user.lastName}
+          </Typography>
+          <IconButton onClick={logout} aria-label='delete'>
+            <ExitToApp />
+          </IconButton>
+        </div>
       )}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-        }}>
-        <Typography variant='h6'>
-          {user?.firstName && user.firstName + ' ' + user.lastName}
-        </Typography>
-        <IconButton onClick={logout} aria-label='delete'>
-          <ExitToApp />
-        </IconButton>
-      </div>
     </div>
   );
 }
