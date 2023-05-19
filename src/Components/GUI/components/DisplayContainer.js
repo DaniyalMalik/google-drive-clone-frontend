@@ -630,7 +630,7 @@ export default function DisplayContainer({
       );
 
       temp.splice(0, index + 1);
-      temp = temp.join('\\');
+      temp = temp.join('/');
 
       setLinkFolderPath(temp);
     }
@@ -768,7 +768,8 @@ export default function DisplayContainer({
               <br />
               <Typography variant='body'>
                 <Link href={`http://localhost:3000/share/link/${user._id}`}>
-                  http://localhost:3000/share/link/{user._id}\{linkFolderPath}
+                  http://localhost:3000/share/link/{user._id}/?path=
+                  {linkFolderPath}
                 </Link>
               </Typography>
             </div>

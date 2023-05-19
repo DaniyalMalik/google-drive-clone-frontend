@@ -28,7 +28,7 @@ import {
   GetAppOutlined,
   Visibility,
 } from '@material-ui/icons';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import Navbar from './Navbar';
 
 export default function DisplayLinkShare() {
@@ -40,6 +40,7 @@ export default function DisplayLinkShare() {
   const [linkUserPath, setLinkUserPath] = React.useState('');
   const [search, setSearch] = React.useState('');
   const { userId } = useParams();
+  const [searchParams] = useSearchParams();
 
   const handleClickOpen = (item) => {
     setOpen(true);
@@ -103,6 +104,14 @@ export default function DisplayLinkShare() {
   };
 
   React.useEffect(() => {
+    if (searchParams.get('path')) {
+      getFilesOrFolders(searchParams.get('path'));
+
+      setSelectedFolder('/' + searchParams.get('path'));
+
+      return;
+    }
+
     getFilesOrFolders(selectedFolder);
   }, [linkUserPath, search]);
 
