@@ -112,16 +112,13 @@ export default function Shared({ search }) {
         alert(res.data.message);
       }
     } else {
-      const res = await axios.get(
-        'http://localhost:5000/api/upload?&customPath=' +
-          sharedFolderPaths.sharedPath +
-          '&search=' +
+      const res = await axios.post(
+        'http://localhost:5000/api/upload/shared',
+        {
+          paths: sharedFolderPaths.sharedPath,
+          user: sharedFolderPaths.sharedBy,
           search,
-        // {
-        //   path: sharedFolderPaths.sharedPath,
-        //   user: sharedFolderPaths.sharedBy,
-        //   search,
-        // },
+        },
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),

@@ -121,6 +121,7 @@ export default function DisplayContainer({
   const [percentage, setPercentage] = React.useState(0);
   const [openBackDrop, setOpenBackDrop] = React.useState(false);
   const [folder, setFolder] = React.useState(false);
+  const [linkFolderPath, setLinkFolderPath] = React.useState('');
   const [show, setShow] = React.useState(false);
 
   // const handleClick = (event) => {
@@ -209,19 +210,31 @@ export default function DisplayContainer({
     setNewPath('');
   };
 
-  const selectFolder = (folderName, index) => {
+  const selectFolder = (folderName, index, path) => {
     if (folderName && !index) {
       setSelectedFolder((prev) => prev + '/' + folderName);
+      setSelectedFolderPath(path);
 
       getFilesOrFolders(
         selectedFolder ? selectedFolder + '/' + folderName : folderName,
       );
     } else if (folderName && index) {
+      let test = selectedFolderPath.split('\\');
       let temp = selectedFolder.split('/');
+      let tempIndex;
+      let removed;
 
+      tempIndex = test.indexOf(
+        user.firstName + '-' + user.lastName + '-' + user._id,
+      );
+      removed = test.splice(0, tempIndex + 1);
+      test.splice(index, test.length - index);
+      test = test.join('\\');
+      removed = removed.join('\\');
       temp.splice(index + 1, temp.length - index - 1);
       temp = temp.join('/');
 
+      setSelectedFolderPath(removed + '\\' + test);
       setSelectedFolder(temp);
       getFilesOrFolders(temp);
     } else {
@@ -257,7 +270,7 @@ export default function DisplayContainer({
       setFiles(res.data.files);
       setSelector({ ...selector, folderName: '' });
       setSelectedFolder('');
-      setSelectedFolderPath([]);
+      setSelectedFolderPath('');
     }
   };
 
@@ -438,7 +451,7 @@ export default function DisplayContainer({
     alert(res.data.message);
 
     if (res.data.success) {
-      // getUser();
+      getSharedList();
       handleClose();
     }
   };
@@ -607,6 +620,22 @@ export default function DisplayContainer({
     }
   };
 
+  React.useEffect(() => {
+    if (selectedPath) {
+      let temp = selectedPath.split('\\');
+      let index;
+
+      index = temp.indexOf(
+        user.firstName + '-' + user.lastName + '-' + user._id,
+      );
+
+      temp.splice(0, index + 1);
+      temp = temp.join('\\');
+
+      setLinkFolderPath(temp);
+    }
+  }, [selectedPath]);
+
   return (
     <div>
       <Breadcrumbs aria-label='breadcrumb'>
@@ -739,7 +768,7 @@ export default function DisplayContainer({
               <br />
               <Typography variant='body'>
                 <Link href={`http://localhost:3000/share/link/${user._id}`}>
-                  http://localhost:3000/share/link/{user._id}
+                  http://localhost:3000/share/link/{user._id}\{linkFolderPath}
                 </Link>
               </Typography>
             </div>
@@ -878,13 +907,16 @@ export default function DisplayContainer({
               <MenuItem value='None'>
                 <em>None</em>
               </MenuItem>
-              {folders.map((item) => {
-                return (
-                  item.folderName !== oldFolder.folderName && (
-                    <MenuItem value={item.location}>{item.folderName}</MenuItem>
-                  )
-                );
-              })}
+              {folders?.length > 0 &&
+                folders.map((item) => {
+                  return (
+                    item.folderName !== oldFolder.folderName && (
+                      <MenuItem value={item.location}>
+                        {item.folderName}
+                      </MenuItem>
+                    )
+                  );
+                })}
             </Select>
           </FormControl>
         </DialogContent>
@@ -994,7 +1026,14 @@ export default function DisplayContainer({
                               <StarOutline />
                             </IconButton>
                           )}
-                      <IconButton onClick={() => selectFolder(item.folderName)}>
+                      <IconButton
+                        onClick={() =>
+                          selectFolder(
+                            item.folderName,
+                            undefined,
+                            item.location,
+                          )
+                        }>
                         <Visibility />
                       </IconButton>
                       <IconButton

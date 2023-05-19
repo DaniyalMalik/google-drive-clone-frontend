@@ -589,7 +589,9 @@ export default function SideBar({
               <div
                 style={{
                   width: `${
-                    user?.currentStorage ? (user?.currentStorage / 5) * 100 : 0
+                    user?.currentStorage
+                      ? (user?.currentStorage / user?.storageLimit) * 100
+                      : 0
                   }%`,
                   height: '3px',
                   borderRadius: '30px',
