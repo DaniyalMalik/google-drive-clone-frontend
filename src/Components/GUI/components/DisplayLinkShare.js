@@ -75,12 +75,7 @@ export default function DisplayLinkShare() {
   const getFilesOrFolders = async (folderName) => {
     if (folderName && linkUserPath) {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?customPath=${linkUserPath}&folderName=${folderName}&search=${search}`,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
-        },
+        `http://localhost:5000/api/upload?customPath=${linkUserPath}&folderName=${folderName}&search=${search}&userId=${userId}`,
       );
 
       setFolders(res.data.folders);
@@ -89,11 +84,6 @@ export default function DisplayLinkShare() {
       if (linkUserPath) {
         const res = await axios.get(
           `http://localhost:5000/api/upload?customPath=${linkUserPath}&search=${search}`,
-          {
-            headers: {
-              'x-auth-token': localStorage.getItem('token'),
-            },
-          },
         );
 
         setFolders(res.data.folders);
@@ -116,11 +106,7 @@ export default function DisplayLinkShare() {
   }, [linkUserPath, search]);
 
   const getUser = async () => {
-    const res = await axios.get('http://localhost:5000/api/user/' + userId, {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
+    const res = await axios.get('http://localhost:5000/api/user/' + userId);
 
     if (res.data.success) {
       setLinkUserPath(res.data.user.folderPath);
