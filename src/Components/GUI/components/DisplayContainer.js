@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
 import {
@@ -125,6 +125,8 @@ export default function DisplayContainer({
   const [linkFolderPath, setLinkFolderPath] = React.useState('');
   const [show, setShow] = React.useState(false);
   const [select, setSelect] = React.useState(false);
+  const [downloadFiles, setDownloadFiles] = React.useState([]);
+  const [downloadFileNames, setDownloadFileNames] = React.useState([]);
 
   // const handleClick = (event) => {
   //   setAnchorEl(event.currentTarget);
@@ -178,7 +180,9 @@ export default function DisplayContainer({
 
   const handleClose = () => {
     setOpen(false);
+    setShow(false);
     setSelectedUser('');
+    setLinkFolderPath('');
     setSelectedPath('');
   };
 
@@ -245,34 +249,40 @@ export default function DisplayContainer({
   };
 
   const getFilesOrFolders = async (folderName) => {
-    if (folderName) {
-      const res = await axios.get(
-        `http://localhost:5000/api/upload?folderName=${folderName}&search=${search}&userId=${user._id}`,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
+    if (user?._id) {
+      if (folderName) {
+        const res = await axios.get(
+          `http://localhost:5000/api/upload?folderName=${folderName}&search=${search}&userId=${user._id}`,
+          {
+            headers: {
+              'x-auth-token': localStorage.getItem('token'),
+            },
           },
-        },
-      );
+        );
 
-      setFolders(res.data.folders);
-      setFiles(res.data.files);
-      setSelector({ ...selector, folderName });
-    } else {
-      const res = await axios.get(
-        `http://localhost:5000/api/upload?search=${search}&userId=${user._id}`,
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
+        if (!res.data.success) alert(res.data.message);
+
+        setFolders(res.data.folders);
+        setFiles(res.data.files);
+        setSelector({ ...selector, folderName });
+      } else {
+        const res = await axios.get(
+          `http://localhost:5000/api/upload?search=${search}&userId=${user._id}`,
+          {
+            headers: {
+              'x-auth-token': localStorage.getItem('token'),
+            },
           },
-        },
-      );
+        );
 
-      setFolders(res.data.folders);
-      setFiles(res.data.files);
-      setSelector({ ...selector, folderName: '' });
-      setSelectedFolder('');
-      setSelectedFolderPath('');
+        if (!res.data.success) alert(res.data.message);
+
+        setFolders(res.data.folders);
+        setFiles(res.data.files);
+        setSelector({ ...selector, folderName: '' });
+        setSelectedFolder('');
+        setSelectedFolderPath('');
+      }
     }
   };
 
@@ -638,6 +648,50 @@ export default function DisplayContainer({
     }
   }, [selectedPath]);
 
+  const saveFileBinary = (e, binary, name) => {
+    if (e.target.checked) {
+      setDownloadFiles((prev) => prev.concat(binary));
+      setDownloadFileNames((prev) => prev.concat(name));
+    } else {
+      setDownloadFiles((prev) => {
+        let index = prev.indexOf(binary);
+        let temp = [...prev];
+
+        temp.splice(index, 1);
+
+        return temp;
+      });
+      setDownloadFileNames((prev) => {
+        let index = prev.indexOf(name);
+        let temp = [...prev];
+
+        temp.splice(index, 1);
+
+        return temp;
+      });
+    }
+  };
+
+  const downloadMultipleFiles = () => {
+    const link = document.createElement('a');
+
+    link.style.display = 'none';
+
+    document.body.appendChild(link);
+
+    for (let i = 0; i < downloadFileNames.length; i++) {
+      link.setAttribute('download', downloadFileNames[i]);
+      link.setAttribute('href', downloadFiles[i]);
+      link.click();
+    }
+
+    document.body.removeChild(link);
+
+    setSelect(false);
+    setDownloadFileNames([]);
+    setDownloadFiles([]);
+  };
+
   return (
     <div>
       <Breadcrumbs aria-label='breadcrumb'>
@@ -762,7 +816,7 @@ export default function DisplayContainer({
             onChange={() => {
               setShow((prev) => !prev);
             }}>
-            Share via link&nbsp;
+            share via link&nbsp;
             <Share />
           </ToggleButton>
           {show && (
@@ -770,7 +824,8 @@ export default function DisplayContainer({
               <br />
               <Typography variant='body'>
                 <Link
-                  href={`http://localhost:3000/share/link/${user._id}/?path=${linkFolderPath}`}>
+                  href={`http://localhost:3000/share/link/${user._id}/?path=${linkFolderPath}`}
+                  target='_blank'>
                   http://localhost:3000/share/link/{user._id}/?path=
                   {linkFolderPath}
                 </Link>
@@ -961,14 +1016,16 @@ export default function DisplayContainer({
           </div>
         ) : (
           <div>
-            {/* <Button variant='outlined' onClick={handleClickOpen_1}>
-              download multiple
-            </Button>
+            {downloadFiles.length > 0 && (
+              <Button variant='outlined' onClick={downloadMultipleFiles}>
+                download multiple
+              </Button>
+            )}
             <Button
               variant='outlined'
               onClick={() => setSelect((prev) => !prev)}>
               {select ? 'Deselect' : 'Select'}
-            </Button> */}
+            </Button>
             <Button variant='outlined' onClick={handleClickOpen_1}>
               Shared with
             </Button>
@@ -978,94 +1035,100 @@ export default function DisplayContainer({
           </div>
         )}
       </div>
-      <div id='contentDisplayer'>
+      <div id='contentDisplayer' style={{ display: 'flex', flexWrap: 'wrap' }}>
         {folders?.length > 0 ? (
           folders.map((item) => (
-            <Card style={{ maxHeight: '80px', margin: '10px' }}>
-              {/* <Checkbox /> */}
-              <CardActionArea>
-                <CardContent>
-                  <Typography
-                    gutterBottom
-                    variant='h5'
-                    component='h2'
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                    <span>{item.folderName}</span>
-                    <span>
-                      <IconButton
-                        onClick={() =>
-                          handleClickOpen_4({ ...item, isFolder: true })
-                        }>
-                        <Create />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => {
-                          setMove(true);
-                          setFolder(true);
-                          setOldFolder(item);
-                          handleClickOpen_2();
-                        }}>
-                        <Forward />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => {
-                          setOldFolder(item);
-                          setMove(false);
-                          setFolder(true);
-                          handleClickOpen_2();
-                        }}>
-                        <FileCopy />
-                      </IconButton>
-                      <IconButton
-                        onClick={() =>
-                          handleClickOpen_3({ ...item, isFolder: true })
-                        }>
-                        <Info />
-                      </IconButton>
-                      {item.favourite
-                        ? !selectedFolder && (
-                            <IconButton
-                              onClick={() => removeFromStarred(item.location)}>
-                              <Star />
-                            </IconButton>
-                          )
-                        : !selectedFolder && (
-                            <IconButton
-                              onClick={() => addToStarred(item.folderName)}>
-                              <StarOutline />
-                            </IconButton>
-                          )}
-                      <IconButton
-                        onClick={() =>
-                          selectFolder(
-                            item.folderName,
-                            undefined,
-                            item.location,
-                          )
-                        }>
-                        <Visibility />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => deleteFileOrFolder(item.folderName)}>
-                        <Delete />
-                      </IconButton>
-                      <IconButton
-                        onClick={(e) => {
-                          // handleClick(e);
-                          handleClickOpen();
-                          setSelectedPath(item.location);
-                        }}>
-                        <Share />
-                      </IconButton>
-                    </span>
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
+            <>
+              {/* &nbsp;
+              {select && <Checkbox color='primary' />} */}
+              <Card
+                style={{ maxHeight: '80px', margin: '10px', width: '500px' }}>
+                <CardActionArea>
+                  <CardContent>
+                    <Typography
+                      gutterBottom
+                      variant='h5'
+                      component='h2'
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                      <span>{item.folderName}</span>
+                      <span>
+                        <IconButton
+                          onClick={() =>
+                            handleClickOpen_4({ ...item, isFolder: true })
+                          }>
+                          <Create />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            setMove(true);
+                            setFolder(true);
+                            setOldFolder(item);
+                            handleClickOpen_2();
+                          }}>
+                          <Forward />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            setOldFolder(item);
+                            setMove(false);
+                            setFolder(true);
+                            handleClickOpen_2();
+                          }}>
+                          <FileCopy />
+                        </IconButton>
+                        <IconButton
+                          onClick={() =>
+                            handleClickOpen_3({ ...item, isFolder: true })
+                          }>
+                          <Info />
+                        </IconButton>
+                        {item.favourite
+                          ? !selectedFolder && (
+                              <IconButton
+                                onClick={() =>
+                                  removeFromStarred(item.location)
+                                }>
+                                <Star />
+                              </IconButton>
+                            )
+                          : !selectedFolder && (
+                              <IconButton
+                                onClick={() => addToStarred(item.folderName)}>
+                                <StarOutline />
+                              </IconButton>
+                            )}
+                        <IconButton
+                          onClick={() =>
+                            selectFolder(
+                              item.folderName,
+                              undefined,
+                              item.location,
+                            )
+                          }>
+                          <Visibility />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => deleteFileOrFolder(item.folderName)}>
+                          <Delete />
+                        </IconButton>
+                        <IconButton
+                          onClick={(e) => {
+                            // handleClick(e);
+                            handleClickOpen();
+                            setSelectedPath(item.location);
+                          }}>
+                          <Share />
+                        </IconButton>
+                      </span>
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </>
           ))
         ) : (
           <Typography variant='h5' style={{ textAlign: 'center' }}>
@@ -1084,109 +1147,134 @@ export default function DisplayContainer({
               style={{
                 marginBottom: '50px',
                 marginTop: '50px',
+                display: 'flex',
+                flexWrap: 'wrap',
               }}
               rowHeight={164}>
               {files.map(
                 (item, key) =>
                   item.mimeType &&
                   item.mimeType.split('/')[0] === 'image' && (
-                    <ImageListItem key={key}>
-                      <img
-                        src={`data:${item.mimeType};base64,${item.file}`}
-                        alt='image'
-                        loading='lazy'
-                      />
-                      <ImageListItemBar
-                        title={
-                          <Typography
-                            variant='body1'
-                            style={{ color: 'white' }}>
-                            {item.fileName}
-                          </Typography>
-                        }
-                        actionIcon={
-                          <div style={{ display: 'flex' }}>
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                handleClickOpen_4({ ...item, isFolder: false })
-                              }>
-                              <Create />
-                            </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() => {
-                                setMove(true);
-                                setFolder(false);
-                                setOldFolder(item);
-                                handleClickOpen_2();
-                              }}>
-                              <Forward />
-                            </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() => {
-                                setOldFolder(item);
-                                setFolder(false);
-                                setMove(false);
-                                handleClickOpen_2();
-                              }}>
-                              <FileCopy />
-                            </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                handleClickOpen_3({ ...item, isFolder: false })
-                              }>
-                              <InfoOutlined />
-                            </IconButton>
-                            {item.favourite ? (
+                    <>
+                      &nbsp;
+                      {select && (
+                        <Checkbox
+                          color='primary'
+                          onChange={(e) =>
+                            saveFileBinary(
+                              e,
+                              `data:${item.mimeType};base64,${item.file}`,
+                              item.fileNameWithExt,
+                            )
+                          }
+                        />
+                      )}
+                      <ImageListItem
+                        key={key}
+                        style={{ width: '500px', height: '300px' }}>
+                        <img
+                          src={`data:${item.mimeType};base64,${item.file}`}
+                          alt='image'
+                          loading='lazy'
+                        />
+                        <ImageListItemBar
+                          title={
+                            <Typography
+                              variant='body1'
+                              style={{ color: 'white' }}>
+                              {item.fileName}
+                            </Typography>
+                          }
+                          actionIcon={
+                            <div style={{ display: 'flex' }}>
                               <IconButton
                                 color='primary'
                                 onClick={() =>
-                                  removeFromStarred(item.location)
+                                  handleClickOpen_4({
+                                    ...item,
+                                    isFolder: false,
+                                  })
                                 }>
-                                <Star />
+                                <Create />
                               </IconButton>
-                            ) : (
+                              <IconButton
+                                color='primary'
+                                onClick={() => {
+                                  setMove(true);
+                                  setFolder(false);
+                                  setOldFolder(item);
+                                  handleClickOpen_2();
+                                }}>
+                                <Forward />
+                              </IconButton>
+                              <IconButton
+                                color='primary'
+                                onClick={() => {
+                                  setOldFolder(item);
+                                  setFolder(false);
+                                  setMove(false);
+                                  handleClickOpen_2();
+                                }}>
+                                <FileCopy />
+                              </IconButton>
                               <IconButton
                                 color='primary'
                                 onClick={() =>
-                                  addToStarred(item.fileNameWithExt)
+                                  handleClickOpen_3({
+                                    ...item,
+                                    isFolder: false,
+                                  })
                                 }>
-                                <StarOutline />
+                                <InfoOutlined />
                               </IconButton>
-                            )}
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                deleteFileOrFolder(item.fileNameWithExt)
-                              }>
-                              <DeleteOutlined />
-                            </IconButton>
-                            <a
-                              style={{
-                                textDecoration: 'none',
-                              }}
-                              download={item.fileNameWithExt}
-                              href={`data:${item.mimeType};base64,${item.file}`}>
-                              <IconButton color='primary'>
-                                <GetAppOutlined />
+                              {item.favourite ? (
+                                <IconButton
+                                  color='primary'
+                                  onClick={() =>
+                                    removeFromStarred(item.location)
+                                  }>
+                                  <Star />
+                                </IconButton>
+                              ) : (
+                                <IconButton
+                                  color='primary'
+                                  onClick={() =>
+                                    addToStarred(item.fileNameWithExt)
+                                  }>
+                                  <StarOutline />
+                                </IconButton>
+                              )}
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  deleteFileOrFolder(item.fileNameWithExt)
+                                }>
+                                <DeleteOutlined />
                               </IconButton>
-                            </a>
-                            <IconButton
-                              color='primary'
-                              onClick={(e) => {
-                                // handleClick(e);
-                                handleClickOpen();
-                                setSelectedPath(item.location);
-                              }}>
-                              <Share />
-                            </IconButton>
-                          </div>
-                        }
-                      />
-                    </ImageListItem>
+                              <a
+                                style={{
+                                  textDecoration: 'none',
+                                }}
+                                download={item.fileNameWithExt}
+                                href={`data:${item.mimeType};base64,${item.file}`}>
+                                <IconButton color='primary'>
+                                  <GetAppOutlined />
+                                </IconButton>
+                              </a>
+                              <IconButton
+                                color='primary'
+                                onClick={(e) => {
+                                  // handleClick(e);
+                                  handleClickOpen();
+                                  setSelectedPath(item.location);
+                                }}>
+                                <Share />
+                              </IconButton>
+                            </div>
+                          }
+                        />
+                      </ImageListItem>
+                    </>
                   ),
               )}
             </ImageList>
@@ -1197,100 +1285,125 @@ export default function DisplayContainer({
               style={{
                 marginBottom: '50px',
                 marginTop: '50px',
+                display: 'flex',
+                flexWrap: 'wrap',
               }}
               rowHeight={164}>
               {files.map(
                 (item, key) =>
                   item.mimeType &&
                   item.mimeType.split('/')[0] === 'video' && (
-                    <ImageListItem key={key}>
-                      <video controls>
-                        <source
-                          type={item.mimeType}
-                          src={`data:${item.mimeType};base64,${item.file}`}
+                    <>
+                      &nbsp;
+                      {select && (
+                        <Checkbox
+                          color='primary'
+                          onChange={(e) =>
+                            saveFileBinary(
+                              e,
+                              `data:${item.mimeType};base64,${item.file}`,
+                              item.fileNameWithExt,
+                            )
+                          }
                         />
-                      </video>
-                      <ImageListItemBar
-                        title={
-                          <Typography
-                            variant='body1'
-                            style={{ color: 'white' }}>
-                            {item.fileName}
-                          </Typography>
-                        }
-                        actionIcon={
-                          <>
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                handleClickOpen_4({ ...item, isFolder: false })
-                              }>
-                              <Create />
-                            </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() => {
-                                setOldFolder(item);
-                                setFolder(false);
-                                setMove(true);
-                                handleClickOpen_2();
-                              }}>
-                              <Forward />
-                            </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() => {
-                                setOldFolder(item);
-                                setFolder(false);
-                                setMove(false);
-                                handleClickOpen_2();
-                              }}>
-                              <FileCopy />
-                            </IconButton>
-                            {item.favourite ? (
+                      )}
+                      <ImageListItem
+                        key={key}
+                        style={{ width: '500px', height: '300px' }}>
+                        <video controls>
+                          <source
+                            type={item.mimeType}
+                            src={`data:${item.mimeType};base64,${item.file}`}
+                          />
+                        </video>
+                        <ImageListItemBar
+                          title={
+                            <Typography
+                              variant='body1'
+                              style={{ color: 'white' }}>
+                              {item.fileName}
+                            </Typography>
+                          }
+                          actionIcon={
+                            <>
                               <IconButton
                                 color='primary'
                                 onClick={() =>
-                                  removeFromStarred(item.location)
+                                  handleClickOpen_4({
+                                    ...item,
+                                    isFolder: false,
+                                  })
                                 }>
-                                <Star />
+                                <Create />
                               </IconButton>
-                            ) : (
+                              <IconButton
+                                color='primary'
+                                onClick={() => {
+                                  setOldFolder(item);
+                                  setFolder(false);
+                                  setMove(true);
+                                  handleClickOpen_2();
+                                }}>
+                                <Forward />
+                              </IconButton>
+                              <IconButton
+                                color='primary'
+                                onClick={() => {
+                                  setOldFolder(item);
+                                  setFolder(false);
+                                  setMove(false);
+                                  handleClickOpen_2();
+                                }}>
+                                <FileCopy />
+                              </IconButton>
+                              {item.favourite ? (
+                                <IconButton
+                                  color='primary'
+                                  onClick={() =>
+                                    removeFromStarred(item.location)
+                                  }>
+                                  <Star />
+                                </IconButton>
+                              ) : (
+                                <IconButton
+                                  color='primary'
+                                  onClick={() =>
+                                    addToStarred(item.fileNameWithExt)
+                                  }>
+                                  <StarOutline />
+                                </IconButton>
+                              )}
                               <IconButton
                                 color='primary'
                                 onClick={() =>
-                                  addToStarred(item.fileNameWithExt)
+                                  handleClickOpen_3({
+                                    ...item,
+                                    isFolder: false,
+                                  })
                                 }>
-                                <StarOutline />
+                                <InfoOutlined />
                               </IconButton>
-                            )}
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                handleClickOpen_3({ ...item, isFolder: false })
-                              }>
-                              <InfoOutlined />
-                            </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                deleteFileOrFolder(item.fileNameWithExt)
-                              }>
-                              <DeleteOutlined />
-                            </IconButton>
-                            <IconButton
-                              color='primary'
-                              onClick={(e) => {
-                                // handleClick(e);
-                                handleClickOpen();
-                                setSelectedPath(item.location);
-                              }}>
-                              <Share />
-                            </IconButton>
-                          </>
-                        }
-                      />
-                    </ImageListItem>
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  deleteFileOrFolder(item.fileNameWithExt)
+                                }>
+                                <DeleteOutlined />
+                              </IconButton>
+                              <IconButton
+                                color='primary'
+                                onClick={(e) => {
+                                  // handleClick(e);
+                                  handleClickOpen();
+                                  setSelectedPath(item.location);
+                                }}>
+                                <Share />
+                              </IconButton>
+                            </>
+                          }
+                        />
+                      </ImageListItem>
+                    </>
                   ),
               )}
             </ImageList>
@@ -1301,27 +1414,164 @@ export default function DisplayContainer({
               style={{
                 marginBottom: '50px',
                 marginTop: '50px',
+                display: 'flex',
+                flexWrap: 'wrap',
               }}
               rowHeight={164}>
               {files.map(
                 (item, key) =>
                   item.mimeType &&
                   item.mimeType.split('/')[0] === 'audio' && (
-                    <ImageListItem key={key}>
-                      <audio
-                        controls
-                        src={`data:${item.mimeType};base64,${item.file}`}
-                      />
-                      <ImageListItemBar
-                        title={
-                          <Typography
-                            variant='body1'
-                            style={{ color: 'white' }}>
-                            {item.fileName}
-                          </Typography>
-                        }
-                        actionIcon={
-                          <>
+                    <>
+                      &nbsp;
+                      {select && (
+                        <Checkbox
+                          color='primary'
+                          onChange={(e) =>
+                            saveFileBinary(
+                              e,
+                              `data:${item.mimeType};base64,${item.file}`,
+                              item.fileNameWithExt,
+                            )
+                          }
+                        />
+                      )}
+                      <ImageListItem
+                        key={key}
+                        style={{ width: '500px', height: '100px' }}>
+                        <audio
+                          controls
+                          src={`data:${item.mimeType};base64,${item.file}`}
+                        />
+                        <ImageListItemBar
+                          title={
+                            <Typography
+                              variant='body1'
+                              style={{ color: 'white' }}>
+                              {item.fileName}
+                            </Typography>
+                          }
+                          actionIcon={
+                            <>
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  handleClickOpen_4({
+                                    ...item,
+                                    isFolder: false,
+                                  })
+                                }>
+                                <Create />
+                              </IconButton>
+                              <IconButton
+                                color='primary'
+                                onClick={() => {
+                                  setOldFolder(item);
+                                  setFolder(false);
+                                  setMove(true);
+                                  handleClickOpen_2();
+                                }}>
+                                <Forward />
+                              </IconButton>
+                              <IconButton
+                                color='primary'
+                                onClick={() => {
+                                  setOldFolder(item);
+                                  setFolder(false);
+                                  setMove(false);
+                                  handleClickOpen_2();
+                                }}>
+                                <FileCopy />
+                              </IconButton>
+                              {item.favourite ? (
+                                <IconButton
+                                  color='primary'
+                                  onClick={() =>
+                                    removeFromStarred(item.location)
+                                  }>
+                                  <Star />
+                                </IconButton>
+                              ) : (
+                                <IconButton
+                                  color='primary'
+                                  onClick={() =>
+                                    addToStarred(item.fileNameWithExt)
+                                  }>
+                                  <StarOutline />
+                                </IconButton>
+                              )}
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  handleClickOpen_3({
+                                    ...item,
+                                    isFolder: false,
+                                  })
+                                }>
+                                <InfoOutlined />
+                              </IconButton>
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  deleteFileOrFolder(item.fileNameWithExt)
+                                }>
+                                <DeleteOutlined />
+                              </IconButton>
+                              <IconButton
+                                color='primary'
+                                onClick={(e) => {
+                                  // handleClick(e);
+                                  handleClickOpen();
+                                  setSelectedPath(item.location);
+                                }}>
+                                <Share />
+                              </IconButton>
+                            </>
+                          }
+                        />
+                      </ImageListItem>
+                    </>
+                  ),
+              )}
+            </ImageList>
+            <Divider />
+            <br />
+            <Typography variant='h5'>Documents</Typography>
+            <div
+              style={{
+                marginBottom: '50px',
+                marginTop: '50px',
+                display: 'flex',
+                flexWrap: 'wrap',
+              }}>
+              {files.map(
+                (item, key) =>
+                  item.mimeType &&
+                  (item.mimeType.split('/')[0] === 'application' ||
+                    item.mimeType.split('/')[0] === 'text') && (
+                    <>
+                      &nbsp;
+                      {select && (
+                        <Checkbox
+                          color='primary'
+                          onChange={(e) =>
+                            saveFileBinary(
+                              e,
+                              `data:${item.mimeType};base64,${item.file}`,
+                              item.fileNameWithExt,
+                            )
+                          }
+                        />
+                      )}
+                      <List
+                        style={{
+                          bgcolor: 'background.paper',
+                          width: '500px',
+                          height: '100px',
+                        }}>
+                        <ListItem alignItems='flex-start'>
+                          <ListItemText primary={item.fileName} />
+                          <ListItemIcon>
                             <IconButton
                               color='primary'
                               onClick={() =>
@@ -1332,9 +1582,9 @@ export default function DisplayContainer({
                             <IconButton
                               color='primary'
                               onClick={() => {
-                                setOldFolder(item);
-                                setFolder(false);
                                 setMove(true);
+                                setFolder(false);
+                                setOldFolder(item);
                                 handleClickOpen_2();
                               }}>
                               <Forward />
@@ -1342,12 +1592,19 @@ export default function DisplayContainer({
                             <IconButton
                               color='primary'
                               onClick={() => {
-                                setOldFolder(item);
                                 setFolder(false);
+                                setOldFolder(item);
                                 setMove(false);
                                 handleClickOpen_2();
                               }}>
                               <FileCopy />
+                            </IconButton>
+                            <IconButton
+                              color='primary'
+                              onClick={() =>
+                                handleClickOpen_3({ ...item, isFolder: false })
+                              }>
+                              <InfoOutlined />
                             </IconButton>
                             {item.favourite ? (
                               <IconButton
@@ -1366,13 +1623,19 @@ export default function DisplayContainer({
                                 <StarOutline />
                               </IconButton>
                             )}
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                handleClickOpen_3({ ...item, isFolder: false })
-                              }>
-                              <InfoOutlined />
-                            </IconButton>
+                            <a
+                              href={`data:${item.mimeType};base64,${item.file}`}
+                              download={
+                                item.fileNameWithExt.split('.')[1] === 'rar'
+                                  ? item.fileNameWithExt
+                                  : item.fileName
+                              }
+                              rel='noreferrer'
+                              target='_blank'>
+                              <IconButton>
+                                <GetAppOutlined color='primary' />
+                              </IconButton>
+                            </a>
                             <IconButton
                               color='primary'
                               onClick={() =>
@@ -1389,116 +1652,11 @@ export default function DisplayContainer({
                               }}>
                               <Share />
                             </IconButton>
-                          </>
-                        }
-                      />
-                    </ImageListItem>
-                  ),
-              )}
-            </ImageList>
-            <Divider />
-            <br />
-            <Typography variant='h5'>Documents</Typography>
-            <div
-              style={{
-                marginBottom: '50px',
-                marginTop: '50px',
-              }}>
-              {files.map(
-                (item, key) =>
-                  item.mimeType &&
-                  (item.mimeType.split('/')[0] === 'application' ||
-                    item.mimeType.split('/')[0] === 'text') && (
-                    <List
-                      sx={{
-                        width: '100%',
-                        bgcolor: 'background.paper',
-                      }}>
-                      <ListItem alignItems='flex-start'>
-                        <ListItemText primary={item.fileName} />
-                        <ListItemIcon>
-                          <IconButton
-                            color='primary'
-                            onClick={() =>
-                              handleClickOpen_4({ ...item, isFolder: false })
-                            }>
-                            <Create />
-                          </IconButton>
-                          <IconButton
-                            color='primary'
-                            onClick={() => {
-                              setMove(true);
-                              setFolder(false);
-                              setOldFolder(item);
-                              handleClickOpen_2();
-                            }}>
-                            <Forward />
-                          </IconButton>
-                          <IconButton
-                            color='primary'
-                            onClick={() => {
-                              setFolder(false);
-                              setOldFolder(item);
-                              setMove(false);
-                              handleClickOpen_2();
-                            }}>
-                            <FileCopy />
-                          </IconButton>
-                          <IconButton
-                            color='primary'
-                            onClick={() =>
-                              handleClickOpen_3({ ...item, isFolder: false })
-                            }>
-                            <InfoOutlined />
-                          </IconButton>
-                          {item.favourite ? (
-                            <IconButton
-                              color='primary'
-                              onClick={() => removeFromStarred(item.location)}>
-                              <Star />
-                            </IconButton>
-                          ) : (
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                addToStarred(item.fileNameWithExt)
-                              }>
-                              <StarOutline />
-                            </IconButton>
-                          )}
-                          <a
-                            href={`data:${item.mimeType};base64,${item.file}`}
-                            download={
-                              item.fileNameWithExt.split('.')[1] === 'rar'
-                                ? item.fileNameWithExt
-                                : item.fileName
-                            }
-                            rel='noreferrer'
-                            target='_blank'>
-                            <IconButton>
-                              <GetAppOutlined color='primary' />
-                            </IconButton>
-                          </a>
-                          <IconButton
-                            color='primary'
-                            onClick={() =>
-                              deleteFileOrFolder(item.fileNameWithExt)
-                            }>
-                            <DeleteOutlined />
-                          </IconButton>
-                          <IconButton
-                            color='primary'
-                            onClick={(e) => {
-                              // handleClick(e);
-                              handleClickOpen();
-                              setSelectedPath(item.location);
-                            }}>
-                            <Share />
-                          </IconButton>
-                        </ListItemIcon>
-                      </ListItem>
-                      <Divider variant='inset' component='li' />
-                    </List>
+                          </ListItemIcon>
+                        </ListItem>
+                        <Divider variant='inset' component='li' />
+                      </List>
+                    </>
                   ),
               )}
             </div>

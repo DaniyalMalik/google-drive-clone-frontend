@@ -39,6 +39,8 @@ export default function DisplayLinkShare() {
   const [itemDetails, setItemDetails] = React.useState({});
   const [linkUserPath, setLinkUserPath] = React.useState('');
   const [search, setSearch] = React.useState('');
+  const [user, setUser] = React.useState({});
+  const [root, setRoot] = React.useState(false);
   const { userId } = useParams();
   const [searchParams] = useSearchParams();
 
@@ -68,48 +70,60 @@ export default function DisplayLinkShare() {
       setSelectedFolder(temp);
       getFilesOrFolders(temp);
     } else {
-      getFilesOrFolders();
+      setSelectedFolder('');
+      getFilesOrFolders('');
     }
   };
 
   const getFilesOrFolders = async (folderName) => {
-    if (folderName && linkUserPath) {
+    if ((root || folderName) && linkUserPath) {
       const res = await axios.get(
         `http://localhost:5000/api/upload?customPath=${linkUserPath}&folderName=${folderName}&search=${search}&userId=${userId}`,
       );
 
+      if (!res.data.success) alert(res.data.message);
+
       setFolders(res.data.folders);
       setFiles(res.data.files);
     } else {
-      if (linkUserPath) {
-        const res = await axios.get(
-          `http://localhost:5000/api/upload?customPath=${linkUserPath}&search=${search}`,
-        );
+      const res = await axios.post(`http://localhost:5000/api/upload/shared`, {
+        paths: [linkUserPath],
+        search: search,
+        user,
+      });
 
-        setFolders(res.data.folders);
-        setFiles(res.data.files);
-        setSelectedFolder('');
-      }
+      if (!res.data.success) alert(res.data.message);
+
+      setFolders(res.data.folders);
+      setFiles(res.data.files);
+      setSelectedFolder('');
     }
   };
 
   React.useEffect(() => {
-    if (searchParams.get('path')) {
-      getFilesOrFolders(searchParams.get('path'));
+    if (user?._id) {
+      if (searchParams.get('path')) {
+        let temp = searchParams.get('path').split('/');
 
-      setSelectedFolder('/' + searchParams.get('path'));
+        temp = temp.join('\\');
 
-      return;
+        setLinkUserPath(user.folderPath + '\\' + temp);
+      } else {
+        setLinkUserPath(user.folderPath);
+        setRoot(true);
+      }
+
+      if (linkUserPath) {
+        getFilesOrFolders(selectedFolder);
+      }
     }
-
-    getFilesOrFolders(selectedFolder);
-  }, [linkUserPath, search]);
+  }, [linkUserPath, search, user]);
 
   const getUser = async () => {
     const res = await axios.get('http://localhost:5000/api/user/' + userId);
 
     if (res.data.success) {
-      setLinkUserPath(res.data.user.folderPath);
+      setUser(res.data.user);
     } else {
       alert(res.data.message);
     }
@@ -180,11 +194,11 @@ export default function DisplayLinkShare() {
         }}>
         <h1>Folders</h1>
         {selectedFolder && (
-          <Button variant='outlined' onClick={() => getFilesOrFolders()}>
+          <Button variant='outlined' onClick={() => selectFolder()}>
             back to root folder
           </Button>
         )}
-        <Breadcrumbs aria-label='breadcrumb'>
+        {/* <Breadcrumbs aria-label='breadcrumb'>
           {selectedFolder.split('/').map((item, index) =>
             index === selectedFolder.split('/').length - 1 ? (
               <Typography color='textPrimary'>
@@ -199,7 +213,7 @@ export default function DisplayLinkShare() {
               </Link>
             ),
           )}
-        </Breadcrumbs>
+        </Breadcrumbs> */}
       </div>
       <div style={{ padding: '10px', minWidth: '95vw' }}>
         {folders?.length > 0 ? (

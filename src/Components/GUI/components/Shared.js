@@ -119,11 +119,6 @@ export default function Shared({ search }) {
           user: sharedFolderPaths.sharedBy,
           search,
         },
-        {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
-        },
       );
 
       if (res.data.success) {
