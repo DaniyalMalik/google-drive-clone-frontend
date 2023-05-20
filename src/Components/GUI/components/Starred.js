@@ -78,7 +78,7 @@ export default function Starred({ user, search, selector, setSelector }) {
 
     if (folderName) {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?customPath=${customPath}&folderName=${folderName}&search=${search}`,
+        `http://localhost:5000/api/upload?customPath=${customPath}&folderName=${folderName}&search=${search}&userId=${user._id}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -91,7 +91,7 @@ export default function Starred({ user, search, selector, setSelector }) {
       setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?customPath=${customPath}&search=${search}`,
+        `http://localhost:5000/api/upload?customPath=${customPath}&search=${search}&userId=${user._id}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),

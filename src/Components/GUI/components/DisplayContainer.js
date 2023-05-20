@@ -245,7 +245,7 @@ export default function DisplayContainer({
   const getFilesOrFolders = async (folderName) => {
     if (folderName) {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?folderName=${folderName}&search=${search}`,
+        `http://localhost:5000/api/upload?folderName=${folderName}&search=${search}&userId=${user._id}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -258,7 +258,7 @@ export default function DisplayContainer({
       setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?folderName=&search=${search}`,
+        `http://localhost:5000/api/upload?search=${search}&userId=${user._id}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -767,7 +767,8 @@ export default function DisplayContainer({
             <div>
               <br />
               <Typography variant='body'>
-                <Link href={`http://localhost:3000/share/link/${user._id}`}>
+                <Link
+                  href={`http://localhost:3000/share/link/${user._id}/?path=${linkFolderPath}`}>
                   http://localhost:3000/share/link/{user._id}/?path=
                   {linkFolderPath}
                 </Link>
