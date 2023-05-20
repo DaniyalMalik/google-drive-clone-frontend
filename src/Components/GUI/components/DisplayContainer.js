@@ -32,6 +32,7 @@ import {
   Backdrop,
   Breadcrumbs,
   Link,
+  Checkbox,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -123,6 +124,7 @@ export default function DisplayContainer({
   const [folder, setFolder] = React.useState(false);
   const [linkFolderPath, setLinkFolderPath] = React.useState('');
   const [show, setShow] = React.useState(false);
+  const [select, setSelect] = React.useState(false);
 
   // const handleClick = (event) => {
   //   setAnchorEl(event.currentTarget);
@@ -245,7 +247,7 @@ export default function DisplayContainer({
   const getFilesOrFolders = async (folderName) => {
     if (folderName) {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?folderName=${folderName}&search=${search}`,
+        `http://localhost:5000/api/upload?folderName=${folderName}&search=${search}&userId=${user._id}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -258,7 +260,7 @@ export default function DisplayContainer({
       setSelector({ ...selector, folderName });
     } else {
       const res = await axios.get(
-        `http://localhost:5000/api/upload?folderName=&search=${search}`,
+        `http://localhost:5000/api/upload?search=${search}&userId=${user._id}`,
         {
           headers: {
             'x-auth-token': localStorage.getItem('token'),
@@ -384,7 +386,7 @@ export default function DisplayContainer({
 
   React.useEffect(() => {
     getFilesOrFolders(selectedFolder);
-  }, [search]);
+  }, [search, user]);
 
   React.useEffect(async () => {
     const res = await axios.get('http://localhost:5000/api/user/all', {
@@ -767,7 +769,8 @@ export default function DisplayContainer({
             <div>
               <br />
               <Typography variant='body'>
-                <Link href={`http://localhost:3000/share/link/${user._id}`}>
+                <Link
+                  href={`http://localhost:3000/share/link/${user._id}/?path=${linkFolderPath}`}>
                   http://localhost:3000/share/link/{user._id}/?path=
                   {linkFolderPath}
                 </Link>
@@ -958,6 +961,14 @@ export default function DisplayContainer({
           </div>
         ) : (
           <div>
+            {/* <Button variant='outlined' onClick={handleClickOpen_1}>
+              download multiple
+            </Button>
+            <Button
+              variant='outlined'
+              onClick={() => setSelect((prev) => !prev)}>
+              {select ? 'Deselect' : 'Select'}
+            </Button> */}
             <Button variant='outlined' onClick={handleClickOpen_1}>
               Shared with
             </Button>
@@ -971,6 +982,7 @@ export default function DisplayContainer({
         {folders?.length > 0 ? (
           folders.map((item) => (
             <Card style={{ maxHeight: '80px', margin: '10px' }}>
+              {/* <Checkbox /> */}
               <CardActionArea>
                 <CardContent>
                   <Typography
