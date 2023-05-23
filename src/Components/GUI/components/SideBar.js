@@ -172,9 +172,9 @@ export default function SideBar({
               color='inherit'
               size='large'
               disabled={
-                (user.storageLimit === 5 && paidPlan === 0) ||
-                (user.storageLimit === 25 && paidPlan === 1) ||
-                (user.storageLimit === 50 && paidPlan === 2)
+                (user?.storageLimit === 5 && paidPlan === 0) ||
+                (user?.storageLimit === 25 && paidPlan === 1) ||
+                (user?.storageLimit === 50 && paidPlan === 2)
               }
               onClick={handleSubmit}>
               save

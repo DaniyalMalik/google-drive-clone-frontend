@@ -852,11 +852,12 @@ export default function DisplayContainer({
                   <em>None</em>
                 </MenuItem>
               )}
-              {usersList.map((item) => (
-                <MenuItem value={item}>
-                  {item.firstName + ' ' + item.lastName}
-                </MenuItem>
-              ))}
+              {usersList &&
+                usersList.map((item) => (
+                  <MenuItem value={item}>
+                    {item.firstName + ' ' + item.lastName}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
         </DialogContent>
@@ -992,6 +993,16 @@ export default function DisplayContainer({
         <h1>Folders</h1>
         {selectedFolder ? (
           <div>
+            {downloadFiles.length > 0 && (
+              <Button variant='outlined' onClick={downloadMultipleFiles}>
+                download multiple
+              </Button>
+            )}
+            <Button
+              variant='outlined'
+              onClick={() => setSelect((prev) => !prev)}>
+              {select ? 'Deselect' : 'Select'}
+            </Button>
             <Button
               variant='outlined'
               component='span'
