@@ -495,10 +495,8 @@ export default function DisplayContainer({
   const onUploadFolder = (e) => {
     const arr = [];
     console.log(e.target.files, 'e.target.files');
-    return;
-    if (e.target.files.length === 0)
-      return alert('No folder selected or it is empty!');
-
+    // return;
+    
     for (let i = 0; i < e.target.files.length; i++) {
       arr.push(e.target.files[i]);
     }
@@ -1108,7 +1106,6 @@ export default function DisplayContainer({
               webkitdirectory='true'
               mozdirectory='true'
               directory='true'
-              multiple
               type='file'
               onChange={onUploadFolder}
             />

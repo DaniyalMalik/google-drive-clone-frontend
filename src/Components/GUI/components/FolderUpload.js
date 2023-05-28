@@ -57,18 +57,30 @@ export default function FolderUpload({ user, getUser, setSelector }) {
     const formData = new FormData();
     let size = 0;
     let folderName = '';
+    let folderNames = {};
+    let index;
+    let temp = '';
 
     for (let i = 0; i < fileInput.current.files.length; i++) {
-      formData.append(
-        'files',
-        fileInput.current.files[i],
-        fileInput.current.files[i].webkitRelativePath,
-      );
+      formData.append('files', fileInput.current.files[i]);
 
+      temp = fileInput.current.files[i].webkitRelativePath.split('/');
+      index = temp.indexOf(fileInput.current.files[i].name);
+
+      if (index - 1 === 0) {
+        folderNames[fileInput.current.files[i].name] = null;
+      } else {
+        temp = temp.slice(1, index);
+        temp = temp.join('/');
+        folderNames[fileInput.current.files[i].name] = temp;
+      }
+
+      // formData.append(fileInput.current.files[i].name, temp);
       size += fileInput.current.files[i].size;
       folderName = fileInput.current.files[i].webkitRelativePath;
     }
 
+    formData.append('folders', temp);
     if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
       return alert('Uploaded folder size is greater than your storage limit');
 
@@ -91,23 +103,23 @@ export default function FolderUpload({ user, getUser, setSelector }) {
 
     alert(res.data.message);
 
-    if (res.data.success) {
-      setSelector({
-        account: false,
-        trash: false,
-        shared: false,
-        files: true,
-        starred: false,
-        uploadFile: false,
-        uploadFolder: false,
-        createFolder: false,
-        folderName: '',
-      });
-      setOpen(false);
-      setPercentage(0);
+    // if (res.data.success) {
+    //   setSelector({
+    //     account: false,
+    //     trash: false,
+    //     shared: false,
+    //     files: true,
+    //     starred: false,
+    //     uploadFile: false,
+    //     uploadFolder: false,
+    //     createFolder: false,
+    //     folderName: '',
+    //   });
+    //   setOpen(false);
+    //   setPercentage(0);
 
-      getUser();
-    }
+    //   getUser();
+    // }
   };
 
   return (
@@ -125,7 +137,7 @@ export default function FolderUpload({ user, getUser, setSelector }) {
       <div id='contentDisplayer'>
         <form
           onSubmit={(e) => {
-            setOpen(true);
+            // setOpen(true);
             handleSubmit(e);
           }}>
           <input
