@@ -97,6 +97,7 @@ export default function DisplayContainer({
 }) {
   const [files, setFiles] = React.useState([]);
   const [saveFiles, setSaveFiles] = React.useState([]);
+  const [saveFolders, setSaveFolders] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
   const [sameFolder, setSameFolder] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
@@ -382,9 +383,67 @@ export default function DisplayContainer({
 
       setSaveFiles([]);
       setSameFolder(false);
+      setOpenBackDrop(false);
 
       if (res.data.success) {
-        setOpenBackDrop(false);
+        setPercentage(0);
+
+        // getUser();
+
+        getFilesOrFolders(selectedFolder);
+      }
+    }
+  };
+
+  const uploadFolders = async () => {
+    const formData = new FormData();
+    let size = 0;
+    let folderName = '';
+
+    for (let i = 0; i < saveFolders.length; i++) {
+      size += saveFolders[i].size;
+
+      formData.append('files', saveFolders[i]);
+
+      size += saveFolders[i].size;
+      folderName = saveFolders[i].webkitRelativePath;
+    }
+
+    if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
+      return alert('Uploaded files size is greater than your storage limit');
+
+    folderName = folderName.split('/')[0];
+
+    if (selectedFolder) {
+      const res = await axios.post(
+        'http://localhost:5000/api/upload?folderName=' +
+          selectedFolder +
+          '&sameFolder=' +
+          sameFolder +
+          '&uploadFolderName=' +
+          folderName,
+        formData,
+        {
+          onUploadProgress: (progressEvent) => {
+            const { loaded, total } = progressEvent;
+
+            // if (percent <= 100) {
+            setPercentage(Math.floor((loaded * 100) / total));
+            // }
+          },
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      alert(res.data.message);
+
+      setSaveFolders([]);
+      setSameFolder(false);
+      setOpenBackDrop(false);
+
+      if (res.data.success) {
         setPercentage(0);
 
         // getUser();
@@ -415,6 +474,13 @@ export default function DisplayContainer({
     }
   }, [saveFiles]);
 
+  React.useEffect(() => {
+    if (saveFolders.length > 0) {
+      uploadFolders();
+      setOpenBackDrop(true);
+    }
+  }, [saveFolders]);
+
   const onUploadFiles = (e) => {
     const arr = [];
 
@@ -423,6 +489,21 @@ export default function DisplayContainer({
     }
 
     setSaveFiles(arr);
+    setSameFolder(true);
+  };
+
+  const onUploadFolder = (e) => {
+    const arr = [];
+    console.log(e.target.files, 'e.target.files');
+    return;
+    if (e.target.files.length === 0)
+      return alert('No folder selected or it is empty!');
+
+    for (let i = 0; i < e.target.files.length; i++) {
+      arr.push(e.target.files[i]);
+    }
+
+    setSaveFolders(arr);
     setSameFolder(true);
   };
 
@@ -1019,6 +1100,21 @@ export default function DisplayContainer({
             <label htmlFor='contained-button-file'>
               <Button variant='outlined' component='span'>
                 upload files in Folder: <b>{selectedFolder}</b>
+              </Button>
+            </label>
+            <input
+              style={{ display: 'none' }}
+              id='contained-button-folder'
+              webkitdirectory='true'
+              mozdirectory='true'
+              directory='true'
+              multiple
+              type='file'
+              onChange={onUploadFolder}
+            />
+            <label htmlFor='contained-button-folder'>
+              <Button variant='outlined' component='span'>
+                upload folder in Folder: <b>{selectedFolder}</b>
               </Button>
             </label>
             <Button variant='outlined' onClick={() => getFilesOrFolders()}>
