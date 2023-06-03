@@ -62,8 +62,6 @@ export default function FolderUpload({ user, getUser, setSelector }) {
     let temp = '';
 
     for (let i = 0; i < fileInput.current.files.length; i++) {
-      formData.append('files', fileInput.current.files[i]);
-
       temp = fileInput.current.files[i].webkitRelativePath.split('/');
       index = temp.indexOf(fileInput.current.files[i].name);
 
@@ -75,16 +73,19 @@ export default function FolderUpload({ user, getUser, setSelector }) {
         folderNames[fileInput.current.files[i].name] = temp;
       }
 
-      // formData.append(fileInput.current.files[i].name, temp);
       size += fileInput.current.files[i].size;
       folderName = fileInput.current.files[i].webkitRelativePath;
     }
 
-    formData.append('folders', temp);
-    if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
-      return alert('Uploaded folder size is greater than your storage limit');
+    formData.append('folders', JSON.stringify(folderNames));
 
     folderName = folderName.split('/')[0];
+
+    for (let i = 0; i < fileInput.current.files.length; i++)
+      formData.append('files', fileInput.current.files[i]);
+
+    if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
+      return alert('Uploaded folder size is greater than your storage limit');
 
     const res = await axios.post(
       'http://localhost:5000/api/upload?folderName=' + folderName,
@@ -103,23 +104,23 @@ export default function FolderUpload({ user, getUser, setSelector }) {
 
     alert(res.data.message);
 
-    // if (res.data.success) {
-    //   setSelector({
-    //     account: false,
-    //     trash: false,
-    //     shared: false,
-    //     files: true,
-    //     starred: false,
-    //     uploadFile: false,
-    //     uploadFolder: false,
-    //     createFolder: false,
-    //     folderName: '',
-    //   });
-    //   setOpen(false);
-    //   setPercentage(0);
+    if (res.data.success) {
+      setSelector({
+        account: false,
+        trash: false,
+        shared: false,
+        files: true,
+        starred: false,
+        uploadFile: false,
+        uploadFolder: false,
+        createFolder: false,
+        folderName: '',
+      });
+      setOpen(false);
+      setPercentage(0);
 
-    //   getUser();
-    // }
+      getUser();
+    }
   };
 
   return (
@@ -137,7 +138,7 @@ export default function FolderUpload({ user, getUser, setSelector }) {
       <div id='contentDisplayer'>
         <form
           onSubmit={(e) => {
-            // setOpen(true);
+            setOpen(true);
             handleSubmit(e);
           }}>
           <input

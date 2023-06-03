@@ -97,7 +97,7 @@ export default function DisplayContainer({
 }) {
   const [files, setFiles] = React.useState([]);
   const [saveFiles, setSaveFiles] = React.useState([]);
-  const [saveFolders, setSaveFolders] = React.useState([]);
+  const [saveFolder, setSaveFolder] = React.useState([]);
   const [folders, setFolders] = React.useState([]);
   const [sameFolder, setSameFolder] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
@@ -395,19 +395,34 @@ export default function DisplayContainer({
     }
   };
 
-  const uploadFolders = async () => {
+  const uploadFolder = async () => {
     const formData = new FormData();
     let size = 0;
     let folderName = '';
+    let folderNames = {};
+    let index;
+    let temp = '';
 
-    for (let i = 0; i < saveFolders.length; i++) {
-      size += saveFolders[i].size;
+    for (let i = 0; i < saveFolder.length; i++) {
+      temp = saveFolder[i].webkitRelativePath.split('/');
+      index = temp.indexOf(saveFolder[i].name);
 
-      formData.append('files', saveFolders[i]);
+      if (index - 1 === 0) {
+        folderNames[saveFolder[i].name] = null;
+      } else {
+        temp = temp.slice(1, index);
+        temp = temp.join('/');
+        folderNames[saveFolder[i].name] = temp;
+      }
 
-      size += saveFolders[i].size;
-      folderName = saveFolders[i].webkitRelativePath;
+      size += saveFolder[i].size;
+      folderName = saveFolder[i].webkitRelativePath;
     }
+
+    formData.append('folders', JSON.stringify(folderNames));
+
+    for (let i = 0; i < saveFolder.length; i++)
+      formData.append('files', saveFolder[i]);
 
     if (user?.currentStorage + size / 1024 / 1024 / 1024 >= user?.storageLimit)
       return alert('Uploaded files size is greater than your storage limit');
@@ -439,7 +454,7 @@ export default function DisplayContainer({
 
       alert(res.data.message);
 
-      setSaveFolders([]);
+      setSaveFolder([]);
       setSameFolder(false);
       setOpenBackDrop(false);
 
@@ -475,11 +490,11 @@ export default function DisplayContainer({
   }, [saveFiles]);
 
   React.useEffect(() => {
-    if (saveFolders.length > 0) {
-      uploadFolders();
+    if (saveFolder.length > 0) {
+      uploadFolder();
       setOpenBackDrop(true);
     }
-  }, [saveFolders]);
+  }, [saveFolder]);
 
   const onUploadFiles = (e) => {
     const arr = [];
@@ -494,14 +509,12 @@ export default function DisplayContainer({
 
   const onUploadFolder = (e) => {
     const arr = [];
-    console.log(e.target.files, 'e.target.files');
-    // return;
-    
+
     for (let i = 0; i < e.target.files.length; i++) {
       arr.push(e.target.files[i]);
     }
 
-    setSaveFolders(arr);
+    setSaveFolder(arr);
     setSameFolder(true);
   };
 
