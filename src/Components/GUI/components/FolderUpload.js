@@ -65,9 +65,8 @@ export default function FolderUpload({ user, getUser, setSelector }) {
       temp = fileInput.current.files[i].webkitRelativePath.split('/');
       index = temp.indexOf(fileInput.current.files[i].name);
 
-      if (index - 1 === 0) {
-        folderNames[fileInput.current.files[i].name] = null;
-      } else {
+      if (index - 1 === 0) folderNames[fileInput.current.files[i].name] = null;
+      else {
         temp = temp.slice(1, index);
         temp = temp.join('/');
         folderNames[fileInput.current.files[i].name] = temp;

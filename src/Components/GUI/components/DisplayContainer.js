@@ -1288,7 +1288,11 @@ export default function DisplayContainer({
                       )}
                       <ImageListItem
                         key={key}
-                        style={{ width: '500px', height: '300px' }}>
+                        style={{
+                          width: '500px',
+                          height: '300px',
+                          padding: '5px',
+                        }}>
                         <img
                           src={`data:${item.mimeType};base64,${item.file}`}
                           alt='image'
@@ -1426,7 +1430,11 @@ export default function DisplayContainer({
                       )}
                       <ImageListItem
                         key={key}
-                        style={{ width: '500px', height: '300px' }}>
+                        style={{
+                          width: '500px',
+                          height: '300px',
+                          padding: '5px',
+                        }}>
                         <video controls>
                           <source
                             type={item.mimeType}
@@ -1555,7 +1563,11 @@ export default function DisplayContainer({
                       )}
                       <ImageListItem
                         key={key}
-                        style={{ width: '500px', height: '100px' }}>
+                        style={{
+                          width: '500px',
+                          height: '100px',
+                          padding: '5px',
+                        }}>
                         <audio
                           controls
                           src={`data:${item.mimeType};base64,${item.file}`}
@@ -1685,6 +1697,7 @@ export default function DisplayContainer({
                           bgcolor: 'background.paper',
                           width: '500px',
                           height: '100px',
+                          padding: '5px',
                         }}>
                         <ListItem alignItems='flex-start'>
                           <ListItemText primary={item.fileName} />
