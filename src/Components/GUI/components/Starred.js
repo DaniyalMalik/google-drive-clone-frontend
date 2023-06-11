@@ -24,6 +24,7 @@ import {
   Breadcrumbs,
   Link,
 } from '@material-ui/core';
+import { saveAs } from 'file-saver';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Info,
@@ -31,7 +32,9 @@ import {
   GetAppOutlined,
   Visibility,
   Star,
+  GetApp,
 } from '@material-ui/icons';
+import JSZip from 'jszip';
 
 export default function Starred({ user, search, selector, setSelector }) {
   const [files, setFiles] = React.useState([]);
@@ -42,6 +45,7 @@ export default function Starred({ user, search, selector, setSelector }) {
   const [downloadFiles, setDownloadFiles] = React.useState([]);
   const [downloadFileNames, setDownloadFileNames] = React.useState([]);
   const [select, setSelect] = React.useState(false);
+  const zip = JSZip();
 
   const handleClickOpen = (item) => {
     setOpen(true);
@@ -176,6 +180,51 @@ export default function Starred({ user, search, selector, setSelector }) {
     setDownloadFiles([]);
   };
 
+  const download = (folderName) => {
+    zip.generateAsync({ type: 'blob' }).then(function (blob) {
+      saveAs(blob, `${folderName}.zip`);
+    });
+  };
+
+  const generateZip = (obj, folderName) => {
+    if (obj.folders.length) {
+      for (const element of obj.folders) {
+        zip.folder(element);
+      }
+    }
+
+    if (obj.files.length) {
+      for (const element of obj.files) {
+        let path = element.location.split(
+          user.firstName + '-' + user.lastName + '-' + user._id,
+        );
+
+        path = path[1].split('\\');
+        path.shift();
+        path = path.join('/');
+
+        zip.file(path, element.file, {
+          base64: true,
+        });
+      }
+
+      download(folderName);
+    }
+  };
+
+  const getFolderChildren = async (folderName) => {
+    const res = await axios.get(
+      `http://localhost:5000/api/upload/folderdirectory?folderName=${folderName}&userPath=${user.folderPath}`,
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    if (res.data.success) generateZip(res.data, folderName);
+  };
+
   return (
     <div>
       <Breadcrumbs aria-label='breadcrumb'>
@@ -297,6 +346,10 @@ export default function Starred({ user, search, selector, setSelector }) {
                             handleClickOpen({ ...item, isFolder: true })
                           }>
                           <Info />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => getFolderChildren(item.folderName)}>
+                          <GetApp />
                         </IconButton>
                         {!selectedFolder && (
                           <IconButton

@@ -34,7 +34,10 @@ import {
   Info,
   InfoOutlined,
   GetAppOutlined,
+  GetApp,
 } from '@material-ui/icons';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -53,13 +56,14 @@ export default function Shared({ search }) {
   const [folders, setFolders] = React.useState([]);
   const [shared, setShared] = React.useState([]);
   const [sharedFolderPaths, setSharedFolderPaths] = React.useState('None');
-  const [open_3, setOpen_3] = React.useState(false);
+  const [open_1, setOpen_1] = React.useState(false);
+  const [open_2, setOpen_2] = React.useState(false);
   const [itemDetails, setItemDetails] = React.useState({});
-  const [open, setOpen] = React.useState(false);
   const [selectedFolder, setSelectedFolder] = React.useState('');
   const [select, setSelect] = React.useState(false);
   const [downloadFiles, setDownloadFiles] = React.useState([]);
   const [downloadFileNames, setDownloadFileNames] = React.useState([]);
+  const zip = JSZip();
 
   const selectFolder = (folderName, index) => {
     if (folderName && !index) {
@@ -86,11 +90,11 @@ export default function Shared({ search }) {
   };
 
   const handleClose = () => {
-    setOpen(false);
+    setOpen_1(false);
   };
 
   const handleOpen = () => {
-    setOpen(true);
+    setOpen_1(true);
   };
 
   const getFilesOrFolders = async (folderName) => {
@@ -163,12 +167,12 @@ export default function Shared({ search }) {
   };
 
   const handleClickOpen_3 = (item) => {
-    setOpen_3(true);
+    setOpen_2(true);
     setItemDetails(item);
   };
 
   const handleClose_3 = () => {
-    setOpen_3(false);
+    setOpen_2(false);
     setItemDetails({});
   };
 
@@ -234,6 +238,55 @@ export default function Shared({ search }) {
     setDownloadFiles([]);
   };
 
+  const download = (folderName) => {
+    zip.generateAsync({ type: 'blob' }).then(function (blob) {
+      saveAs(blob, `${folderName}.zip`);
+    });
+  };
+
+  const generateZip = (obj, folderName) => {
+    if (obj.folders.length) {
+      for (const element of obj.folders) {
+        zip.folder(element);
+      }
+    }
+
+    if (obj.files.length) {
+      for (const element of obj.files) {
+        let path = element.location.split(
+          sharedFolderPaths.sharedBy.firstName +
+            '-' +
+            sharedFolderPaths.sharedBy.lastName +
+            '-' +
+            sharedFolderPaths.sharedBy._id,
+        );
+
+        path = path[1].split('\\');
+        path.shift();
+        path = path.join('/');
+
+        zip.file(path, element.file, {
+          base64: true,
+        });
+      }
+
+      download(folderName);
+    }
+  };
+
+  const getFolderChildren = async (folderName) => {
+    const res = await axios.get(
+      `http://localhost:5000/api/upload/folderdirectory?folderName=${folderName}&userPath=${sharedFolderPaths.sharedBy.folderPath}`,
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    if (res.data.success) generateZip(res.data, folderName);
+  };
+
   return (
     <div>
       <Breadcrumbs aria-label='breadcrumb'>
@@ -253,7 +306,7 @@ export default function Shared({ search }) {
         )}
       </Breadcrumbs>
       <Dialog
-        open={open_3}
+        open_1={open_2}
         onClose={handleClose_3}
         aria-labelledby='form-dialog-title-2'>
         <DialogTitle id='form-dialog-title-2'>
@@ -308,27 +361,29 @@ export default function Shared({ search }) {
               </Button>
             </>
           ) : (
-            <>
-              {downloadFiles.length > 0 && (
-                <Button variant='outlined' onClick={downloadMultipleFiles}>
-                  download multiple
+            sharedFolderPaths !== 'None' && (
+              <>
+                {downloadFiles.length > 0 && (
+                  <Button variant='outlined' onClick={downloadMultipleFiles}>
+                    download multiple
+                  </Button>
+                )}
+                <Button
+                  variant='outlined'
+                  onClick={() => setSelect((prev) => !prev)}>
+                  {select ? 'Deselect' : 'Select'}
                 </Button>
-              )}
-              <Button
-                variant='outlined'
-                onClick={() => setSelect((prev) => !prev)}>
-                {select ? 'Deselect' : 'Select'}
-              </Button>
-            </>
+              </>
+            )
           )}
           <FormControl className={classes.formControl}>
-            <InputLabel id='demo-controlled-open-select-label'>
+            <InputLabel id='demo-controlled-open_1-select-label'>
               Shared Folder
             </InputLabel>
             <Select
-              labelId='demo-controlled-open-select-label'
-              id='demo-controlled-open-select'
-              open={open}
+              labelId='demo-controlled-open_1-select-label'
+              id='demo-controlled-open_1-select'
+              open_1={open_1}
               onClose={handleClose}
               onOpen={handleOpen}
               value={sharedFolderPaths}
@@ -369,6 +424,10 @@ export default function Shared({ search }) {
                         <IconButton
                           onClick={() => selectFolder(item.folderName)}>
                           <Visibility />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => getFolderChildren(item.folderName)}>
+                          <GetApp />
                         </IconButton>
                         <IconButton
                           onClick={() =>

@@ -131,6 +131,7 @@ export default function DisplayContainer({
   const [select, setSelect] = React.useState(false);
   const [downloadFiles, setDownloadFiles] = React.useState([]);
   const [downloadFileNames, setDownloadFileNames] = React.useState([]);
+  const zip = JSZip();
 
   // const handleClick = (event) => {
   //   setAnchorEl(event.currentTarget);
@@ -791,8 +792,6 @@ export default function DisplayContainer({
     setDownloadFileNames([]);
     setDownloadFiles([]);
   };
-
-  var zip = JSZip();
 
   const download = (folderName) => {
     zip.generateAsync({ type: 'blob' }).then(function (blob) {
