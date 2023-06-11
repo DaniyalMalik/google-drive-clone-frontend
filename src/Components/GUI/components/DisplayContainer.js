@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import '../css/DisplayContainer.css';
 import axios from 'axios';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import {
   Typography,
   Divider,
@@ -42,6 +44,7 @@ import {
   InfoOutlined,
   Forward,
   FileCopy,
+  GetApp,
   GetAppOutlined,
   Share,
   Delete,
@@ -789,6 +792,53 @@ export default function DisplayContainer({
     setDownloadFiles([]);
   };
 
+  var zip = JSZip();
+
+  const download = (folderName) => {
+    zip.generateAsync({ type: 'blob' }).then(function (blob) {
+      saveAs(blob, `${folderName}.zip`);
+    });
+  };
+
+  const generateZip = (obj, folderName) => {
+    if (obj.folders.length) {
+      for (const element of obj.folders) {
+        zip.folder(element);
+      }
+    }
+
+    if (obj.files.length) {
+      for (const element of obj.files) {
+        let path = element.location.split(
+          user.firstName + '-' + user.lastName + '-' + user._id,
+        );
+
+        path = path[1].split('\\');
+        path.shift();
+        path = path.join('/');
+
+        zip.file(path, element.file, {
+          base64: true,
+        });
+      }
+
+      download(folderName);
+    }
+  };
+
+  const getFolderChildren = async (folderName) => {
+    const res = await axios.get(
+      `http://localhost:5000/api/upload/folderdirectory?folderName=${folderName}&userPath=${user.folderPath}`,
+      {
+        headers: {
+          'x-auth-token': localStorage.getItem('token'),
+        },
+      },
+    );
+
+    if (res.data.success) generateZip(res.data, folderName);
+  };
+
   return (
     <div>
       <Breadcrumbs aria-label='breadcrumb'>
@@ -1213,6 +1263,10 @@ export default function DisplayContainer({
                               handleClickOpen_3({ ...item, isFolder: true })
                             }>
                             <Info />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => getFolderChildren(item.folderName)}>
+                            <GetApp />
                           </IconButton>
                           {item.favourite
                             ? !selectedFolder && (
