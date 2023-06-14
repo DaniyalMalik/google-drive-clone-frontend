@@ -228,20 +228,40 @@ export default function DisplayContainer({
 
   const handleClickOpen = () => {
     setOpen(true);
+    handleMenuClose_1();
+    handleMenuClose_2();
+    handleMenuClose_3();
+    handleMenuClose_4();
+    handleMenuClose_5();
   };
 
   const handleClickOpen_3 = (item) => {
     setOpen_3(true);
     setItemDetails(item);
+    handleMenuClose_1();
+    handleMenuClose_2();
+    handleMenuClose_3();
+    handleMenuClose_4();
+    handleMenuClose_5();
   };
 
   const handleClickOpen_2 = () => {
     setOpen_2(true);
+    handleMenuClose_1();
+    handleMenuClose_2();
+    handleMenuClose_3();
+    handleMenuClose_4();
+    handleMenuClose_5();
   };
 
   const handleClickOpen_4 = (item) => {
     setOpen_4(true);
     setItemDetails(item);
+    handleMenuClose_1();
+    handleMenuClose_2();
+    handleMenuClose_3();
+    handleMenuClose_4();
+    handleMenuClose_5();
   };
 
   const handleClickOpen_5 = (item) => {
@@ -294,6 +314,11 @@ export default function DisplayContainer({
     if (folderName && !index) {
       setSelectedFolder((prev) => prev + '/' + folderName);
       setSelectedFolderPath(path);
+      handleMenuClose_1();
+      handleMenuClose_2();
+      handleMenuClose_3();
+      handleMenuClose_4();
+      handleMenuClose_5();
 
       getFilesOrFolders(
         selectedFolder ? selectedFolder + '/' + folderName : folderName,
@@ -314,10 +339,21 @@ export default function DisplayContainer({
       temp.splice(index + 1, temp.length - index - 1);
       temp = temp.join('/');
 
+      handleMenuClose_1();
+      handleMenuClose_2();
+      handleMenuClose_3();
+      handleMenuClose_4();
+      handleMenuClose_5();
+
       setSelectedFolderPath(removed + '\\' + test);
       setSelectedFolder(temp);
       getFilesOrFolders(temp);
     } else {
+      handleMenuClose_1();
+      handleMenuClose_2();
+      handleMenuClose_3();
+      handleMenuClose_4();
+      handleMenuClose_5();
       getFilesOrFolders();
     }
   };
@@ -383,6 +419,12 @@ export default function DisplayContainer({
 
     alert(res.data.message);
 
+    handleMenuClose_1();
+    handleMenuClose_2();
+    handleMenuClose_3();
+    handleMenuClose_4();
+    handleMenuClose_5();
+
     if (res.data.success) {
       // getUser();
       getFilesOrFolders(selectedFolder);
@@ -411,6 +453,12 @@ export default function DisplayContainer({
     );
 
     alert(res.data.message);
+
+    handleMenuClose_1();
+    handleMenuClose_2();
+    handleMenuClose_3();
+    handleMenuClose_4();
+    handleMenuClose_5();
 
     if (res.data.success) {
       // getUser();
@@ -772,6 +820,12 @@ export default function DisplayContainer({
 
     alert(res.data.message);
 
+    handleMenuClose_1();
+    handleMenuClose_2();
+    handleMenuClose_3();
+    handleMenuClose_4();
+    handleMenuClose_5();
+
     if (res.data.success) {
       getFilesOrFolders();
     }
@@ -903,6 +957,12 @@ export default function DisplayContainer({
         },
       },
     );
+
+    handleMenuClose_1();
+    handleMenuClose_2();
+    handleMenuClose_3();
+    handleMenuClose_4();
+    handleMenuClose_5();
 
     if (res.data.success) generateZip(res.data, folderName);
   };
@@ -1151,6 +1211,7 @@ export default function DisplayContainer({
               display: 'flex',
               alignItems: 'center',
             }}
+            onClick={handleMenuClose_2}
             download={selectedItem.fileNameWithExt}
             href={`data:${selectedItem.mimeType};base64,${selectedItem.file}`}>
             <ListItemIcon>
@@ -1432,6 +1493,7 @@ export default function DisplayContainer({
               display: 'flex',
               alignItems: 'center',
             }}
+            onClick={handleMenuClose_5}
             href={`data:${selectedItem.mimeType};base64,${selectedItem.file}`}
             download={
               selectedItem?.fileNameWithExt &&
