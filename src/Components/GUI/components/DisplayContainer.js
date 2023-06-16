@@ -916,13 +916,13 @@ export default function DisplayContainer({
     setDownloadFiles([]);
   };
 
-  const download = (folderName) => {
+  const download = () => {
     zip.generateAsync({ type: 'blob' }).then(function (blob) {
-      saveAs(blob, `${folderName}.zip`);
+      saveAs(blob, 'download.zip');
     });
   };
 
-  const generateZip = (obj, folderName) => {
+  const generateZip = (obj) => {
     if (obj.folders.length) {
       for (const element of obj.folders) {
         zip.folder(element);
@@ -944,13 +944,20 @@ export default function DisplayContainer({
         });
       }
 
-      download(folderName);
+      download();
     }
   };
 
   const getFolderChildren = async (folderName) => {
+    let temp = selectedFolder.split('/');
+
+    temp.shift();
+    temp = temp.join('/');
+
     const res = await axios.get(
-      `http://localhost:5000/api/upload/folderdirectory?folderName=${folderName}&userPath=${user.folderPath}`,
+      `http://localhost:5000/api/upload/folderdirectory?folderName=${
+        temp + '/' + folderName
+      }&userPath=${user.folderPath}`,
       {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
@@ -964,7 +971,8 @@ export default function DisplayContainer({
     handleMenuClose_4();
     handleMenuClose_5();
 
-    if (res.data.success) generateZip(res.data, folderName);
+    if (res.data.success) generateZip(res.data);
+    else alert(res.data.message);
   };
 
   return (

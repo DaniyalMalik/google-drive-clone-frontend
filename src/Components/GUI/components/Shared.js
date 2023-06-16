@@ -60,18 +60,36 @@ export default function Shared({ search }) {
   const [open_2, setOpen_2] = React.useState(false);
   const [itemDetails, setItemDetails] = React.useState({});
   const [selectedFolder, setSelectedFolder] = React.useState('');
+  const [selectedLocation, setSelectedLocation] = React.useState('');
   const [select, setSelect] = React.useState(false);
   const [downloadFiles, setDownloadFiles] = React.useState([]);
   const [downloadFileNames, setDownloadFileNames] = React.useState([]);
   const zip = JSZip();
 
-  const selectFolder = (folderName, index) => {
+  const selectFolder = (folderName, index, location) => {
     if (folderName && !index) {
-      setSelectedFolder((prev) => prev + '/' + folderName);
+      let temp = sharedFolderPaths.sharedPath[0].split('\\');
+      let tempUser =
+        sharedFolderPaths.sharedBy.firstName +
+        '-' +
+        sharedFolderPaths.sharedBy.lastName +
+        '-' +
+        sharedFolderPaths.sharedBy._id;
 
-      getFilesOrFolders(
-        selectedFolder ? selectedFolder + '/' + folderName : folderName,
-      );
+      if (
+        sharedFolderPaths.sharedPath.length === 1 &&
+        temp[temp.length - 1] === tempUser
+      ) {
+        getFilesOrFolders(
+          selectedFolder ? selectedFolder + '/' + folderName : folderName,
+        );
+
+        return setSelectedFolder((prev) => prev + '/' + folderName);
+      }
+
+      setSelectedLocation(location);
+      getFilesOrFolders('', location);
+      setSelectedFolder((prev) => prev + '/' + folderName);
     } else if (folderName && index) {
       let temp = selectedFolder.split('/');
 
@@ -89,15 +107,15 @@ export default function Shared({ search }) {
     setSharedFolderPaths(event.target.value);
   };
 
-  const handleClose = () => {
+  const handleClose_1 = () => {
     setOpen_1(false);
   };
 
-  const handleOpen = () => {
+  const handleOpen_1 = () => {
     setOpen_1(true);
   };
 
-  const getFilesOrFolders = async (folderName) => {
+  const getFilesOrFolders = async (folderName, customPath) => {
     let temp = sharedFolderPaths.sharedPath[0].split('\\');
     let tempUser =
       sharedFolderPaths.sharedBy.firstName +
@@ -146,6 +164,26 @@ export default function Shared({ search }) {
       if (res.data.success) {
         setFolders(res.data.folders);
         setFiles(res.data.files);
+        setSelectedFolder('');
+      } else {
+        alert(res.data.message);
+      }
+    } else if (customPath) {
+      const res = await axios.get(
+        'http://localhost:5000/api/upload/?customPath=' +
+          customPath +
+          '&search=' +
+          search,
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      if (res.data.success) {
+        setFolders(res.data.folders);
+        setFiles(res.data.files);
       } else {
         alert(res.data.message);
       }
@@ -166,12 +204,12 @@ export default function Shared({ search }) {
     }
   };
 
-  const handleClickOpen_3 = (item) => {
+  const handleClickOpen_2 = (item) => {
     setOpen_2(true);
     setItemDetails(item);
   };
 
-  const handleClose_3 = () => {
+  const handleClose_2 = () => {
     setOpen_2(false);
     setItemDetails({});
   };
@@ -180,8 +218,24 @@ export default function Shared({ search }) {
     if (
       typeof sharedFolderPaths === 'object' &&
       Object.keys(sharedFolderPaths).length > 0
-    )
-      getFilesOrFolders(selectedFolder);
+    ) {
+      let temp = sharedFolderPaths.sharedPath[0].split('\\');
+      let tempUser =
+        sharedFolderPaths.sharedBy.firstName +
+        '-' +
+        sharedFolderPaths.sharedBy.lastName +
+        '-' +
+        sharedFolderPaths.sharedBy._id;
+
+      if (
+        sharedFolderPaths.sharedPath.length === 1 &&
+        temp[temp.length - 1] === tempUser
+      ) {
+        getFilesOrFolders(selectedFolder);
+      } else {
+        getFilesOrFolders('', selectedLocation);
+      }
+    }
   }, [sharedFolderPaths, search]);
 
   React.useEffect(async () => {
@@ -238,13 +292,13 @@ export default function Shared({ search }) {
     setDownloadFiles([]);
   };
 
-  const download = (folderName) => {
+  const download = () => {
     zip.generateAsync({ type: 'blob' }).then(function (blob) {
-      saveAs(blob, `${folderName}.zip`);
+      saveAs(blob, 'download.zip');
     });
   };
 
-  const generateZip = (obj, folderName) => {
+  const generateZip = (obj) => {
     if (obj.folders.length) {
       for (const element of obj.folders) {
         zip.folder(element);
@@ -270,21 +324,54 @@ export default function Shared({ search }) {
         });
       }
 
-      download(folderName);
+      download();
     }
   };
 
-  const getFolderChildren = async (folderName) => {
-    const res = await axios.get(
-      `http://localhost:5000/api/upload/folderdirectory?folderName=${folderName}&userPath=${sharedFolderPaths.sharedBy.folderPath}`,
-      {
-        headers: {
-          'x-auth-token': localStorage.getItem('token'),
-        },
-      },
-    );
+  const getFolderChildren = async (folderName, customPath) => {
+    let tempPath = sharedFolderPaths.sharedPath[0].split('\\');
+    let tempUser =
+      sharedFolderPaths.sharedBy.firstName +
+      '-' +
+      sharedFolderPaths.sharedBy.lastName +
+      '-' +
+      sharedFolderPaths.sharedBy._id;
 
-    if (res.data.success) generateZip(res.data, folderName);
+    if (
+      sharedFolderPaths.sharedPath.length === 1 &&
+      tempPath[tempPath.length - 1] === tempUser
+    ) {
+      let temp = selectedFolder.split('/');
+
+      temp.shift();
+      temp = temp.join('/');
+
+      const res = await axios.get(
+        `http://localhost:5000/api/upload/folderdirectory?folderName=${
+          temp + '/' + folderName
+        }&userPath=${sharedFolderPaths.sharedBy.folderPath}`,
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      if (res.data.success) generateZip(res.data, folderName);
+    } else {
+      const userFolder = `${sharedFolderPaths.sharedBy.firstName}-${sharedFolderPaths.sharedBy.lastName}-${sharedFolderPaths.sharedBy._id}`;
+      const res = await axios.get(
+        `http://localhost:5000/api/upload/folderdirectory?customPath=${customPath}&userFolder=${userFolder}`,
+        {
+          headers: {
+            'x-auth-token': localStorage.getItem('token'),
+          },
+        },
+      );
+
+      if (res.data.success) generateZip(res.data, folderName);
+      else alert(res.data.message);
+    }
   };
 
   return (
@@ -306,8 +393,8 @@ export default function Shared({ search }) {
         )}
       </Breadcrumbs>
       <Dialog
-        open_1={open_2}
-        onClose={handleClose_3}
+        open={open_2}
+        onClose={handleClose_2}
         aria-labelledby='form-dialog-title-2'>
         <DialogTitle id='form-dialog-title-2'>
           {itemDetails.isFolder ? 'Folder details' : 'File details'}
@@ -336,7 +423,7 @@ export default function Shared({ search }) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose_3} color='primary'>
+          <Button onClick={handleClose_2} color='primary'>
             Close
           </Button>
         </DialogActions>
@@ -383,9 +470,9 @@ export default function Shared({ search }) {
             <Select
               labelId='demo-controlled-open_1-select-label'
               id='demo-controlled-open_1-select'
-              open_1={open_1}
-              onClose={handleClose}
-              onOpen={handleOpen}
+              open={open_1}
+              onClose={handleClose_1}
+              onOpen={handleOpen_1}
               value={sharedFolderPaths}
               onChange={handleChange}>
               <MenuItem value='None'>
@@ -422,16 +509,20 @@ export default function Shared({ search }) {
                       {item.folderName}
                       <span>
                         <IconButton
-                          onClick={() => selectFolder(item.folderName)}>
+                          onClick={() =>
+                            selectFolder(item.folderName, null, item.location)
+                          }>
                           <Visibility />
                         </IconButton>
                         <IconButton
-                          onClick={() => getFolderChildren(item.folderName)}>
+                          onClick={() =>
+                            getFolderChildren(item.folderName, item.location)
+                          }>
                           <GetApp />
                         </IconButton>
                         <IconButton
                           onClick={() =>
-                            handleClickOpen_3({ ...item, isFolder: true })
+                            handleClickOpen_2({ ...item, isFolder: true })
                           }>
                           <Info />
                         </IconButton>
@@ -502,7 +593,7 @@ export default function Shared({ search }) {
                               <IconButton
                                 color='primary'
                                 onClick={() =>
-                                  handleClickOpen_3({
+                                  handleClickOpen_2({
                                     ...item,
                                     isFolder: false,
                                   })
@@ -578,7 +669,7 @@ export default function Shared({ search }) {
                               <IconButton
                                 color='primary'
                                 onClick={() =>
-                                  handleClickOpen_3({
+                                  handleClickOpen_2({
                                     ...item,
                                     isFolder: false,
                                   })
@@ -641,7 +732,7 @@ export default function Shared({ search }) {
                             <IconButton
                               color='primary'
                               onClick={() =>
-                                handleClickOpen_3({ ...item, isFolder: false })
+                                handleClickOpen_2({ ...item, isFolder: false })
                               }>
                               <InfoOutlined />
                             </IconButton>
@@ -693,7 +784,7 @@ export default function Shared({ search }) {
                             <IconButton
                               color='primary'
                               onClick={() =>
-                                handleClickOpen_3({ ...item, isFolder: false })
+                                handleClickOpen_2({ ...item, isFolder: false })
                               }>
                               <InfoOutlined />
                             </IconButton>
