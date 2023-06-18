@@ -91,14 +91,43 @@ export default function Shared({ search }) {
       getFilesOrFolders('', location);
       setSelectedFolder((prev) => prev + '/' + folderName);
     } else if (folderName && index) {
-      let temp = selectedFolder.split('/');
+      let temp = sharedFolderPaths.sharedPath[0].split('\\');
+      let tempUser =
+        sharedFolderPaths.sharedBy.firstName +
+        '-' +
+        sharedFolderPaths.sharedBy.lastName +
+        '-' +
+        sharedFolderPaths.sharedBy._id;
 
-      temp.splice(index + 1, temp.length - index - 1);
-      temp = temp.join('/');
+      if (
+        sharedFolderPaths.sharedPath.length === 1 &&
+        temp[temp.length - 1] === tempUser
+      ) {
+        let temp = selectedFolder.split('/');
 
-      setSelectedFolder(temp);
-      getFilesOrFolders(temp);
+        temp.splice(index + 1, temp.length - index - 1);
+        temp = temp.join('/');
+
+        setSelectedLocation('');
+        setSelectedFolder(temp);
+        getFilesOrFolders(temp);
+      } else {
+        let tempPath = selectedLocation.split('\\');
+        let temp = selectedFolder.split('/');
+        let tempPathIndex;
+
+        temp.splice(index + 1, temp.length - index - 1);
+        tempPathIndex = tempPath.indexOf(temp[1]);
+        tempPath.splice(tempPathIndex + 1, tempPath.length - tempPathIndex - 1);
+        tempPath = tempPath.join('\\');
+        temp = temp.join('/');
+
+        setSelectedLocation('');
+        setSelectedFolder(temp);
+        getFilesOrFolders('', tempPath);
+      }
     } else {
+      setSelectedLocation('');
       getFilesOrFolders();
     }
   };
@@ -124,7 +153,7 @@ export default function Shared({ search }) {
       '-' +
       sharedFolderPaths.sharedBy._id;
 
-    if (folderName) {
+    if (folderName && !customPath) {
       const res = await axios.get(
         'http://localhost:5000/api/upload/?folderName=' +
           folderName +
@@ -219,22 +248,8 @@ export default function Shared({ search }) {
       typeof sharedFolderPaths === 'object' &&
       Object.keys(sharedFolderPaths).length > 0
     ) {
-      let temp = sharedFolderPaths.sharedPath[0].split('\\');
-      let tempUser =
-        sharedFolderPaths.sharedBy.firstName +
-        '-' +
-        sharedFolderPaths.sharedBy.lastName +
-        '-' +
-        sharedFolderPaths.sharedBy._id;
-
-      if (
-        sharedFolderPaths.sharedPath.length === 1 &&
-        temp[temp.length - 1] === tempUser
-      ) {
-        getFilesOrFolders(selectedFolder);
-      } else {
-        getFilesOrFolders('', selectedLocation);
-      }
+      if (selectedLocation) getFilesOrFolders(selectedFolder, selectedLocation);
+      else getFilesOrFolders(selectedFolder);
     }
   }, [sharedFolderPaths, search]);
 
