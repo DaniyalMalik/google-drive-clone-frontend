@@ -1467,7 +1467,7 @@ export default function DisplayContainer({
         </StyledMenuItem>
         <StyledMenuItem
           onClick={() =>
-            handleClickOpen_4({
+            handleClickOpen_3({
               ...selectedItem,
               isFolder: false,
             })
