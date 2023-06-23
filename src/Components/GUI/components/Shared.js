@@ -64,6 +64,7 @@ export default function Shared({ search }) {
   const [select, setSelect] = React.useState(false);
   const [downloadFiles, setDownloadFiles] = React.useState([]);
   const [downloadFileNames, setDownloadFileNames] = React.useState([]);
+  const [downloadFolderObj, setDownloadFolderObj] = React.useState([]);
   const zip = JSZip();
 
   const selectFolder = (folderName, index, location) => {
@@ -287,7 +288,7 @@ export default function Shared({ search }) {
     }
   };
 
-  const downloadMultipleFiles = () => {
+  const downloadMultipleItems = () => {
     const link = document.createElement('a');
 
     link.style.display = 'none';
@@ -300,10 +301,18 @@ export default function Shared({ search }) {
       link.click();
     }
 
+    for (let i = 0; i < downloadFolderObj.length; i++) {
+      getFolderChildren(
+        downloadFolderObj[i].folderName,
+        downloadFolderObj[i].location,
+      );
+    }
+
     document.body.removeChild(link);
 
     setSelect(false);
     setDownloadFileNames([]);
+    setDownloadFolderObj([]);
     setDownloadFiles([]);
   };
 
@@ -372,7 +381,10 @@ export default function Shared({ search }) {
         },
       );
 
-      if (res.data.success) generateZip(res.data, folderName);
+      if (res.data.files.length === 0 && res.data.folders.length === 0)
+        alert('Folder is empty!');
+      else if (res.data.success) generateZip(res.data);
+      else alert(res.data.message);
     } else {
       const userFolder = `${sharedFolderPaths.sharedBy.firstName}-${sharedFolderPaths.sharedBy.lastName}-${sharedFolderPaths.sharedBy._id}`;
       const res = await axios.get(
@@ -384,7 +396,9 @@ export default function Shared({ search }) {
         },
       );
 
-      if (res.data.success) generateZip(res.data, folderName);
+      if (res.data.files.length === 0 && res.data.folders.length === 0)
+        alert('Folder is empty!');
+      else if (res.data.success) generateZip(res.data);
       else alert(res.data.message);
     }
   };
@@ -447,35 +461,45 @@ export default function Shared({ search }) {
         <h1>Folders</h1>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {selectedFolder ? (
-            <>
-              {downloadFiles.length > 0 && (
-                <Button variant='outlined' onClick={downloadMultipleFiles}>
+            <div>
+              {(downloadFolderObj.length > 0 || downloadFiles.length > 0) && (
+                <Button variant='outlined' onClick={downloadMultipleItems}>
                   download multiple
                 </Button>
               )}
               <Button
                 variant='outlined'
-                onClick={() => setSelect((prev) => !prev)}>
+                onClick={() => {
+                  setSelect((prev) => !prev);
+                  setDownloadFiles([]);
+                  setDownloadFileNames([]);
+                  setDownloadFolderObj([]);
+                }}>
                 {select ? 'Deselect' : 'Select'}
               </Button>
               <Button variant='outlined' onClick={() => getFilesOrFolders()}>
                 back to root folder
               </Button>
-            </>
+            </div>
           ) : (
             sharedFolderPaths !== 'None' && (
-              <>
-                {downloadFiles.length > 0 && (
-                  <Button variant='outlined' onClick={downloadMultipleFiles}>
+              <div>
+                {(downloadFolderObj.length > 0 || downloadFiles.length > 0) && (
+                  <Button variant='outlined' onClick={downloadMultipleItems}>
                     download multiple
                   </Button>
                 )}
                 <Button
                   variant='outlined'
-                  onClick={() => setSelect((prev) => !prev)}>
+                  onClick={() => {
+                    setSelect((prev) => !prev);
+                    setDownloadFiles([]);
+                    setDownloadFileNames([]);
+                    setDownloadFolderObj([]);
+                  }}>
                   {select ? 'Deselect' : 'Select'}
                 </Button>
-              </>
+              </div>
             )
           )}
           <FormControl className={classes.formControl}>
@@ -506,46 +530,60 @@ export default function Shared({ search }) {
         {folders?.length > 0 ? (
           folders.map((item) => (
             <>
-              {/* &nbsp;
-              {select && <Checkbox color='primary' />} */}
-              <Card
-                style={{ maxHeight: '80px', margin: '10px', width: '500px' }}>
-                <CardActionArea>
-                  <CardContent>
-                    <Typography
-                      gutterBottom
-                      variant='h5'
-                      component='h2'
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}>
-                      {item.folderName}
-                      <span>
-                        <IconButton
-                          onClick={() =>
-                            selectFolder(item.folderName, null, item.location)
-                          }>
-                          <Visibility />
-                        </IconButton>
-                        <IconButton
-                          onClick={() =>
-                            getFolderChildren(item.folderName, item.location)
-                          }>
-                          <GetApp />
-                        </IconButton>
-                        <IconButton
-                          onClick={() =>
-                            handleClickOpen_2({ ...item, isFolder: true })
-                          }>
-                          <Info />
-                        </IconButton>
-                      </span>
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                &nbsp;
+                {select && (
+                  <Checkbox
+                    color='primary'
+                    onClick={() =>
+                      setDownloadFolderObj((prev) =>
+                        prev.concat({
+                          folderName: item.folderName,
+                          location: item.location,
+                        }),
+                      )
+                    }
+                  />
+                )}
+                <Card
+                  style={{ maxHeight: '80px', margin: '5px', width: '500px' }}>
+                  <CardActionArea>
+                    <CardContent>
+                      <Typography
+                        gutterBottom
+                        variant='h5'
+                        component='h2'
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}>
+                        {item.folderName}
+                        <span>
+                          <IconButton
+                            onClick={() =>
+                              selectFolder(item.folderName, null, item.location)
+                            }>
+                            <Visibility />
+                          </IconButton>
+                          <IconButton
+                            onClick={() =>
+                              getFolderChildren(item.folderName, item.location)
+                            }>
+                            <GetApp />
+                          </IconButton>
+                          <IconButton
+                            onClick={() =>
+                              handleClickOpen_2({ ...item, isFolder: true })
+                            }>
+                            <Info />
+                          </IconButton>
+                        </span>
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </div>
             </>
           ))
         ) : (
@@ -574,61 +612,68 @@ export default function Shared({ search }) {
                   item.mimeType &&
                   item.mimeType.split('/')[0] === 'image' && (
                     <>
-                      &nbsp;
-                      {select && (
-                        <Checkbox
-                          color='primary'
-                          onChange={(e) =>
-                            saveFileBinary(
-                              e,
-                              `data:${item.mimeType};base64,${item.file}`,
-                              item.fileNameWithExt,
-                            )
-                          }
-                        />
-                      )}
-                      <ImageListItem
-                        key={key}
-                        style={{ width: '500px', height: '300px' }}>
-                        <img
-                          src={`data:${item.mimeType};base64,${item.file}`}
-                          alt='image'
-                          loading='lazy'
-                        />
-                        <ImageListItemBar
-                          title={
-                            <Typography
-                              variant='body1'
-                              style={{ color: 'white' }}>
-                              {item.fileName}
-                            </Typography>
-                          }
-                          actionIcon={
-                            <div style={{ display: 'flex' }}>
-                              <IconButton
-                                color='primary'
-                                onClick={() =>
-                                  handleClickOpen_2({
-                                    ...item,
-                                    isFolder: false,
-                                  })
-                                }>
-                                <InfoOutlined />
-                              </IconButton>
-                              <a
-                                style={{
-                                  textDecoration: 'none',
-                                }}
-                                download={item.fileNameWithExt}
-                                href={`data:${item.mimeType};base64,${item.file}`}>
-                                <IconButton color='primary'>
-                                  <GetAppOutlined />
+                      {' '}
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        &nbsp;
+                        {select && (
+                          <Checkbox
+                            color='primary'
+                            onChange={(e) =>
+                              saveFileBinary(
+                                e,
+                                `data:${item.mimeType};base64,${item.file}`,
+                                item.fileNameWithExt,
+                              )
+                            }
+                          />
+                        )}
+                        <ImageListItem
+                          key={key}
+                          style={{
+                            width: '500px',
+                            height: '300px',
+                            padding: '5px',
+                          }}>
+                          <img
+                            src={`data:${item.mimeType};base64,${item.file}`}
+                            alt='image'
+                            loading='lazy'
+                          />
+                          <ImageListItemBar
+                            title={
+                              <Typography
+                                variant='body1'
+                                style={{ color: 'white' }}>
+                                {item.fileName}
+                              </Typography>
+                            }
+                            actionIcon={
+                              <div style={{ display: 'flex' }}>
+                                <IconButton
+                                  color='primary'
+                                  onClick={() =>
+                                    handleClickOpen_2({
+                                      ...item,
+                                      isFolder: false,
+                                    })
+                                  }>
+                                  <InfoOutlined />
                                 </IconButton>
-                              </a>
-                            </div>
-                          }
-                        />
-                      </ImageListItem>
+                                <a
+                                  style={{
+                                    textDecoration: 'none',
+                                  }}
+                                  download={item.fileNameWithExt}
+                                  href={`data:${item.mimeType};base64,${item.file}`}>
+                                  <IconButton color='primary'>
+                                    <GetAppOutlined />
+                                  </IconButton>
+                                </a>
+                              </div>
+                            }
+                          />
+                        </ImageListItem>
+                      </div>
                     </>
                   ),
               )}
@@ -649,52 +694,59 @@ export default function Shared({ search }) {
                   item.mimeType &&
                   item.mimeType.split('/')[0] === 'video' && (
                     <>
-                      &nbsp;
-                      {select && (
-                        <Checkbox
-                          color='primary'
-                          onChange={(e) =>
-                            saveFileBinary(
-                              e,
-                              `data:${item.mimeType};base64,${item.file}`,
-                              item.fileNameWithExt,
-                            )
-                          }
-                        />
-                      )}
-                      <ImageListItem
-                        key={key}
-                        style={{ width: '500px', height: '300px' }}>
-                        <video controls>
-                          <source
-                            type={item.mimeType}
-                            src={`data:${item.mimeType};base64,${item.file}`}
+                      {' '}
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        &nbsp;
+                        {select && (
+                          <Checkbox
+                            color='primary'
+                            onChange={(e) =>
+                              saveFileBinary(
+                                e,
+                                `data:${item.mimeType};base64,${item.file}`,
+                                item.fileNameWithExt,
+                              )
+                            }
                           />
-                        </video>
-                        <ImageListItemBar
-                          title={
-                            <Typography
-                              variant='body1'
-                              style={{ color: 'white' }}>
-                              {item.fileName}
-                            </Typography>
-                          }
-                          actionIcon={
-                            <div style={{ display: 'flex' }}>
-                              <IconButton
-                                color='primary'
-                                onClick={() =>
-                                  handleClickOpen_2({
-                                    ...item,
-                                    isFolder: false,
-                                  })
-                                }>
-                                <InfoOutlined />
-                              </IconButton>
-                            </div>
-                          }
-                        />
-                      </ImageListItem>
+                        )}
+                        <ImageListItem
+                          key={key}
+                          style={{
+                            width: '500px',
+                            height: '300px',
+                            padding: '5px',
+                          }}>
+                          <video controls>
+                            <source
+                              type={item.mimeType}
+                              src={`data:${item.mimeType};base64,${item.file}`}
+                            />
+                          </video>
+                          <ImageListItemBar
+                            title={
+                              <Typography
+                                variant='body1'
+                                style={{ color: 'white' }}>
+                                {item.fileName}
+                              </Typography>
+                            }
+                            actionIcon={
+                              <div style={{ display: 'flex' }}>
+                                <IconButton
+                                  color='primary'
+                                  onClick={() =>
+                                    handleClickOpen_2({
+                                      ...item,
+                                      isFolder: false,
+                                    })
+                                  }>
+                                  <InfoOutlined />
+                                </IconButton>
+                              </div>
+                            }
+                          />
+                        </ImageListItem>
+                      </div>
                     </>
                   ),
               )}
@@ -715,45 +767,55 @@ export default function Shared({ search }) {
                   item.mimeType &&
                   item.mimeType.split('/')[0] === 'audio' && (
                     <>
-                      &nbsp;
-                      {select && (
-                        <Checkbox
-                          color='primary'
-                          onChange={(e) =>
-                            saveFileBinary(
-                              e,
-                              `data:${item.mimeType};base64,${item.file}`,
-                              item.fileNameWithExt,
-                            )
-                          }
-                        />
-                      )}
-                      <ImageListItem
-                        key={key}
-                        style={{ width: '500px', height: '100px' }}>
-                        <audio
-                          controls
-                          src={`data:${item.mimeType};base64,${item.file}`}
-                        />
-                        <ImageListItemBar
-                          title={
-                            <Typography
-                              variant='body1'
-                              style={{ color: 'white' }}>
-                              {item.fileName}
-                            </Typography>
-                          }
-                          actionIcon={
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                handleClickOpen_2({ ...item, isFolder: false })
-                              }>
-                              <InfoOutlined />
-                            </IconButton>
-                          }
-                        />
-                      </ImageListItem>
+                      {' '}
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        &nbsp;
+                        {select && (
+                          <Checkbox
+                            color='primary'
+                            onChange={(e) =>
+                              saveFileBinary(
+                                e,
+                                `data:${item.mimeType};base64,${item.file}`,
+                                item.fileNameWithExt,
+                              )
+                            }
+                          />
+                        )}
+                        <ImageListItem
+                          key={key}
+                          style={{
+                            width: '500px',
+                            height: '100px',
+                            padding: '5px',
+                          }}>
+                          <audio
+                            controls
+                            src={`data:${item.mimeType};base64,${item.file}`}
+                          />
+                          <ImageListItemBar
+                            title={
+                              <Typography
+                                variant='body1'
+                                style={{ color: 'white' }}>
+                                {item.fileName}
+                              </Typography>
+                            }
+                            actionIcon={
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  handleClickOpen_2({
+                                    ...item,
+                                    isFolder: false,
+                                  })
+                                }>
+                                <InfoOutlined />
+                              </IconButton>
+                            }
+                          />
+                        </ImageListItem>
+                      </div>
                     </>
                   ),
               )}
@@ -774,52 +836,59 @@ export default function Shared({ search }) {
                   (item.mimeType.split('/')[0] === 'application' ||
                     item.mimeType.split('/')[0] === 'text') && (
                     <>
-                      &nbsp;
-                      {select && (
-                        <Checkbox
-                          color='primary'
-                          onChange={(e) =>
-                            saveFileBinary(
-                              e,
-                              `data:${item.mimeType};base64,${item.file}`,
-                              item.fileNameWithExt,
-                            )
-                          }
-                        />
-                      )}
-                      <List
-                        style={{
-                          bgcolor: 'background.paper',
-                          width: '500px',
-                          height: '100px',
-                        }}>
-                        <ListItem alignItems='flex-start'>
-                          <ListItemText primary={item.fileName} />
-                          <ListItemIcon>
-                            <IconButton
-                              color='primary'
-                              onClick={() =>
-                                handleClickOpen_2({ ...item, isFolder: false })
-                              }>
-                              <InfoOutlined />
-                            </IconButton>
-                            <a
-                              href={`data:${item.mimeType};base64,${item.file}`}
-                              download={
-                                item.fileNameWithExt.split('.')[1] === 'rar'
-                                  ? item.fileNameWithExt
-                                  : item.fileName
-                              }
-                              rel='noreferrer'
-                              target='_blank'>
-                              <IconButton>
-                                <GetAppOutlined color='primary' />
+                      {' '}
+                      <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                        &nbsp;
+                        {select && (
+                          <Checkbox
+                            color='primary'
+                            onChange={(e) =>
+                              saveFileBinary(
+                                e,
+                                `data:${item.mimeType};base64,${item.file}`,
+                                item.fileNameWithExt,
+                              )
+                            }
+                          />
+                        )}
+                        <List
+                          style={{
+                            bgcolor: 'background.paper',
+                            width: '500px',
+                            height: '100px',
+                            padding: '5px',
+                          }}>
+                          <ListItem alignItems='flex-start'>
+                            <ListItemText primary={item.fileName} />
+                            <ListItemIcon>
+                              <IconButton
+                                color='primary'
+                                onClick={() =>
+                                  handleClickOpen_2({
+                                    ...item,
+                                    isFolder: false,
+                                  })
+                                }>
+                                <InfoOutlined />
                               </IconButton>
-                            </a>
-                          </ListItemIcon>
-                        </ListItem>
-                        <Divider variant='inset' component='li' />
-                      </List>
+                              <a
+                                href={`data:${item.mimeType};base64,${item.file}`}
+                                download={
+                                  item.fileNameWithExt.split('.')[1] === 'rar'
+                                    ? item.fileNameWithExt
+                                    : item.fileName
+                                }
+                                rel='noreferrer'
+                                target='_blank'>
+                                <IconButton>
+                                  <GetAppOutlined color='primary' />
+                                </IconButton>
+                              </a>
+                            </ListItemIcon>
+                          </ListItem>
+                          <Divider variant='inset' component='li' />
+                        </List>
+                      </div>
                     </>
                   ),
               )}

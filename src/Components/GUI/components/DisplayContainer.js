@@ -168,6 +168,7 @@ export default function DisplayContainer({
   const [select, setSelect] = React.useState(false);
   const [downloadFiles, setDownloadFiles] = React.useState([]);
   const [downloadFileNames, setDownloadFileNames] = React.useState([]);
+  const [downloadFolderNames, setDownloadFolderNames] = React.useState([]);
   const zip = JSZip();
 
   const handleClick_1 = (event) => {
@@ -896,7 +897,7 @@ export default function DisplayContainer({
     }
   };
 
-  const downloadMultipleFiles = () => {
+  const downloadMultipleItems = () => {
     const link = document.createElement('a');
 
     link.style.display = 'none';
@@ -909,11 +910,16 @@ export default function DisplayContainer({
       link.click();
     }
 
+    for (let i = 0; i < downloadFolderNames.length; i++) {
+      getFolderChildren(downloadFolderNames[i]);
+    }
+
     document.body.removeChild(link);
 
     setSelect(false);
     setDownloadFileNames([]);
     setDownloadFiles([]);
+    setDownloadFolderNames([]);
   };
 
   const download = () => {
@@ -971,7 +977,9 @@ export default function DisplayContainer({
     handleMenuClose_4();
     handleMenuClose_5();
 
-    if (res.data.success) generateZip(res.data);
+    if (res.data.files.length === 0 && res.data.folders.length === 0)
+      alert('Folder is empty!');
+    else if (res.data.success) generateZip(res.data);
     else alert(res.data.message);
   };
 
@@ -1791,14 +1799,19 @@ export default function DisplayContainer({
         <h1>Folders</h1>
         {selectedFolder ? (
           <div>
-            {downloadFiles.length > 0 && (
-              <Button variant='outlined' onClick={downloadMultipleFiles}>
+            {(downloadFolderNames.length > 0 || downloadFiles.length > 0) && (
+              <Button variant='outlined' onClick={downloadMultipleItems}>
                 download multiple
               </Button>
             )}
             <Button
               variant='outlined'
-              onClick={() => setSelect((prev) => !prev)}>
+              onClick={() => {
+                setSelect((prev) => !prev);
+                setDownloadFiles([]);
+                setDownloadFileNames([]);
+                setDownloadFolderNames([]);
+              }}>
               {select ? 'Deselect' : 'Select'}
             </Button>
             <Button
@@ -1839,14 +1852,19 @@ export default function DisplayContainer({
           </div>
         ) : (
           <div>
-            {downloadFiles.length > 0 && (
-              <Button variant='outlined' onClick={downloadMultipleFiles}>
+            {(downloadFolderNames.length > 0 || downloadFiles.length > 0) && (
+              <Button variant='outlined' onClick={downloadMultipleItems}>
                 download multiple
               </Button>
             )}
             <Button
               variant='outlined'
-              onClick={() => setSelect((prev) => !prev)}>
+              onClick={() => {
+                setSelect((prev) => !prev);
+                setDownloadFiles([]);
+                setDownloadFileNames([]);
+                setDownloadFolderNames([]);
+              }}>
               {select ? 'Deselect' : 'Select'}
             </Button>
             <Button variant='outlined' onClick={handleClickOpen_1}>
@@ -1863,8 +1881,17 @@ export default function DisplayContainer({
           folders.map((item) => (
             <>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                {/* &nbsp;
-              {select && <Checkbox color='primary' />} */}
+                &nbsp;
+                {select && (
+                  <Checkbox
+                    color='primary'
+                    onClick={() =>
+                      setDownloadFolderNames((prev) =>
+                        prev.concat(item.folderName),
+                      )
+                    }
+                  />
+                )}
                 <Card
                   style={{ maxHeight: '80px', margin: '5px', width: '500px' }}>
                   <CardActionArea>
@@ -2128,7 +2155,7 @@ export default function DisplayContainer({
                   (item.mimeType.split('/')[0] === 'application' ||
                     item.mimeType.split('/')[0] === 'text') && (
                     <>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline' }}>
                         &nbsp;
                         {select && (
                           <Checkbox
